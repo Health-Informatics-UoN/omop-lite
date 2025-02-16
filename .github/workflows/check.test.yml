@@ -40,11 +40,11 @@ jobs:
           -e SCHEMA_NAME=omop \
           -e DB_USER=postgres \
           -e DB_PORT=5432 \
+          -e SYNTHETIC=true \
           omop-lite
 
       - name: Verify data in PostgreSQL
         run: |
-          docker run --rm --network=host postgres psql -h localhost -U postgres -d omop -c "SELECT COUNT(*) FROM omop.person;"
-        env:
-          PGPASSWORD: postgres
-      
+          docker run --rm --network=host \
+          -e PGPASSWORD=postgres \
+          postgres psql -h localhost -U postgres -d omop -c "SELECT COUNT(*) FROM omop.person;"
