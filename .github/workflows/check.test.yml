@@ -22,6 +22,19 @@ jobs:
         ports:
           - 5432:5432
 
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2019-latest
+        env:
+          SA_PASSWORD: "Password123!"
+          ACCEPT_EULA: "Y"
+        options: >-
+          --health-cmd "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q 'SELECT 1'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 1433:1433
+
     steps:
       - uses: actions/checkout@v4
 
@@ -31,7 +44,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t omop-lite .
 
-      - name: Run Docker container
+      - name: Run Docker container for PostgreSQL
         run: |
           docker run --rm --network=host \
           -e DB_HOST=localhost \
@@ -48,3 +61,22 @@ jobs:
           docker run --rm --network=host \
           -e PGPASSWORD=postgres \
           postgres psql -h localhost -U postgres -d omop -c "SELECT COUNT(*) FROM omop.person;"
+
+      - name: Run Docker container for SQL Server
+        run: |
+          docker run --rm --network=host \
+          -e DB_HOST=localhost \
+          -e DB_PASSWORD=Password123! \
+          -e DB_NAME=master \
+          -e SCHEMA_NAME=omop \
+          -e DB_USER=SA \
+          -e DB_PORT=1433 \
+          -e DB_TYPE=sqlserver \
+          -e SYNTHETIC=true \
+          omop-lite
+
+      - name: Verify data in SQL Server
+        run: |
+          docker run --rm --network=host \
+          mcr.microsoft.com/mssql-tools \
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "SELECT COUNT(*) FROM omop.person;"
