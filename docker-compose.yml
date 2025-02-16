@@ -20,3 +20,30 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+
+  omop-lite-sqlserver:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SCHEMA_NAME=cdm
+      - SYNTHETIC=true
+      - DB_NAME=master
+      - DB_USER=sa
+      - DB_PASSWORD=Password123!
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_TYPE=sqlserver
+    volumes:
+      - ./data:/data
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
