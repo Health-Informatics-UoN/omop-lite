@@ -1,0 +1,50 @@
+name: Run Tests
+
+on:
+  pull_request:
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    env:
+      DATASOURCE_DB_USERNAME: postgres
+      DATASOURCE_DB_PASSWORD: postgres
+      DATASOURCE_DB_DATABASE: omop
+      DATASOURCE_DB_SCHEMA: omop
+      DATASOURCE_DB_PORT: 5432
+      DATASOURCE_DB_HOST: localhost
+      SYNTHETIC: true
+      
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: omop
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: docker build -t omop-lite .
+
+      - name: Run Docker container
+        run: docker run --rm --network=host omop-lite
+
+      - name: Verify data in PostgreSQL
+        run: |
+          docker run --rm --network=host postgres psql -h localhost -U postgres -d omop -c "SELECT COUNT(*) FROM omop.person;"
+        env:
+          PGPASSWORD: postgres
+      
