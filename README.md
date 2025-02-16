@@ -1,6 +1,6 @@
 # omop-lite
 
-A small container to get an OMOP CDM Postgres database running quickly.
+A small container to get an OMOP CDM database running quickly, with support for both PostgreSQL and SQL Server.
 
 Drop your data into `data/`, and run the container.
 
@@ -8,11 +8,12 @@ Drop your data into `data/`, and run the container.
 
 You can configure the Docker container using the following environment variables:
 
-- `DB_HOST`: The hostname of the PostgreSQL database. Default is `db`.
-- `DB_PORT`: The port number of the PostgreSQL database. Default is `5432`.
-- `DB_USER`: The username for the PostgreSQL database. Default is `postgres`.
-- `DB_PASSWORD`: The password for the PostgreSQL database. Default is `password`.
-- `DB_NAME`: The name of the PostgreSQL database. Default is `omop`.
+- `DB_HOST`: The hostname of the database. Default is `db`.
+- `DB_PORT`: The port number of the database. Default is `5432`.
+- `DB_USER`: The username for the database. Default is `postgres`.
+- `DB_PASSWORD`: The password for the database. Default is `password`.
+- `DB_NAME`: The name of the database. Default is `omop`.
+- `DB_TYPE`: The type of database to use. Default is `pg`, but can also be `sqlserver`.
 - `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `omop`.
 - `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
 - `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
