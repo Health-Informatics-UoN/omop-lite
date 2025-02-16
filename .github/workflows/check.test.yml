@@ -8,14 +8,14 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     env:
-      DATASOURCE_DB_USERNAME: postgres
-      DATASOURCE_DB_PASSWORD: postgres
-      DATASOURCE_DB_DATABASE: omop
-      DATASOURCE_DB_SCHEMA: omop
-      DATASOURCE_DB_PORT: 5432
-      DATASOURCE_DB_HOST: localhost
       SYNTHETIC: true
-      
+      DB_HOST: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: omop
+      SCHEMA_NAME: omop
+      DB_USER: postgres
+      DB_PORT: 5432
+
     services:
       postgres:
         image: postgres
