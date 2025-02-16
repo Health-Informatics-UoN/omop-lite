@@ -32,14 +32,15 @@ jobs:
         run: docker build -t omop-lite .
 
       - name: Run Docker container
-        run: docker run --rm --network=host omop-lite
-        env:
-          DB_HOST: postgres
-          DB_PASSWORD: postgres
-          DB_NAME: omop
-          SCHEMA_NAME: omop
-          DB_USER: postgres
-          DB_PORT: 5432
+        run: |
+          docker run --rm --network=host \
+          -e DB_HOST=postgres \
+          -e DB_PASSWORD=postgres \
+          -e DB_NAME=omop \
+          -e SCHEMA_NAME=omop \
+          -e DB_USER=postgres \
+          -e DB_PORT=5432 \
+          omop-lite
 
       - name: Verify data in PostgreSQL
         run: |
