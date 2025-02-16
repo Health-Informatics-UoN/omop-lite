@@ -23,6 +23,4 @@ COPY --chown=appuser:appgroup setup.sh /setup.sh
 RUN chmod +x /setup.sh
 
 # Set entrypoint
-# ENTRYPOINT ["/bin/bash", "/setup.sh"]
-# TODO: uncomment when we can do this conditionally
-ENTRYPOINT ["/bin/bash", "/server.sh"]
+ENTRYPOINT ["/bin/bash", "/setup.sh"]
