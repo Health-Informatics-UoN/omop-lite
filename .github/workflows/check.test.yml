@@ -1,0 +1,77 @@
+name: Run Tests
+
+on:
+  pull_request:
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: omop
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          SA_PASSWORD: "Password123!"
+          ACCEPT_EULA: "Y"
+        ports:
+          - 1433:1433
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image
+        run: docker build -t omop-lite .
+
+      - name: Run Docker container for PostgreSQL
+        run: |
+          docker run --rm --network=host \
+          -e DB_HOST=localhost \
+          -e DB_PASSWORD=postgres \
+          -e DB_NAME=omop \
+          -e SCHEMA_NAME=omop \
+          -e DB_USER=postgres \
+          -e DB_PORT=5432 \
+          -e SYNTHETIC=true \
+          omop-lite
+
+      - name: Verify data in PostgreSQL
+        run: |
+          docker run --rm --network=host \
+          -e PGPASSWORD=postgres \
+          postgres psql -h localhost -U postgres -d omop -c "SELECT COUNT(*) FROM omop.person;"
+
+      - name: Run Docker container for SQL Server
+        run: |
+          docker run --rm --network=host \
+          -e DB_HOST=localhost \
+          -e DB_PASSWORD=Password123! \
+          -e DB_NAME=master \
+          -e SCHEMA_NAME=omop \
+          -e DB_USER=SA \
+          -e DB_PORT=1433 \
+          -e DB_TYPE=sqlserver \
+          -e SYNTHETIC=true \
+          omop-lite
+
+      - name: Verify data in SQL Server
+        run: |
+          docker run --rm --network=host \
+          mcr.microsoft.com/mssql-tools \
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "SELECT COUNT(*) FROM omop.person;"

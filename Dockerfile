@@ -6,6 +6,7 @@ RUN apk --no-cache add bash postgresql-client wait4x
 USER appuser
 
 # Set environment variables
+ENV DB_TYPE="pg"
 ENV DB_HOST="db"
 ENV DB_PORT="5432"
 ENV DB_USER="postgres"
