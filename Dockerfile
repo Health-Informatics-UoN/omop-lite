@@ -6,6 +6,7 @@ RUN apk --no-cache add bash postgresql-client wait4x
 USER appuser
 
 # Set environment variables
+ENV DB_TYPE="pg"
 ENV DB_HOST="db"
 ENV DB_PORT="5432"
 ENV DB_USER="postgres"
@@ -22,4 +23,6 @@ COPY --chown=appuser:appgroup setup.sh /setup.sh
 RUN chmod +x /setup.sh
 
 # Set entrypoint
-ENTRYPOINT ["/bin/bash", "/setup.sh"]
+# ENTRYPOINT ["/bin/bash", "/setup.sh"]
+# TODO: uncomment when we can do this conditionally
+ENTRYPOINT ["/bin/bash", "/server.sh"]
