@@ -7,14 +7,6 @@ jobs:
   run-tests:
     name: Run Tests
     runs-on: ubuntu-latest
-    env:
-      SYNTHETIC: true
-      DB_HOST: postgres
-      DB_PASSWORD: postgres
-      DB_NAME: omop
-      SCHEMA_NAME: omop
-      DB_USER: postgres
-      DB_PORT: 5432
 
     services:
       postgres:
@@ -41,6 +33,13 @@ jobs:
 
       - name: Run Docker container
         run: docker run --rm --network=host omop-lite
+        env:
+          DB_HOST: postgres
+          DB_PASSWORD: postgres
+          DB_NAME: omop
+          SCHEMA_NAME: omop
+          DB_USER: postgres
+          DB_PORT: 5432
 
       - name: Verify data in PostgreSQL
         run: |
