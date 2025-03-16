@@ -17,6 +17,8 @@ COPY --from=builder /opt/mssql-tools /opt/mssql-tools
 RUN ln -s /opt/mssql-tools/bin/sqlcmd /usr/local/bin/sqlcmd \
     && ln -s /opt/mssql-tools/bin/bcp /usr/local/bin/bcp
 
+ENV PATH="/opt/mssql-tools/bin:${PATH}"
+
 USER appuser
 
 # Set environment variables
