@@ -1,27 +1,28 @@
 name: omop-lite
 
 services:
-  omop-lite:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - SCHEMA_NAME=cdm
-      - SYNTHETIC=true
-    volumes:
-      - ./data:/data
-    depends_on:
-      - db
+  # omop-lite:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile
+  #   environment:
+  #     - SCHEMA_NAME=cdm
+  #     - SYNTHETIC=true
+  #   volumes:
+  #     - ./data:/data
+  #   depends_on:
+  #     - db
 
-  db:
-    image: postgres:latest
-    environment:
-      - POSTGRES_DB=omop
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5432:5432"
+  # db:
+  #   image: postgres:latest
+  #   environment:
+  #     - POSTGRES_DB=omop
+  #     - POSTGRES_PASSWORD=password
+  #   ports:
+  #     - "5432:5432"
 
   omop-lite-sqlserver:
+    platform: "linux/amd64"
     build:
       context: .
       dockerfile: Dockerfile
@@ -30,6 +31,7 @@ services:
       - SYNTHETIC=true
       - DB_NAME=master
       - DB_USER=sa
+      - SQL_SERVER_USER=sa
       - DB_PASSWORD=Password123!
       - DB_HOST=sqlserver
       - DB_PORT=1433
