@@ -1,8 +1,8 @@
 """Add constraints
 
-Revision ID: 9a343fe1e393
-Revises: 377e674b2401
-Create Date: 2025-03-16 15:33:06.835289
+Revision ID: 3da18f79ff7b
+Revises: bbf6835f69e1
+Create Date: 2025-03-22 18:31:54.602686
 
 """
 
@@ -13,8 +13,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = "9a343fe1e393"
-down_revision: Union[str, None] = "377e674b2401"
+revision: str = "3da18f79ff7b"
+down_revision: Union[str, None] = "bbf6835f69e1"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 
@@ -30,14 +30,14 @@ def upgrade() -> None:
         None, "care_site", "location", ["location_id"], ["location_id"]
     )
     op.create_foreign_key(
-        None, "cohort_definition", "concept", ["subject_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None,
         "cohort_definition",
         "concept",
         ["definition_type_concept_id"],
         ["concept_id"],
+    )
+    op.create_foreign_key(
+        None, "cohort_definition", "concept", ["subject_concept_id"], ["concept_id"]
     )
     op.create_index(
         "idx_concept_class_id", "concept", ["concept_class_id"], unique=False
@@ -49,13 +49,16 @@ def upgrade() -> None:
         "idx_concept_vocabluary_id", "concept", ["vocabulary_id"], unique=False
     )
     op.create_foreign_key(
-        None, "concept_ancestor", "concept", ["descendant_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None, "concept_ancestor", "concept", ["ancestor_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
+        None, "concept_ancestor", "concept", ["descendant_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "concept_class", "concept", ["concept_class_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "concept_relationship", "concept", ["concept_id_2"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "concept_relationship", "concept", ["concept_id_1"], ["concept_id"]
@@ -68,18 +71,15 @@ def upgrade() -> None:
         ["relationship_id"],
     )
     op.create_foreign_key(
-        None, "concept_relationship", "concept", ["concept_id_2"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None, "concept_synonym", "concept", ["concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "concept_synonym", "concept", ["language_concept_id"], ["concept_id"]
     )
-    op.create_foreign_key(None, "condition_era", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None, "condition_era", "concept", ["condition_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "condition_era", "person", ["person_id"], ["person_id"])
     op.create_index(
         "idx_condition_concept_id_1",
         "condition_occurrence",
@@ -96,10 +96,23 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_foreign_key(
+        None, "condition_occurrence", "provider", ["provider_id"], ["provider_id"]
+    )
+    op.create_foreign_key(
+        None,
+        "condition_occurrence",
+        "visit_occurrence",
+        ["visit_occurrence_id"],
+        ["visit_occurrence_id"],
+    )
+    op.create_foreign_key(
+        None, "condition_occurrence", "person", ["person_id"], ["person_id"]
+    )
+    op.create_foreign_key(
         None,
         "condition_occurrence",
         "concept",
-        ["condition_status_concept_id"],
+        ["condition_type_concept_id"],
         ["concept_id"],
     )
     op.create_foreign_key(
@@ -110,13 +123,10 @@ def upgrade() -> None:
         ["visit_detail_id"],
     )
     op.create_foreign_key(
-        None, "condition_occurrence", "provider", ["provider_id"], ["provider_id"]
-    )
-    op.create_foreign_key(
         None,
         "condition_occurrence",
         "concept",
-        ["condition_type_concept_id"],
+        ["condition_concept_id"],
         ["concept_id"],
     )
     op.create_foreign_key(
@@ -130,32 +140,19 @@ def upgrade() -> None:
         None,
         "condition_occurrence",
         "concept",
-        ["condition_concept_id"],
+        ["condition_status_concept_id"],
         ["concept_id"],
-    )
-    op.create_foreign_key(
-        None, "condition_occurrence", "person", ["person_id"], ["person_id"]
-    )
-    op.create_foreign_key(
-        None,
-        "condition_occurrence",
-        "visit_occurrence",
-        ["visit_occurrence_id"],
-        ["visit_occurrence_id"],
-    )
-    op.create_foreign_key(None, "cost", "concept", ["drg_concept_id"], ["concept_id"])
-    op.create_foreign_key(
-        None, "cost", "concept", ["revenue_code_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "cost", "concept", ["cost_type_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "cost", "concept", ["drg_concept_id"], ["concept_id"])
     op.create_foreign_key(None, "cost", "domain", ["cost_domain_id"], ["domain_id"])
     op.create_foreign_key(
-        None, "cost", "concept", ["currency_concept_id"], ["concept_id"]
+        None, "cost", "concept", ["revenue_code_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "death", "concept", ["cause_source_concept_id"], ["concept_id"]
+        None, "cost", "concept", ["currency_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "death", "concept", ["cause_concept_id"], ["concept_id"]
@@ -163,18 +160,37 @@ def upgrade() -> None:
     op.create_foreign_key(
         None, "death", "concept", ["death_type_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(
+        None, "death", "concept", ["cause_source_concept_id"], ["concept_id"]
+    )
     op.create_foreign_key(None, "death", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
+        None, "device_exposure", "concept", ["device_source_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "device_exposure", "provider", ["provider_id"], ["provider_id"]
+    )
+    op.create_foreign_key(
+        None, "device_exposure", "concept", ["device_type_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None,
+        "device_exposure",
+        "visit_occurrence",
+        ["visit_occurrence_id"],
+        ["visit_occurrence_id"],
+    )
+    op.create_foreign_key(
+        None, "device_exposure", "concept", ["unit_source_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "device_exposure", "concept", ["device_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "device_exposure", "person", ["person_id"], ["person_id"]
     )
     op.create_foreign_key(
-        None, "device_exposure", "concept", ["device_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "device_exposure", "concept", ["device_concept_id"], ["concept_id"]
+        None, "device_exposure", "concept", ["unit_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -184,53 +200,21 @@ def upgrade() -> None:
         ["visit_detail_id"],
     )
     op.create_foreign_key(
-        None, "device_exposure", "concept", ["unit_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None,
-        "device_exposure",
-        "visit_occurrence",
-        ["visit_occurrence_id"],
-        ["visit_occurrence_id"],
-    )
-    op.create_foreign_key(
-        None, "device_exposure", "concept", ["device_type_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "device_exposure", "concept", ["unit_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None, "domain", "concept", ["domain_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "dose_era", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None, "dose_era", "concept", ["drug_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "dose_era", "concept", ["unit_concept_id"], ["concept_id"]
     )
-    op.create_foreign_key(None, "dose_era", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None, "drug_era", "concept", ["drug_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(None, "drug_era", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
-        None, "drug_exposure", "concept", ["drug_type_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None, "drug_exposure", "concept", ["drug_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(None, "drug_exposure", "person", ["person_id"], ["person_id"])
-    op.create_foreign_key(
-        None, "drug_exposure", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
-    )
-    op.create_foreign_key(
-        None, "drug_exposure", "concept", ["drug_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "drug_exposure", "provider", ["provider_id"], ["provider_id"]
-    )
-    op.create_foreign_key(
-        None, "drug_exposure", "concept", ["route_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -240,13 +224,20 @@ def upgrade() -> None:
         ["visit_occurrence_id"],
     )
     op.create_foreign_key(
-        None, "drug_strength", "concept", ["numerator_unit_concept_id"], ["concept_id"]
+        None, "drug_exposure", "concept", ["drug_source_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "drug_strength", "concept", ["drug_concept_id"], ["concept_id"]
+        None, "drug_exposure", "provider", ["provider_id"], ["provider_id"]
+    )
+    op.create_foreign_key(None, "drug_exposure", "person", ["person_id"], ["person_id"])
+    op.create_foreign_key(
+        None, "drug_exposure", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
     )
     op.create_foreign_key(
-        None, "drug_strength", "concept", ["ingredient_concept_id"], ["concept_id"]
+        None, "drug_exposure", "concept", ["drug_type_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "drug_exposure", "concept", ["route_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -256,21 +247,30 @@ def upgrade() -> None:
         ["concept_id"],
     )
     op.create_foreign_key(
+        None, "drug_strength", "concept", ["numerator_unit_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "drug_strength", "concept", ["amount_unit_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "episode", "concept", ["episode_object_concept_id"], ["concept_id"]
+        None, "drug_strength", "concept", ["drug_concept_id"], ["concept_id"]
     )
-    op.create_foreign_key(None, "episode", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
-        None, "episode", "concept", ["episode_source_concept_id"], ["concept_id"]
+        None, "drug_strength", "concept", ["ingredient_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "episode", "concept", ["episode_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
+        None, "episode", "concept", ["episode_source_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "episode", "concept", ["episode_object_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "episode", "concept", ["episode_type_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "episode", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None,
         "episode_event",
@@ -300,14 +300,14 @@ def upgrade() -> None:
         unique=False,
     )
     op.create_foreign_key(
-        None, "fact_relationship", "concept", ["domain_concept_id_1"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None,
         "fact_relationship",
         "concept",
         ["relationship_concept_id"],
         ["concept_id"],
+    )
+    op.create_foreign_key(
+        None, "fact_relationship", "concept", ["domain_concept_id_1"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "fact_relationship", "concept", ["domain_concept_id_2"], ["concept_id"]
@@ -323,18 +323,18 @@ def upgrade() -> None:
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
     )
-    op.create_foreign_key(None, "measurement", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
-        None, "measurement", "concept", ["unit_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "measurement", "concept", ["measurement_type_concept_id"], ["concept_id"]
+        None, "measurement", "concept", ["operator_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "measurement", "concept", ["value_as_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "measurement", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None, "measurement", "concept", ["unit_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "measurement", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
     )
     op.create_foreign_key(
         None,
@@ -344,28 +344,35 @@ def upgrade() -> None:
         ["concept_id"],
     )
     op.create_foreign_key(
+        None, "measurement", "concept", ["unit_source_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "measurement", "concept", ["measurement_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "measurement", "concept", ["meas_event_field_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "measurement", "provider", ["provider_id"], ["provider_id"]
     )
     op.create_foreign_key(
-        None, "measurement", "concept", ["measurement_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "measurement", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
-    )
-    op.create_foreign_key(
-        None, "measurement", "concept", ["operator_concept_id"], ["concept_id"]
+        None, "measurement", "concept", ["measurement_type_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "metadata", "concept", ["metadata_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
+        None, "metadata", "concept", ["metadata_type_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "metadata", "concept", ["value_as_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "metadata", "concept", ["metadata_type_concept_id"], ["concept_id"]
+        None, "note", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
+    )
+    op.create_foreign_key(None, "note", "provider", ["provider_id"], ["provider_id"])
+    op.create_foreign_key(
+        None, "note", "concept", ["note_event_field_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "note", "concept", ["language_concept_id"], ["concept_id"]
@@ -382,14 +389,7 @@ def upgrade() -> None:
         ["visit_occurrence_id"],
     )
     op.create_foreign_key(
-        None, "note", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
-    )
-    op.create_foreign_key(
         None, "note", "concept", ["note_type_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(None, "note", "provider", ["provider_id"], ["provider_id"])
-    op.create_foreign_key(
-        None, "note", "concept", ["note_event_field_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "note", "concept", ["note_class_concept_id"], ["concept_id"]
@@ -407,11 +407,16 @@ def upgrade() -> None:
     op.create_foreign_key(
         None, "note_nlp", "concept", ["section_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "observation", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
-        None, "observation", "concept", ["observation_type_concept_id"], ["concept_id"]
+        None,
+        "observation",
+        "visit_occurrence",
+        ["visit_occurrence_id"],
+        ["visit_occurrence_id"],
     )
     op.create_foreign_key(
-        None, "observation", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
+        None, "observation", "concept", ["obs_event_field_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "observation", "concept", ["value_as_concept_id"], ["concept_id"]
@@ -422,29 +427,24 @@ def upgrade() -> None:
     op.create_foreign_key(
         None,
         "observation",
-        "visit_occurrence",
-        ["visit_occurrence_id"],
-        ["visit_occurrence_id"],
+        "concept",
+        ["observation_source_concept_id"],
+        ["concept_id"],
     )
     op.create_foreign_key(
         None, "observation", "concept", ["unit_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None,
-        "observation",
-        "concept",
-        ["observation_source_concept_id"],
-        ["concept_id"],
+        None, "observation", "visit_detail", ["visit_detail_id"], ["visit_detail_id"]
     )
-    op.create_foreign_key(None, "observation", "person", ["person_id"], ["person_id"])
+    op.create_foreign_key(
+        None, "observation", "concept", ["observation_type_concept_id"], ["concept_id"]
+    )
     op.create_foreign_key(
         None, "observation", "concept", ["observation_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "observation", "concept", ["qualifier_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "observation", "concept", ["obs_event_field_concept_id"], ["concept_id"]
     )
     op.create_index(
         "idx_observation_period_id_1", "observation_period", ["person_id"], unique=False
@@ -460,14 +460,13 @@ def upgrade() -> None:
         ["concept_id"],
     )
     op.create_foreign_key(
+        None, "payer_plan_period", "concept", ["stop_reason_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "payer_plan_period", "concept", ["payer_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None,
-        "payer_plan_period",
-        "concept",
-        ["sponsor_source_concept_id"],
-        ["concept_id"],
+        None, "payer_plan_period", "concept", ["plan_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -477,7 +476,10 @@ def upgrade() -> None:
         ["concept_id"],
     )
     op.create_foreign_key(
-        None, "payer_plan_period", "concept", ["stop_reason_concept_id"], ["concept_id"]
+        None, "payer_plan_period", "person", ["person_id"], ["person_id"]
+    )
+    op.create_foreign_key(
+        None, "payer_plan_period", "concept", ["plan_source_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -487,54 +489,39 @@ def upgrade() -> None:
         ["concept_id"],
     )
     op.create_foreign_key(
-        None, "payer_plan_period", "concept", ["plan_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None, "payer_plan_period", "concept", ["sponsor_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "payer_plan_period", "concept", ["plan_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "payer_plan_period", "person", ["person_id"], ["person_id"]
+        None,
+        "payer_plan_period",
+        "concept",
+        ["sponsor_source_concept_id"],
+        ["concept_id"],
     )
     op.create_index("idx_gender", "person", ["gender_concept_id"], unique=False)
     op.create_index("idx_person_id_1", "person", ["person_id"], unique=False)
     op.create_foreign_key(
-        None, "person", "care_site", ["care_site_id"], ["care_site_id"]
+        None, "person", "concept", ["ethnicity_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "person", "concept", ["race_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "person", "concept", ["gender_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "person", "concept", ["ethnicity_concept_id"], ["concept_id"]
+        None, "person", "concept", ["gender_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(None, "person", "provider", ["provider_id"], ["provider_id"])
     op.create_foreign_key(
-        None, "person", "concept", ["ethnicity_source_concept_id"], ["concept_id"]
+        None, "person", "concept", ["gender_source_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "person", "concept", ["gender_concept_id"], ["concept_id"]
+        None, "person", "care_site", ["care_site_id"], ["care_site_id"]
     )
-    op.create_foreign_key(None, "person", "location", ["location_id"], ["location_id"])
     op.create_foreign_key(
         None, "person", "concept", ["race_source_concept_id"], ["concept_id"]
     )
+    op.create_foreign_key(None, "person", "location", ["location_id"], ["location_id"])
     op.create_foreign_key(
-        None,
-        "procedure_occurrence",
-        "visit_occurrence",
-        ["visit_occurrence_id"],
-        ["visit_occurrence_id"],
-    )
-    op.create_foreign_key(
-        None, "procedure_occurrence", "provider", ["provider_id"], ["provider_id"]
-    )
-    op.create_foreign_key(
-        None, "procedure_occurrence", "concept", ["modifier_concept_id"], ["concept_id"]
+        None, "person", "concept", ["ethnicity_source_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -558,7 +545,20 @@ def upgrade() -> None:
         ["visit_detail_id"],
     )
     op.create_foreign_key(
+        None, "procedure_occurrence", "provider", ["provider_id"], ["provider_id"]
+    )
+    op.create_foreign_key(
+        None, "procedure_occurrence", "concept", ["modifier_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "procedure_occurrence", "person", ["person_id"], ["person_id"]
+    )
+    op.create_foreign_key(
+        None,
+        "procedure_occurrence",
+        "visit_occurrence",
+        ["visit_occurrence_id"],
+        ["visit_occurrence_id"],
     )
     op.create_foreign_key(
         None,
@@ -569,19 +569,22 @@ def upgrade() -> None:
     )
     op.create_index("idx_provider_id_1", "provider", ["provider_id"], unique=False)
     op.create_foreign_key(
-        None, "provider", "concept", ["specialty_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "provider", "concept", ["gender_source_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
         None, "provider", "care_site", ["care_site_id"], ["care_site_id"]
     )
     op.create_foreign_key(
         None, "provider", "concept", ["gender_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
+        None, "provider", "concept", ["gender_source_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "provider", "concept", ["specialty_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
         None, "relationship", "concept", ["relationship_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "source_to_concept_map", "concept", ["target_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None,
@@ -593,24 +596,21 @@ def upgrade() -> None:
     op.create_foreign_key(
         None, "source_to_concept_map", "concept", ["source_concept_id"], ["concept_id"]
     )
-    op.create_foreign_key(
-        None, "source_to_concept_map", "concept", ["target_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "specimen", "concept", ["specimen_type_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "specimen", "concept", ["disease_status_concept_id"], ["concept_id"]
-    )
     op.create_foreign_key(None, "specimen", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None, "specimen", "concept", ["unit_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
-        None, "specimen", "concept", ["specimen_concept_id"], ["concept_id"]
+        None, "specimen", "concept", ["specimen_type_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "specimen", "concept", ["anatomic_site_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "specimen", "concept", ["disease_status_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "specimen", "concept", ["specimen_concept_id"], ["concept_id"]
     )
     op.create_index(
         "idx_visit_det_concept_id_1",
@@ -627,9 +627,22 @@ def upgrade() -> None:
     op.create_foreign_key(
         None,
         "visit_detail",
-        "concept",
-        ["visit_detail_type_concept_id"],
-        ["concept_id"],
+        "visit_detail",
+        ["preceding_visit_detail_id"],
+        ["visit_detail_id"],
+    )
+    op.create_foreign_key(
+        None, "visit_detail", "concept", ["admitted_from_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "visit_detail", "concept", ["discharged_to_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None,
+        "visit_detail",
+        "visit_occurrence",
+        ["visit_occurrence_id"],
+        ["visit_occurrence_id"],
     )
     op.create_foreign_key(
         None,
@@ -639,23 +652,7 @@ def upgrade() -> None:
         ["concept_id"],
     )
     op.create_foreign_key(
-        None, "visit_detail", "concept", ["visit_detail_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "visit_detail", "concept", ["discharged_to_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "visit_detail", "provider", ["provider_id"], ["provider_id"]
-    )
-    op.create_foreign_key(
         None, "visit_detail", "care_site", ["care_site_id"], ["care_site_id"]
-    )
-    op.create_foreign_key(
-        None,
-        "visit_detail",
-        "visit_occurrence",
-        ["visit_occurrence_id"],
-        ["visit_occurrence_id"],
     )
     op.create_foreign_key(
         None,
@@ -664,51 +661,25 @@ def upgrade() -> None:
         ["parent_visit_detail_id"],
         ["visit_detail_id"],
     )
-    op.create_foreign_key(
-        None, "visit_detail", "concept", ["admitted_from_concept_id"], ["concept_id"]
-    )
+    op.create_foreign_key(None, "visit_detail", "person", ["person_id"], ["person_id"])
     op.create_foreign_key(
         None,
         "visit_detail",
-        "visit_detail",
-        ["preceding_visit_detail_id"],
-        ["visit_detail_id"],
+        "concept",
+        ["visit_detail_type_concept_id"],
+        ["concept_id"],
     )
-    op.create_foreign_key(None, "visit_detail", "person", ["person_id"], ["person_id"])
+    op.create_foreign_key(
+        None, "visit_detail", "concept", ["visit_detail_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "visit_detail", "provider", ["provider_id"], ["provider_id"]
+    )
     op.create_index(
         "idx_visit_concept_id_1", "visit_occurrence", ["visit_concept_id"], unique=False
     )
     op.create_index(
         "idx_visit_person_id_1", "visit_occurrence", ["person_id"], unique=False
-    )
-    op.create_foreign_key(
-        None, "visit_occurrence", "concept", ["visit_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "visit_occurrence", "care_site", ["care_site_id"], ["care_site_id"]
-    )
-    op.create_foreign_key(
-        None, "visit_occurrence", "concept", ["visit_type_concept_id"], ["concept_id"]
-    )
-    op.create_foreign_key(
-        None, "visit_occurrence", "person", ["person_id"], ["person_id"]
-    )
-    op.create_foreign_key(
-        None,
-        "visit_occurrence",
-        "concept",
-        ["discharged_to_concept_id"],
-        ["concept_id"],
-    )
-    op.create_foreign_key(
-        None, "visit_occurrence", "provider", ["provider_id"], ["provider_id"]
-    )
-    op.create_foreign_key(
-        None,
-        "visit_occurrence",
-        "concept",
-        ["admitted_from_concept_id"],
-        ["concept_id"],
     )
     op.create_foreign_key(
         None,
@@ -718,7 +689,36 @@ def upgrade() -> None:
         ["visit_occurrence_id"],
     )
     op.create_foreign_key(
+        None,
+        "visit_occurrence",
+        "concept",
+        ["discharged_to_concept_id"],
+        ["concept_id"],
+    )
+    op.create_foreign_key(
+        None, "visit_occurrence", "person", ["person_id"], ["person_id"]
+    )
+    op.create_foreign_key(
+        None, "visit_occurrence", "provider", ["provider_id"], ["provider_id"]
+    )
+    op.create_foreign_key(
         None, "visit_occurrence", "concept", ["visit_source_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None, "visit_occurrence", "care_site", ["care_site_id"], ["care_site_id"]
+    )
+    op.create_foreign_key(
+        None, "visit_occurrence", "concept", ["visit_type_concept_id"], ["concept_id"]
+    )
+    op.create_foreign_key(
+        None,
+        "visit_occurrence",
+        "concept",
+        ["admitted_from_concept_id"],
+        ["concept_id"],
+    )
+    op.create_foreign_key(
+        None, "visit_occurrence", "concept", ["visit_concept_id"], ["concept_id"]
     )
     op.create_foreign_key(
         None, "vocabulary", "concept", ["vocabulary_concept_id"], ["concept_id"]
