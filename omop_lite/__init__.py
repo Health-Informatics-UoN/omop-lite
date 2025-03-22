@@ -15,15 +15,10 @@ def main() -> None:
     # Run create table migration
     db.create_tables()
 
-    # # Load data
-    # # If synthetic data is requested, load synthetic data
-    # if settings.synthetic:
-    #     db.load_synthetic_data()
-    # # Otherwise, load from data directory
-    # else:
-    #     db.load_data_from_directory(settings.data_dir)
+    # Load data
+    db.load_data()
 
-    # # Run update table migrations
+    # Run update table migrations
     db.update_tables()
 
 

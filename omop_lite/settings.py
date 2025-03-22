@@ -5,15 +5,15 @@ from typing import Literal
 class Settings(BaseSettings):
     """Settings for OMOP Lite."""
 
-    db_host: str
-    db_port: int
-    db_user: str
-    db_password: str
-    db_name: str
-    synthetic: bool
-    data_dir: str
-    schema_name: str
-    db_type: Literal["postgresql", "sqlite"]
+    db_host: str = "localhost"
+    db_port: int = 5432
+    db_user: str = "postgres"
+    db_password: str = "postgres"
+    db_name: str = "omop"
+    synthetic: bool = False
+    data_dir: str = "data"
+    schema_name: str = "public"
+    db_type: Literal["postgresql", "sqlite"] = "postgresql"
 
     class Config:
         env_file = ".env"
