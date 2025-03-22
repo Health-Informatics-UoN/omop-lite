@@ -34,13 +34,10 @@ class Database:
         return schema_name in inspector.get_schema_names()
 
     def create_schema(self, schema_name: str) -> None:
-        if not self.schema_exists(schema_name):
-            with self.engine.connect() as connection:
-                connection.execute(text(f'CREATE SCHEMA "{schema_name}"'))
-                print(f"Schema '{schema_name}' created.")
-                connection.commit()
-        else:
-            print(f"Schema '{schema_name}' already exists.")
+        with self.engine.connect() as connection:
+            connection.execute(text(f'CREATE SCHEMA "{schema_name}"'))
+            print(f"Schema '{schema_name}' created.")
+            connection.commit()
 
     def create_tables(self) -> None:
         """
