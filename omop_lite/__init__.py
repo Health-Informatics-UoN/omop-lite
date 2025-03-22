@@ -7,6 +7,7 @@ def main() -> None:
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger(__name__)
     logger.info("Starting OMOP Lite")
+    logger.info(f"Settings: {settings.model_dump()}")
     db = Database()
 
     # Create schema if not exists
