@@ -2,3 +2,4 @@ vocabs
 data
 .DS_Store
 *.pyc
+.env
