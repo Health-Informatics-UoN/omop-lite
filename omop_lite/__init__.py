@@ -14,10 +14,10 @@ def main() -> None:
     # db.create_schema(settings.schema_name)
 
     # Run create table migration
-    db.create_tables()
+    # db.create_tables()
 
     # Load data
-    db.load_data()
+    # db.load_data()
 
     # Run update table migrations
     db.update_tables()

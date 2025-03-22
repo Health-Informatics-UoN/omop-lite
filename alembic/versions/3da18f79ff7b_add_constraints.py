@@ -90,29 +90,6 @@ def upgrade() -> None:
         source_schema=schema,
         referent_schema=schema,
     )
-    op.create_index(
-        "idx_concept_class_id",
-        "concept",
-        ["concept_class_id"],
-        unique=False,
-        schema=schema,
-    )
-    op.create_index(
-        "idx_concept_code", "concept", ["concept_code"], unique=False, schema=schema
-    )
-    op.create_index(
-        "idx_concept_concept_id", "concept", ["concept_id"], unique=False, schema=schema
-    )
-    op.create_index(
-        "idx_concept_domain_id", "concept", ["domain_id"], unique=False, schema=schema
-    )
-    op.create_index(
-        "idx_concept_vocabluary_id",
-        "concept",
-        ["vocabulary_id"],
-        unique=False,
-        schema=schema,
-    )
     op.create_foreign_key(
         "fk_concept_ancestor_ancestor_concept_id",
         "concept_ancestor",
@@ -742,7 +719,7 @@ def upgrade() -> None:
     )
     op.create_index(
         "idx_location_id_1",
-        f"{schema}.location",
+        "location",
         ["location_id"],
         unique=False,
         schema=schema,
@@ -974,14 +951,14 @@ def upgrade() -> None:
     )
     op.create_index(
         "idx_note_nlp_concept_id_1",
-        f"{schema}.note_nlp",
+        "note_nlp",
         ["note_nlp_concept_id"],
         unique=False,
         schema=schema,
     )
     op.create_index(
         "idx_note_nlp_note_id_1",
-        f"{schema}.note_nlp",
+        "note_nlp",
         ["note_id"],
         unique=False,
         schema=schema,
@@ -1114,7 +1091,7 @@ def upgrade() -> None:
     )
     op.create_index(
         "idx_observation_period_id_1",
-        f"{schema}.observation_period",
+        "observation_period",
         ["person_id"],
         unique=False,
         schema=schema,
@@ -1220,14 +1197,14 @@ def upgrade() -> None:
     )
     op.create_index(
         "idx_gender",
-        f"{schema}.person",
+        "person",
         ["gender_concept_id"],
         unique=False,
         schema=schema,
     )
     op.create_index(
         "idx_person_id_1",
-        f"{schema}.person",
+        "person",
         ["person_id"],
         unique=False,
         schema=schema,
@@ -1387,7 +1364,7 @@ def upgrade() -> None:
     )
     op.create_index(
         "idx_provider_id_1",
-        f"{schema}.provider",
+        "provider",
         ["provider_id"],
         unique=False,
         schema=schema,
