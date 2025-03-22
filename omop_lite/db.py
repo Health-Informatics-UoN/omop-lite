@@ -6,6 +6,9 @@ from pathlib import Path
 from typing import Dict, Any, List
 import csv
 from urllib.parse import urlparse
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -36,7 +39,7 @@ class Database:
     def create_schema(self, schema_name: str) -> None:
         with self.engine.connect() as connection:
             connection.execute(text(f'CREATE SCHEMA "{schema_name}"'))
-            print(f"Schema '{schema_name}' created.")
+            logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
     def create_tables(self) -> None:
@@ -103,23 +106,23 @@ class Database:
         ]
 
         data_dir = Path("synthetic") if settings.synthetic else Path(settings.data_dir)
-        print(f"Loading data from {data_dir}")
+        logger.info(f"Loading data from {data_dir}")
 
         for table_name in omop_tables:
             table_lower = table_name.lower()
             csv_file = data_dir / f"{table_name}.csv"
 
             if not csv_file.exists():
-                print(f"Warning: {csv_file} not found, skipping...")
+                logger.warning(f"Warning: {csv_file} not found, skipping...")
                 continue
 
-            print(f"Loading: {table_name}")
+            logger.info(f"Loading: {table_name}")
 
             try:
                 # Look up table with schema prefix
                 qualified_table = f"{settings.schema_name}.{table_lower}"
                 if qualified_table not in self.metadata.tables:
-                    print(f"Available tables: {list(self.metadata.tables.keys())}")
+                    logger.error(f"Available tables: {list(self.metadata.tables.keys())}")
                     raise KeyError(f"Table {qualified_table} not found in metadata")
 
                 table = self.metadata.tables[qualified_table]
@@ -135,9 +138,9 @@ class Database:
                             connection.execute(table.insert(), chunk)
                     connection.commit()
 
-                print(f"Successfully loaded {table_name}")
+                logger.info(f"Successfully loaded {table_name}")
             except Exception as e:
-                print(f"Error loading {table_name}: {str(e)}")
+                logger.error(f"Error loading {table_name}: {str(e)}")
 
     def update_tables(self) -> None:
         """

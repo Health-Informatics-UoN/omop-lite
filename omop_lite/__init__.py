@@ -10,10 +10,10 @@ def main() -> None:
     This function will create the schema if it doesn't exist, 
     create the tables, load the data, and run the update migrations.
     """
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=settings.log_level)
     logger = logging.getLogger(__name__)
     logger.info("Starting OMOP Lite")
-    logger.info(f"Settings: {settings.model_dump()}")
+    logger.debug(f"Settings: {settings.model_dump()}")
     db = Database()
 
     # Create schema if not exists and not 'public'

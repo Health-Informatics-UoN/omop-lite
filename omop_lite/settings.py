@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     data_dir: str = "data"
     schema_name: str = "public"
     db_type: Literal["postgresql", "sqlite"] = "postgresql"
+    log_level: str = "INFO"
 
     class Config:
         env_file = ".env"
