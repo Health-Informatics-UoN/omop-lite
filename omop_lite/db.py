@@ -84,7 +84,7 @@ class Database:
             "CONCEPT_CLASS", "DOMAIN"
         ]
 
-        data_dir = Path(settings.data_dir)
+        data_dir = Path("synthetic") if settings.synthetic else Path(settings.data_dir)
         print(f"Loading data from {data_dir}")
         
         for table_name in omop_tables:
