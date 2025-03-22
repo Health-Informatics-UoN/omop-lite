@@ -5,6 +5,7 @@ Revises: bbf6835f69e1
 Create Date: 2025-03-22 18:31:54.602686
 
 """
+
 from typing import Sequence, Union
 
 from alembic import op
@@ -22,24 +23,45 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     """Upgrade schema."""
     # Get schema from config
-    schema = context.config.attributes['schema']
-    
+    schema = context.config.attributes["schema"]
+
     # Create indexes with schema-qualified table names
-    op.create_index("idx_care_site_id_1", "care_site", ["care_site_id"], unique=False, schema=schema)
-    op.create_index("idx_concept_class_id", "concept", ["concept_class_id"], unique=False, schema=schema)
-    op.create_index("idx_concept_code", "concept", ["concept_code"], unique=False, schema=schema)
-    op.create_index("idx_concept_concept_id", "concept", ["concept_id"], unique=False, schema=schema)
-    op.create_index("idx_concept_domain_id", "concept", ["domain_id"], unique=False, schema=schema)
-    op.create_index("idx_concept_vocabulary_id", "concept", ["vocabulary_id"], unique=False, schema=schema)
+    op.create_index(
+        "idx_care_site_id_1", "care_site", ["care_site_id"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_class_id",
+        "concept",
+        ["concept_class_id"],
+        unique=False,
+        schema=schema,
+    )
+    op.create_index(
+        "idx_concept_code", "concept", ["concept_code"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_concept_id", "concept", ["concept_id"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_domain_id", "concept", ["domain_id"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_vocabulary_id",
+        "concept",
+        ["vocabulary_id"],
+        unique=False,
+        schema=schema,
+    )
 
     # Create foreign keys with schema-qualified table names and explicit constraint names
     op.create_foreign_key(
-        "fk_care_site_concept", 
+        "fk_care_site_concept",
         "care_site",
         "concept",
         ["place_of_service_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_care_site_location",
@@ -47,7 +69,8 @@ def upgrade() -> None:
         "location",
         ["location_id"],
         ["location_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cohort_definition_concept_1",
@@ -55,7 +78,8 @@ def upgrade() -> None:
         "concept",
         ["definition_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cohort_definition_concept_2",
@@ -63,16 +87,31 @@ def upgrade() -> None:
         "concept",
         ["subject_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
-        "idx_concept_class_id", "concept", ["concept_class_id"], unique=False, schema=schema
+        "idx_concept_class_id",
+        "concept",
+        ["concept_class_id"],
+        unique=False,
+        schema=schema,
     )
-    op.create_index("idx_concept_code", "concept", ["concept_code"], unique=False, schema=schema)
-    op.create_index("idx_concept_concept_id", "concept", ["concept_id"], unique=False, schema=schema)
-    op.create_index("idx_concept_domain_id", "concept", ["domain_id"], unique=False, schema=schema)
     op.create_index(
-        "idx_concept_vocabluary_id", "concept", ["vocabulary_id"], unique=False, schema=schema
+        "idx_concept_code", "concept", ["concept_code"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_concept_id", "concept", ["concept_id"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_domain_id", "concept", ["domain_id"], unique=False, schema=schema
+    )
+    op.create_index(
+        "idx_concept_vocabluary_id",
+        "concept",
+        ["vocabulary_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_ancestor_ancestor_concept_id",
@@ -80,7 +119,8 @@ def upgrade() -> None:
         "concept",
         ["ancestor_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_ancestor_descendant_concept_id",
@@ -88,7 +128,8 @@ def upgrade() -> None:
         "concept",
         ["descendant_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_class_concept_id",
@@ -96,7 +137,8 @@ def upgrade() -> None:
         "concept",
         ["concept_class_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_relationship_concept_id_2",
@@ -104,7 +146,8 @@ def upgrade() -> None:
         "concept",
         ["concept_id_2"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_relationship_concept_id_1",
@@ -112,7 +155,8 @@ def upgrade() -> None:
         "concept",
         ["concept_id_1"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_relationship_relationship_id",
@@ -120,7 +164,8 @@ def upgrade() -> None:
         "relationship",
         ["relationship_id"],
         ["relationship_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_synonym_concept_id",
@@ -128,7 +173,8 @@ def upgrade() -> None:
         "concept",
         ["concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_concept_synonym_language_concept_id",
@@ -136,7 +182,8 @@ def upgrade() -> None:
         "concept",
         ["language_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_era_concept_id",
@@ -144,7 +191,8 @@ def upgrade() -> None:
         "concept",
         ["condition_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_era_person_id",
@@ -152,24 +200,29 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
         "idx_condition_concept_id_1",
         "condition_occurrence",
         ["condition_concept_id"],
         unique=False,
-        schema=schema
+        schema=schema,
     )
     op.create_index(
-        "idx_condition_person_id_1", "condition_occurrence", ["person_id"], unique=False, schema=schema
+        "idx_condition_person_id_1",
+        "condition_occurrence",
+        ["person_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_index(
         "idx_condition_visit_id_1",
         "condition_occurrence",
         ["visit_occurrence_id"],
         unique=False,
-        schema=schema
+        schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_provider_id",
@@ -177,7 +230,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_visit_occurrence_id",
@@ -185,7 +239,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_person_id",
@@ -193,7 +248,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_condition_type_concept_id",
@@ -201,7 +257,8 @@ def upgrade() -> None:
         "concept",
         ["condition_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_visit_detail_id",
@@ -209,7 +266,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_condition_concept_id",
@@ -217,7 +275,8 @@ def upgrade() -> None:
         "concept",
         ["condition_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_condition_source_concept_id",
@@ -225,7 +284,8 @@ def upgrade() -> None:
         "concept",
         ["condition_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_condition_occurrence_condition_status_concept_id",
@@ -233,7 +293,8 @@ def upgrade() -> None:
         "concept",
         ["condition_status_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cost_concept_id",
@@ -241,7 +302,8 @@ def upgrade() -> None:
         "concept",
         ["cost_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cost_drg_concept_id",
@@ -249,7 +311,8 @@ def upgrade() -> None:
         "concept",
         ["drg_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cost_domain_id",
@@ -257,7 +320,8 @@ def upgrade() -> None:
         "domain",
         ["cost_domain_id"],
         ["domain_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cost_revenue_code_concept_id",
@@ -265,7 +329,8 @@ def upgrade() -> None:
         "concept",
         ["revenue_code_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_cost_currency_concept_id",
@@ -273,7 +338,8 @@ def upgrade() -> None:
         "concept",
         ["currency_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_death_cause_concept_id",
@@ -281,7 +347,8 @@ def upgrade() -> None:
         "concept",
         ["cause_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_death_death_type_concept_id",
@@ -289,7 +356,8 @@ def upgrade() -> None:
         "concept",
         ["death_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_death_cause_source_concept_id",
@@ -297,7 +365,8 @@ def upgrade() -> None:
         "concept",
         ["cause_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_death_person_id",
@@ -305,7 +374,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_concept_id",
@@ -313,7 +383,8 @@ def upgrade() -> None:
         "concept",
         ["device_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_provider_id",
@@ -321,7 +392,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_device_type_concept_id",
@@ -329,7 +401,8 @@ def upgrade() -> None:
         "concept",
         ["device_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_visit_occurrence_id",
@@ -337,7 +410,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_unit_source_concept_id",
@@ -345,7 +419,8 @@ def upgrade() -> None:
         "concept",
         ["unit_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_device_concept_id",
@@ -353,7 +428,8 @@ def upgrade() -> None:
         "concept",
         ["device_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_person_id",
@@ -361,7 +437,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_unit_concept_id",
@@ -369,7 +446,8 @@ def upgrade() -> None:
         "concept",
         ["unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_device_exposure_visit_detail_id",
@@ -377,7 +455,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_domain_concept_id",
@@ -385,7 +464,8 @@ def upgrade() -> None:
         "concept",
         ["domain_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_dose_era_person_id",
@@ -393,7 +473,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_dose_era_concept_id",
@@ -401,14 +482,17 @@ def upgrade() -> None:
         "concept",
         ["drug_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_dose_era_unit_concept_id",
         "dose_era",
         "concept",
         ["unit_concept_id"],
-        ["concept_id"]
+        ["concept_id"],
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_era_concept_id",
@@ -416,7 +500,8 @@ def upgrade() -> None:
         "concept",
         ["drug_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_era_person_id",
@@ -424,7 +509,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_concept_id",
@@ -432,7 +518,8 @@ def upgrade() -> None:
         "concept",
         ["drug_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_visit_occurrence_id",
@@ -440,7 +527,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_drug_source_concept_id",
@@ -448,7 +536,8 @@ def upgrade() -> None:
         "concept",
         ["drug_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_provider_id",
@@ -456,7 +545,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_person_id",
@@ -464,7 +554,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_visit_detail_id",
@@ -472,7 +563,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_drug_type_concept_id",
@@ -480,7 +572,8 @@ def upgrade() -> None:
         "concept",
         ["drug_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_exposure_route_concept_id",
@@ -488,7 +581,8 @@ def upgrade() -> None:
         "concept",
         ["route_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_strength_denominator_unit_concept_id",
@@ -496,7 +590,8 @@ def upgrade() -> None:
         "concept",
         ["denominator_unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_strength_numerator_unit_concept_id",
@@ -504,7 +599,8 @@ def upgrade() -> None:
         "concept",
         ["numerator_unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_strength_amount_unit_concept_id",
@@ -512,7 +608,8 @@ def upgrade() -> None:
         "concept",
         ["amount_unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_strength_drug_concept_id",
@@ -520,7 +617,8 @@ def upgrade() -> None:
         "concept",
         ["drug_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_drug_strength_ingredient_concept_id",
@@ -528,14 +626,17 @@ def upgrade() -> None:
         "concept",
         ["ingredient_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_concept_id",
         "episode",
         "concept",
         ["episode_concept_id"],
-        ["concept_id"]
+        ["concept_id"],
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_source_concept_id",
@@ -543,7 +644,8 @@ def upgrade() -> None:
         "concept",
         ["episode_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_object_concept_id",
@@ -551,7 +653,8 @@ def upgrade() -> None:
         "concept",
         ["episode_object_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_type_concept_id",
@@ -559,7 +662,8 @@ def upgrade() -> None:
         "concept",
         ["episode_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_person_id",
@@ -567,7 +671,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_event_episode_event_field_concept_id",
@@ -575,7 +680,8 @@ def upgrade() -> None:
         "concept",
         ["episode_event_field_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_episode_event_episode_id",
@@ -583,28 +689,29 @@ def upgrade() -> None:
         "episode",
         ["episode_id"],
         ["episode_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
         "idx_fact_relationship_id1",
         "fact_relationship",
         ["domain_concept_id_1"],
         unique=False,
-        schema=schema
+        schema=schema,
     )
     op.create_index(
         "idx_fact_relationship_id2",
         "fact_relationship",
         ["domain_concept_id_2"],
         unique=False,
-        schema=schema
+        schema=schema,
     )
     op.create_index(
         "idx_fact_relationship_id3",
         "fact_relationship",
         ["relationship_concept_id"],
         unique=False,
-        schema=schema
+        schema=schema,
     )
     op.create_foreign_key(
         "fk_fact_relationship_relationship_concept_id",
@@ -612,7 +719,8 @@ def upgrade() -> None:
         "concept",
         ["relationship_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_fact_relationship_domain_concept_id_1",
@@ -620,7 +728,8 @@ def upgrade() -> None:
         "concept",
         ["domain_concept_id_1"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_fact_relationship_domain_concept_id_2",
@@ -628,16 +737,24 @@ def upgrade() -> None:
         "concept",
         ["domain_concept_id_2"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
-    op.create_index("idx_location_id_1", f"{schema}.location", ["location_id"], unique=False)
+    op.create_index(
+        "idx_location_id_1",
+        f"{schema}.location",
+        ["location_id"],
+        unique=False,
+        schema=schema,
+    )
     op.create_foreign_key(
         "fk_location_country_concept_id",
         "location",
         "concept",
         ["country_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_visit_occurrence_id",
@@ -645,7 +762,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_operator_concept_id",
@@ -653,7 +771,8 @@ def upgrade() -> None:
         "concept",
         ["operator_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_value_as_concept_id",
@@ -661,7 +780,8 @@ def upgrade() -> None:
         "concept",
         ["value_as_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_person_id",
@@ -669,7 +789,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_unit_concept_id",
@@ -677,7 +798,8 @@ def upgrade() -> None:
         "concept",
         ["unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_visit_detail_id",
@@ -685,7 +807,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_measurement_source_concept_id",
@@ -693,7 +816,8 @@ def upgrade() -> None:
         "concept",
         ["measurement_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_unit_source_concept_id",
@@ -701,7 +825,8 @@ def upgrade() -> None:
         "concept",
         ["unit_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_measurement_concept_id",
@@ -709,7 +834,8 @@ def upgrade() -> None:
         "concept",
         ["measurement_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_meas_event_field_concept_id",
@@ -717,7 +843,8 @@ def upgrade() -> None:
         "concept",
         ["meas_event_field_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_provider_id",
@@ -725,7 +852,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_measurement_measurement_type_concept_id",
@@ -733,7 +861,8 @@ def upgrade() -> None:
         "concept",
         ["measurement_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_metadata_concept_id",
@@ -741,7 +870,8 @@ def upgrade() -> None:
         "concept",
         ["metadata_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_metadata_metadata_type_concept_id",
@@ -749,7 +879,8 @@ def upgrade() -> None:
         "concept",
         ["metadata_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_metadata_value_as_concept_id",
@@ -757,7 +888,8 @@ def upgrade() -> None:
         "concept",
         ["value_as_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_visit_detail_id",
@@ -765,7 +897,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_provider_id",
@@ -773,7 +906,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_note_event_field_concept_id",
@@ -781,7 +915,8 @@ def upgrade() -> None:
         "concept",
         ["note_event_field_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_language_concept_id",
@@ -789,7 +924,8 @@ def upgrade() -> None:
         "concept",
         ["language_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_encoding_concept_id",
@@ -797,7 +933,8 @@ def upgrade() -> None:
         "concept",
         ["encoding_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_person_id",
@@ -805,7 +942,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_visit_occurrence_id",
@@ -813,7 +951,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_note_type_concept_id",
@@ -821,7 +960,8 @@ def upgrade() -> None:
         "concept",
         ["note_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_note_class_concept_id",
@@ -829,19 +969,31 @@ def upgrade() -> None:
         "concept",
         ["note_class_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
-        "idx_note_nlp_concept_id_1", f"{schema}.note_nlp", ["note_nlp_concept_id"], unique=False, schema=schema
+        "idx_note_nlp_concept_id_1",
+        f"{schema}.note_nlp",
+        ["note_nlp_concept_id"],
+        unique=False,
+        schema=schema,
     )
-    op.create_index("idx_note_nlp_note_id_1", f"{schema}.note_nlp", ["note_id"], unique=False, schema=schema)
+    op.create_index(
+        "idx_note_nlp_note_id_1",
+        f"{schema}.note_nlp",
+        ["note_id"],
+        unique=False,
+        schema=schema,
+    )
     op.create_foreign_key(
         "fk_note_nlp_note_nlp_concept_id",
         "note_nlp",
         "concept",
         ["note_nlp_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_nlp_note_nlp_source_concept_id",
@@ -849,7 +1001,8 @@ def upgrade() -> None:
         "concept",
         ["note_nlp_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_note_nlp_section_concept_id",
@@ -857,7 +1010,8 @@ def upgrade() -> None:
         "concept",
         ["section_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_person_id",
@@ -865,7 +1019,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_visit_occurrence_id",
@@ -873,7 +1028,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_obs_event_field_concept_id",
@@ -881,7 +1037,8 @@ def upgrade() -> None:
         "concept",
         ["obs_event_field_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_value_as_concept_id",
@@ -889,7 +1046,8 @@ def upgrade() -> None:
         "concept",
         ["value_as_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_provider_id",
@@ -897,7 +1055,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_observation_source_concept_id",
@@ -905,7 +1064,8 @@ def upgrade() -> None:
         "concept",
         ["observation_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_unit_concept_id",
@@ -913,7 +1073,8 @@ def upgrade() -> None:
         "concept",
         ["unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_visit_detail_id",
@@ -921,7 +1082,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_observation_type_concept_id",
@@ -929,7 +1091,8 @@ def upgrade() -> None:
         "concept",
         ["observation_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_observation_concept_id",
@@ -937,7 +1100,8 @@ def upgrade() -> None:
         "concept",
         ["observation_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_qualifier_concept_id",
@@ -945,10 +1109,15 @@ def upgrade() -> None:
         "concept",
         ["qualifier_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
-        "idx_observation_period_id_1", f"{schema}.observation_period", ["person_id"], unique=False, schema=schema
+        "idx_observation_period_id_1",
+        f"{schema}.observation_period",
+        ["person_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_period_person_id",
@@ -956,7 +1125,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_observation_period_period_type_concept_id",
@@ -964,7 +1134,8 @@ def upgrade() -> None:
         "concept",
         ["period_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_stop_reason_concept_id",
@@ -972,7 +1143,8 @@ def upgrade() -> None:
         "concept",
         ["stop_reason_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_payer_concept_id",
@@ -980,7 +1152,8 @@ def upgrade() -> None:
         "concept",
         ["payer_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_plan_concept_id",
@@ -988,7 +1161,8 @@ def upgrade() -> None:
         "concept",
         ["plan_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_payer_source_concept_id",
@@ -996,7 +1170,8 @@ def upgrade() -> None:
         "concept",
         ["payer_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_person_id",
@@ -1004,7 +1179,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_plan_source_concept_id",
@@ -1012,7 +1188,8 @@ def upgrade() -> None:
         "concept",
         ["plan_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_stop_reason_source_concept_id",
@@ -1020,7 +1197,8 @@ def upgrade() -> None:
         "concept",
         ["stop_reason_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_sponsor_concept_id",
@@ -1028,7 +1206,8 @@ def upgrade() -> None:
         "concept",
         ["sponsor_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_payer_plan_period_sponsor_source_concept_id",
@@ -1036,17 +1215,31 @@ def upgrade() -> None:
         "concept",
         ["sponsor_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
-    op.create_index("idx_gender", f"{schema}.person", ["gender_concept_id"], unique=False, schema=schema)
-    op.create_index("idx_person_id_1", f"{schema}.person", ["person_id"], unique=False, schema=schema)
+    op.create_index(
+        "idx_gender",
+        f"{schema}.person",
+        ["gender_concept_id"],
+        unique=False,
+        schema=schema,
+    )
+    op.create_index(
+        "idx_person_id_1",
+        f"{schema}.person",
+        ["person_id"],
+        unique=False,
+        schema=schema,
+    )
     op.create_foreign_key(
         "fk_person_ethnicity_concept_id",
         "person",
         "concept",
         ["ethnicity_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_race_concept_id",
@@ -1054,7 +1247,8 @@ def upgrade() -> None:
         "concept",
         ["race_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_gender_concept_id",
@@ -1062,7 +1256,8 @@ def upgrade() -> None:
         "concept",
         ["gender_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_provider_id",
@@ -1070,7 +1265,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_gender_source_concept_id",
@@ -1078,7 +1274,8 @@ def upgrade() -> None:
         "concept",
         ["gender_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_care_site_id",
@@ -1086,7 +1283,8 @@ def upgrade() -> None:
         "care_site",
         ["care_site_id"],
         ["care_site_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_race_source_concept_id",
@@ -1094,7 +1292,8 @@ def upgrade() -> None:
         "concept",
         ["race_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_location_id",
@@ -1102,7 +1301,8 @@ def upgrade() -> None:
         "location",
         ["location_id"],
         ["location_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_person_ethnicity_source_concept_id",
@@ -1110,7 +1310,8 @@ def upgrade() -> None:
         "concept",
         ["ethnicity_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_concept_id",
@@ -1118,7 +1319,8 @@ def upgrade() -> None:
         "concept",
         ["procedure_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_type_concept_id",
@@ -1126,7 +1328,8 @@ def upgrade() -> None:
         "concept",
         ["procedure_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_visit_detail_id",
@@ -1134,7 +1337,8 @@ def upgrade() -> None:
         "visit_detail",
         ["visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_provider_id",
@@ -1142,7 +1346,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_modifier_concept_id",
@@ -1150,7 +1355,8 @@ def upgrade() -> None:
         "concept",
         ["modifier_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_person_id",
@@ -1158,7 +1364,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_visit_occurrence_id",
@@ -1166,7 +1373,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_procedure_occurrence_procedure_source_concept_id",
@@ -1174,16 +1382,24 @@ def upgrade() -> None:
         "concept",
         ["procedure_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
-    op.create_index("idx_provider_id_1", f"{schema}.provider", ["provider_id"], unique=False, schema=schema)
+    op.create_index(
+        "idx_provider_id_1",
+        f"{schema}.provider",
+        ["provider_id"],
+        unique=False,
+        schema=schema,
+    )
     op.create_foreign_key(
         "fk_provider_care_site_id",
         "provider",
         "care_site",
         ["care_site_id"],
         ["care_site_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_provider_gender_concept_id",
@@ -1191,7 +1407,8 @@ def upgrade() -> None:
         "concept",
         ["gender_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_provider_gender_source_concept_id",
@@ -1199,7 +1416,8 @@ def upgrade() -> None:
         "concept",
         ["gender_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_provider_specialty_concept_id",
@@ -1207,7 +1425,8 @@ def upgrade() -> None:
         "concept",
         ["specialty_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_relationship_relationship_concept_id",
@@ -1215,7 +1434,8 @@ def upgrade() -> None:
         "concept",
         ["relationship_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_source_to_concept_map_target_concept_id",
@@ -1223,7 +1443,8 @@ def upgrade() -> None:
         "concept",
         ["target_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_source_to_concept_map_target_vocabulary_id",
@@ -1231,7 +1452,8 @@ def upgrade() -> None:
         "vocabulary",
         ["target_vocabulary_id"],
         ["vocabulary_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_source_to_concept_map_source_concept_id",
@@ -1239,7 +1461,8 @@ def upgrade() -> None:
         "concept",
         ["source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_specimen_person_id",
@@ -1247,7 +1470,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_specimen_unit_concept_id",
@@ -1255,7 +1479,8 @@ def upgrade() -> None:
         "concept",
         ["unit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_specimen_specimen_type_concept_id",
@@ -1263,7 +1488,8 @@ def upgrade() -> None:
         "concept",
         ["specimen_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_specimen_anatomic_site_concept_id",
@@ -1271,7 +1497,8 @@ def upgrade() -> None:
         "concept",
         ["anatomic_site_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_specimen_disease_status_concept_id",
@@ -1279,7 +1506,8 @@ def upgrade() -> None:
         "concept",
         ["disease_status_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_specimen_specimen_concept_id",
@@ -1287,20 +1515,29 @@ def upgrade() -> None:
         "concept",
         ["specimen_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
         "idx_visit_det_concept_id_1",
         "visit_detail",
         ["visit_detail_concept_id"],
         unique=False,
-        schema=schema
+        schema=schema,
     )
     op.create_index(
-        "idx_visit_det_occ_id", "visit_detail", ["visit_occurrence_id"], unique=False, schema=schema
+        "idx_visit_det_occ_id",
+        "visit_detail",
+        ["visit_occurrence_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_index(
-        "idx_visit_det_person_id_1", "visit_detail", ["person_id"], unique=False, schema=schema
+        "idx_visit_det_person_id_1",
+        "visit_detail",
+        ["person_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_preceding_visit_detail_id",
@@ -1308,7 +1545,8 @@ def upgrade() -> None:
         "visit_detail",
         ["preceding_visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_admitted_from_concept_id",
@@ -1316,7 +1554,8 @@ def upgrade() -> None:
         "concept",
         ["admitted_from_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_discharged_to_concept_id",
@@ -1324,7 +1563,8 @@ def upgrade() -> None:
         "concept",
         ["discharged_to_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_visit_occurrence_id",
@@ -1332,7 +1572,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_visit_detail_source_concept_id",
@@ -1340,7 +1581,8 @@ def upgrade() -> None:
         "concept",
         ["visit_detail_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_care_site_id",
@@ -1348,7 +1590,8 @@ def upgrade() -> None:
         "care_site",
         ["care_site_id"],
         ["care_site_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_parent_visit_detail_id",
@@ -1356,7 +1599,8 @@ def upgrade() -> None:
         "visit_detail",
         ["parent_visit_detail_id"],
         ["visit_detail_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_person_id",
@@ -1364,7 +1608,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_visit_detail_type_concept_id",
@@ -1372,7 +1617,8 @@ def upgrade() -> None:
         "concept",
         ["visit_detail_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_visit_detail_concept_id",
@@ -1380,7 +1626,8 @@ def upgrade() -> None:
         "concept",
         ["visit_detail_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_detail_provider_id",
@@ -1388,13 +1635,22 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_index(
-        "idx_visit_concept_id_1", "visit_occurrence", ["visit_concept_id"], unique=False, schema=schema
+        "idx_visit_concept_id_1",
+        "visit_occurrence",
+        ["visit_concept_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_index(
-        "idx_visit_person_id_1", "visit_occurrence", ["person_id"], unique=False, schema=schema
+        "idx_visit_person_id_1",
+        "visit_occurrence",
+        ["person_id"],
+        unique=False,
+        schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_preceding_visit_occurrence_id",
@@ -1402,7 +1658,8 @@ def upgrade() -> None:
         "visit_occurrence",
         ["preceding_visit_occurrence_id"],
         ["visit_occurrence_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_discharged_to_concept_id",
@@ -1410,7 +1667,8 @@ def upgrade() -> None:
         "concept",
         ["discharged_to_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_person_id",
@@ -1418,7 +1676,8 @@ def upgrade() -> None:
         "person",
         ["person_id"],
         ["person_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_provider_id",
@@ -1426,7 +1685,8 @@ def upgrade() -> None:
         "provider",
         ["provider_id"],
         ["provider_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_visit_source_concept_id",
@@ -1434,7 +1694,8 @@ def upgrade() -> None:
         "concept",
         ["visit_source_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_care_site_id",
@@ -1442,7 +1703,8 @@ def upgrade() -> None:
         "care_site",
         ["care_site_id"],
         ["care_site_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_visit_type_concept_id",
@@ -1450,7 +1712,8 @@ def upgrade() -> None:
         "concept",
         ["visit_type_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_admitted_from_concept_id",
@@ -1458,7 +1721,8 @@ def upgrade() -> None:
         "concept",
         ["admitted_from_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_visit_occurrence_visit_concept_id",
@@ -1466,7 +1730,8 @@ def upgrade() -> None:
         "concept",
         ["visit_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     op.create_foreign_key(
         "fk_vocabulary_concept_id",
@@ -1474,7 +1739,8 @@ def upgrade() -> None:
         "concept",
         ["vocabulary_concept_id"],
         ["concept_id"],
-        schema=schema
+        source_schema=schema,
+        referent_schema=schema,
     )
     # ### end Alembic commands ###
 
