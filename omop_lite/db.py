@@ -63,8 +63,12 @@ class Database:
         connection = self.engine.raw_connection()
         try:
             with connection.cursor() as cursor:
-                cursor.execute(sql)
-            connection.commit()
+                try:
+                    cursor.execute(sql)
+                    connection.commit()
+                except Exception as e:
+                    logger.error(f"Error executing {file_path}: {str(e)}")
+                    connection.rollback()
         finally:
             connection.close()
 
