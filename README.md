@@ -67,3 +67,19 @@ The `setup.sh` script included in the Docker image will:
 1. Create the schema if it does not already exist.
 2. Execute the SQL files to set up the database schema, constraints, and indexes.
 3. Load data from the `.csv` files located in the `DATA_DIR`.
+
+## Text search OMOP
+### Full-text search
+Adding a tsvector column to the concept table and an index on that column makes full-text search queries on the concept table run much faster.
+This can be configured by setting `FTS_CREATE` to be non-empty in the environment.
+
+### Vector search
+Postgres does vector search too!
+To enable this on omop-lite, you can compose the `compose-omop-ts.yml` with
+
+```bash
+docker compose -f compose-omop-ts.yml
+```
+
+To do this, you need to have `embeddings/embeddings.parquet`, containing concept_ids and embeddings.
+This uses [pgvector](https://github.com/pgvector/pgvector) to create an `embeddings` table.
