@@ -21,31 +21,31 @@ print("Registered vector type")
 cursor = conn.cursor()
 
 # This drops the table, then creates a new one to fill with embeddings,
-#so it should only be run when you're building the database for the first time
-#or if you want to replace your embeddings
-#if we want to load multiple embeddings datasets, we can make the table name configurable from the environment
+# so it should only be run when you're building the database for the first time
+# or if you want to replace your embeddings
+# if we want to load multiple embeddings datasets, we can make the table name configurable from the environment
 
 print("Loading pgvector extension")
 cursor.execute(
-        """
+    """
         CREATE EXTENSION vector;
         """
-        )
+)
 
 cursor.execute(
-        """
+    """
         DROP TABLE IF EXISTS cdm.embeddings;
         """
-        )
+)
 print(f"Creating a table for {vector_length} dimensional vectors")
 cursor.execute(
-        f"""
+    f"""
         CREATE TABLE cdm.embeddings (
             concept_id  int
             embeddings  vector({vector_length})
         );
         """
-        )
+)
 
 conn.commit()
 
