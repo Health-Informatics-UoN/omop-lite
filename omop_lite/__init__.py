@@ -1,6 +1,7 @@
 from omop_lite.settings import settings
 from omop_lite.db import Database
 import logging
+from importlib.metadata import version
 
 
 def main() -> None:
@@ -12,26 +13,23 @@ def main() -> None:
     """
     logging.basicConfig(level=settings.log_level)
     logger = logging.getLogger(__name__)
-    logger.info("Starting OMOP Lite")
+    logger.info(f"Starting OMOP Lite {version('omop-lite')}")
     logger.debug(f"Settings: {settings.model_dump()}")
     db = Database()
 
-    # Create schema if not exists and not 'public'
-    # if settings.schema_name != "public" and db.schema_exists(settings.schema_name):
-    #     logger.info(f"Schema '{settings.schema_name}' already exists")
-    #     return
-    # else:
-    #     db.create_schema(settings.schema_name)
-
-    # Create tables
-    db.create_tables()
-
-    # Load data
-    db.load_data()
-
-    # Add constraints, indices, and primary keys
-    db.add_constraints()
+    # Handle schema creation if not using 'public'
+    if settings.schema_name != "public":
+        if db.schema_exists(settings.schema_name):
+            logger.info(f"Schema '{settings.schema_name}' already exists")
+            return
+        else:
+            db.create_schema(settings.schema_name) 
     
+    # Continue with table creation, data loading, etc.
+    db.create_tables()
+    db.load_data()
+    db.add_constraints()
+
     logger.info("OMOP Lite database created successfully")
 
 
