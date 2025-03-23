@@ -7,7 +7,7 @@ def main() -> None:
     """
     Main function to create the OMOP Lite database.
 
-    This function will create the schema if it doesn't exist, 
+    This function will create the schema if it doesn't exist,
     create the tables, load the data, and run the update migrations.
     """
     logging.basicConfig(level=settings.log_level)

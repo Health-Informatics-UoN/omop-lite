@@ -19,6 +19,7 @@ class Database:
     }
 
     def __init__(self) -> None:
+        # TODO: Add support for other dialects
         self.db_url = f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}"
         self.engine = create_engine(self.db_url)
         self.dialect = urlparse(self.db_url).scheme.split("+")[0]
@@ -42,24 +43,43 @@ class Database:
             logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
-    def create_tables(self) -> None:
+    def _run_migration(self, migration_name: str) -> None:
         """
-        Run migrations to create tables
+        Run a migration using Alembic.
+
+        This function will refresh the metadata to pick up newly created tables.
+
+        Args:
+            migration_name: The name of the migration to run.
+
+        Returns:
+            None
         """
         alembic_cfg = Config("alembic.ini")
         alembic_cfg.set_main_option("sqlalchemy.url", self.db_url)
-
-        # Set the schema for Alembic's version table
         alembic_cfg.set_main_option("version_table_schema", settings.schema_name)
-
-        # Set the schema name as an attribute that can be accessed in migrations
         alembic_cfg.attributes["schema"] = settings.schema_name
 
-        command.upgrade(alembic_cfg, "377e674b2401")
+        command.upgrade(alembic_cfg, migration_name)
 
         # Refresh metadata to pick up newly created tables
         self.metadata = MetaData(schema=settings.schema_name)
         self.metadata.reflect(bind=self.engine)
+
+    def create_tables(self) -> None:
+        """
+        Create the tables in the database.
+        """
+        self._run_migration("377e674b2401")
+
+    def update_tables(self) -> None:
+        """
+        Update the tables in the database.
+
+        Add primary keys, and other constraints to the tables.
+        """
+        self._run_migration("bbf6835f69e1")
+        self._run_migration("3da18f79ff7b")
 
     def _load_csv_data(self, file_path: Path) -> List[Dict[str, Any]]:
         """
@@ -122,7 +142,9 @@ class Database:
                 # Look up table with schema prefix
                 qualified_table = f"{settings.schema_name}.{table_lower}"
                 if qualified_table not in self.metadata.tables:
-                    logger.error(f"Available tables: {list(self.metadata.tables.keys())}")
+                    logger.error(
+                        f"Available tables: {list(self.metadata.tables.keys())}"
+                    )
                     raise KeyError(f"Table {qualified_table} not found in metadata")
 
                 table = self.metadata.tables[qualified_table]
@@ -141,16 +163,3 @@ class Database:
                 logger.info(f"Successfully loaded {table_name}")
             except Exception as e:
                 logger.error(f"Error loading {table_name}: {str(e)}")
-
-    def update_tables(self) -> None:
-        """
-        Run migrations to update tables
-        """
-        alembic_cfg = Config("alembic.ini")
-        alembic_cfg.set_main_option("sqlalchemy.url", self.db_url)
-        alembic_cfg.attributes["schema"] = settings.schema_name
-
-        command.upgrade(alembic_cfg, "bbf6835f69e1")
-        self.metadata = MetaData(schema=settings.schema_name)
-        self.metadata.reflect(bind=self.engine)
-        command.upgrade(alembic_cfg, "3da18f79ff7b")
