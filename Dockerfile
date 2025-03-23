@@ -1,43 +1,36 @@
-# Stage 1: Use a Debian-based image to install mssql-tools
-FROM mcr.microsoft.com/mssql-tools as builder
+# Install uv
+FROM python:3.13-slim AS builder
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
-RUN apt-get update && \
-    ACCEPT_EULA=Y apt-get install -y mssql-tools unixodbc-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Change the working directory to the `app` directory
+WORKDIR /app
 
-# Stage 2: Use Alpine as the final image
-FROM alpine:latest
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-editable
+    
+# Copy the project into the intermediate image
+COPY . /app
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN apk --no-cache add bash postgresql-client wait4x
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-editable
 
-# Copy mssql-tools from the builder stage
-COPY --from=builder /opt/mssql-tools /opt/mssql-tools
-RUN ln -s /opt/mssql-tools/bin/sqlcmd /usr/local/bin/sqlcmd \
-    && ln -s /opt/mssql-tools/bin/bcp /usr/local/bin/bcp
+# ------
+FROM python:3.13-slim
 
-ENV PATH="/opt/mssql-tools/bin:${PATH}"
+LABEL org.opencontainers.image.title=OMOP\ Lite
+LABEL org.opencontainers.image.description=Get\ an\ OMOP\ CDM\ database\ running\ quickly.
+LABEL org.opencontainers.image.vendor=University\ of\ Nottingham
+LABEL org.opencontainers.image.url=https://github.com/Health-Informatics-UoN/omop-lite/pkgs/container/omop-lite
+LABEL org.opencontainers.image.source=https://github.com/Health-Informatics-UoN/omop-lite
+LABEL org.opencontainers.image.licenses=MIT
 
-USER appuser
+# Copy the environment, but not the source code
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
-# Set environment variables
-ENV DB_TYPE="pg"
-ENV DB_HOST="db"
-ENV DB_PORT="5432"
-ENV DB_USER="postgres"
-ENV SQL_SERVER_USER="sa"
-ENV DB_PASSWORD="password"
-ENV DB_NAME="omop"
-ENV SCHEMA_NAME="public"
-ENV DATA_DIR="data"
-ENV SYNTHETIC="false"
+ENV PATH="/app/.venv/bin:$PATH" 
 
-# Copy files
-COPY --chown=appuser:appgroup synthetic /synthetic
-COPY --chown=appuser:appgroup scripts /scripts
-COPY --chown=appuser:appgroup setup.sh /setup.sh
-RUN chmod +x /setup.sh
-
-# Set entrypoint
-ENTRYPOINT ["/bin/bash", "/setup.sh"]
+CMD ["omop-lite"]
