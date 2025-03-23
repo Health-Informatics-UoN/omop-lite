@@ -14,7 +14,7 @@ You can configure the Docker container using the following environment variables
 - `DB_PASSWORD`: The password for the database. Default is `password`.
 - `DB_NAME`: The name of the database. Default is `omop`.
 - `DB_TYPE`: The type of database to use. Default is `pg`, but can also be `sqlserver`.
-- `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `omop`.
+- `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `public`.
 - `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
 - `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
 
