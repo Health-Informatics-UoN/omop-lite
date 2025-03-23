@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 import csv
 from urllib.parse import urlparse
 import logging
+from importlib.resources import files
 
 logger = logging.getLogger(__name__)
 
@@ -78,16 +79,16 @@ class Database:
         """
         Create the tables in the database by executing the DDL SQL file directly.
         """
-        self._execute_sql_file("omop_lite/scripts/pg/ddl.sql")
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("ddl.sql"))
         self.refresh_metadata()
 
     def add_constraints(self) -> None:
         """
         Add constraints, indices, and primary keys to the tables.
         """
-        self._execute_sql_file("omop_lite/scripts/pg/primary_keys.sql")
-        self._execute_sql_file("omop_lite/scripts/pg/constraints.sql")
-        self._execute_sql_file("omop_lite/scripts/pg/indices.sql")
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("primary_keys.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("constraints.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("indices.sql"))
 
     def _load_csv_data(self, file_path: Path) -> List[Dict[str, Any]]:
         """
