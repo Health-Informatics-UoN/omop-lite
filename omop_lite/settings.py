@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     synthetic: bool = False
     data_dir: str = "data"
     schema_name: str = "public"
-    db_type: Literal["postgresql", "sqlite"] = "postgresql"
+    dialect: Literal["postgresql", "mssql"] = "postgresql"
     log_level: str = "INFO"
 
     class Config:

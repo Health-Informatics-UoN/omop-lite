@@ -1,51 +1,51 @@
 name: omop-lite
 
 services:
-  omop-lite:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - SCHEMA_NAME=public
-      - SYNTHETIC=true
-    volumes:
-      - ./data:/data
-    depends_on:
-      - db
-
-  db:
-    image: postgres:latest
-    environment:
-      - POSTGRES_DB=omop
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5432:5432"
-
-  # omop-lite-sqlserver:
-  #   platform: "linux/amd64"
+  # omop-lite:
   #   build:
   #     context: .
   #     dockerfile: Dockerfile
   #   environment:
-  #     - SCHEMA_NAME=cdm
+  #     - SCHEMA_NAME=public
   #     - SYNTHETIC=true
-  #     - DB_NAME=master
-  #     - DB_USER=sa
-  #     - SQL_SERVER_USER=sa
-  #     - DB_PASSWORD=Password123!
-  #     - DB_HOST=sqlserver
-  #     - DB_PORT=1433
-  #     - DB_TYPE=sqlserver
   #   volumes:
   #     - ./data:/data
   #   depends_on:
-  #     - sqlserver
+  #     - db
 
-  # sqlserver:
-  #   image: mcr.microsoft.com/azure-sql-edge:latest
+  # db:
+  #   image: postgres:16
   #   environment:
-  #     - ACCEPT_EULA=Y
-  #     - MSSQL_SA_PASSWORD=Password123!
-  #     - MSSQL_PID=Developer
+  #     - POSTGRES_DB=omop
+  #     - POSTGRES_PASSWORD=password
   #   ports:
-  #     - "1433:1433"
+  #     - "5432:5432"
+
+  omop-lite-sqlserver:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SCHEMA_NAME=cdm
+      - SYNTHETIC=true
+      - DB_NAME=master
+      - DB_USER=sa
+      - SQL_SERVER_USER=sa
+      - DB_PASSWORD=Password123!
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DB_TYPE=sqlserver
+    volumes:
+      - ./data:/data
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
