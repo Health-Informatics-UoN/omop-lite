@@ -17,19 +17,22 @@ def main() -> None:
     db = Database()
 
     # Create schema if not exists and not 'public'
-    if settings.schema_name != "public" and db.schema_exists(settings.schema_name):
-        logger.info(f"Schema '{settings.schema_name}' already exists")
-    else:
-        db.create_schema(settings.schema_name)
+    # if settings.schema_name != "public" and db.schema_exists(settings.schema_name):
+    #     logger.info(f"Schema '{settings.schema_name}' already exists")
+    #     return
+    # else:
+    #     db.create_schema(settings.schema_name)
 
-    # Run create table migration
+    # Create tables
     db.create_tables()
 
     # Load data
     db.load_data()
 
-    # Run update table migrations
-    db.update_tables()
+    # Add constraints, indices, and primary keys
+    db.add_constraints()
+    
+    logger.info("OMOP Lite database created successfully")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,5 @@
 from sqlalchemy import create_engine, MetaData, text, inspect
 from omop_lite.settings import settings
-from alembic import command
-from alembic.config import Config
 from pathlib import Path
 from typing import Dict, Any, List
 import csv
@@ -14,8 +12,6 @@ logger = logging.getLogger(__name__)
 class Database:
     SUPPORTED_DIALECTS = {
         "postgresql": "PostgreSQL",
-        "mssql": "SQL Server",
-        "snowflake": "Snowflake",
     }
 
     def __init__(self) -> None:
@@ -27,7 +23,14 @@ class Database:
         if self.dialect not in self.SUPPORTED_DIALECTS:
             raise ValueError(f"Unsupported database dialect: {self.dialect}")
 
-        self.metadata = MetaData()
+        # Create metadata with schema
+        self.metadata = MetaData(schema=settings.schema_name)
+        self.metadata.reflect(bind=self.engine)
+
+    def refresh_metadata(self) -> None:
+        """
+        Refresh the metadata to pick up newly created tables.
+        """
         self.metadata.reflect(bind=self.engine)
 
     def schema_exists(self, schema_name: str) -> bool:
@@ -43,43 +46,42 @@ class Database:
             logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
-    def _run_migration(self, migration_name: str) -> None:
+    def _execute_sql_file(self, file_path: str, schema_replacement: bool = True) -> None:
         """
-        Run a migration using Alembic.
-
-        This function will refresh the metadata to pick up newly created tables.
-
+        Execute a SQL file directly using psycopg2.
+        
         Args:
-            migration_name: The name of the migration to run.
-
-        Returns:
-            None
+            file_path: Path to the SQL file to execute
+            schema_replacement: Whether to replace @cdmDatabaseSchema with schema name (default: True)
         """
-        alembic_cfg = Config("alembic.ini")
-        alembic_cfg.set_main_option("sqlalchemy.url", self.db_url)
-        alembic_cfg.set_main_option("version_table_schema", settings.schema_name)
-        alembic_cfg.attributes["schema"] = settings.schema_name
-
-        command.upgrade(alembic_cfg, migration_name)
-
-        # Refresh metadata to pick up newly created tables
-        self.metadata = MetaData(schema=settings.schema_name)
-        self.metadata.reflect(bind=self.engine)
+        with open(file_path, 'r') as f:
+            sql = f.read()
+        
+        if schema_replacement:
+            sql = sql.replace('@cdmDatabaseSchema', settings.schema_name)
+        
+        connection = self.engine.raw_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(sql)
+            connection.commit()
+        finally:
+            connection.close()
 
     def create_tables(self) -> None:
         """
-        Create the tables in the database.
+        Create the tables in the database by executing the DDL SQL file directly.
         """
-        self._run_migration("377e674b2401")
+        self._execute_sql_file('scripts/pg/ddl.sql')
+        self.refresh_metadata()
 
-    def update_tables(self) -> None:
+    def add_constraints(self) -> None:
         """
-        Update the tables in the database.
-
-        Add primary keys, and other constraints to the tables.
+        Add constraints, indices, and primary keys to the tables.
         """
-        self._run_migration("bbf6835f69e1")
-        self._run_migration("3da18f79ff7b")
+        self._execute_sql_file('scripts/pg/primary_keys.sql')
+        self._execute_sql_file('scripts/pg/constraints.sql')
+        self._execute_sql_file('scripts/pg/indices.sql')
 
     def _load_csv_data(self, file_path: Path) -> List[Dict[str, Any]]:
         """
