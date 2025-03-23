@@ -75,6 +75,18 @@ class Database:
         finally:
             connection.close()
 
+    def _get_data_dir(self) -> Path:
+        """
+        Return the data directory based on the synthetic flag.
+        """
+        if settings.synthetic:
+            return files("omop_lite.synthetic")
+        else:
+            data_dir = Path(settings.data_dir)
+            if not data_dir.exists():
+                raise FileNotFoundError(f"Data directory {data_dir} does not exist")
+            return data_dir
+
     def create_tables(self) -> None:
         """
         Create the tables in the database by executing the DDL SQL file directly.
@@ -133,12 +145,8 @@ class Database:
             "CONCEPT_CLASS",
             "DOMAIN",
         ]
-
-        data_dir = (
-            Path("omop_lite/synthetic")
-            if settings.synthetic
-            else Path(settings.data_dir)
-        )
+        data_dir = self._get_data_dir()
+        
         logger.info(f"Loading data from {data_dir}")
 
         for table_name in omop_tables:
