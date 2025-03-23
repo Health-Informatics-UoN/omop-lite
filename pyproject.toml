@@ -15,6 +15,13 @@ dependencies = [
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+include = [
+    "omop_lite/**/*.py",
+    "omop_lite/scripts/**/*.sql",
+    "omop_lite/synthetic/*.csv",
+]
+
 [project.scripts]
 omop-lite = "omop_lite:main"
 

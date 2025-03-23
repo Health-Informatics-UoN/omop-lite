@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - SCHEMA_NAME=cdm
+      - SCHEMA_NAME=public
       - SYNTHETIC=true
     volumes:
       - ./data:/data

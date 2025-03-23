@@ -46,20 +46,22 @@ class Database:
             logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
-    def _execute_sql_file(self, file_path: str, schema_replacement: bool = True) -> None:
+    def _execute_sql_file(
+        self, file_path: str, schema_replacement: bool = True
+    ) -> None:
         """
         Execute a SQL file directly using psycopg2.
-        
+
         Args:
             file_path: Path to the SQL file to execute
             schema_replacement: Whether to replace @cdmDatabaseSchema with schema name (default: True)
         """
-        with open(file_path, 'r') as f:
+        with open(file_path, "r") as f:
             sql = f.read()
-        
+
         if schema_replacement:
-            sql = sql.replace('@cdmDatabaseSchema', settings.schema_name)
-        
+            sql = sql.replace("@cdmDatabaseSchema", settings.schema_name)
+
         connection = self.engine.raw_connection()
         try:
             with connection.cursor() as cursor:
@@ -76,16 +78,16 @@ class Database:
         """
         Create the tables in the database by executing the DDL SQL file directly.
         """
-        self._execute_sql_file('scripts/pg/ddl.sql')
+        self._execute_sql_file("omop_lite/scripts/pg/ddl.sql")
         self.refresh_metadata()
 
     def add_constraints(self) -> None:
         """
         Add constraints, indices, and primary keys to the tables.
         """
-        self._execute_sql_file('scripts/pg/primary_keys.sql')
-        self._execute_sql_file('scripts/pg/constraints.sql')
-        self._execute_sql_file('scripts/pg/indices.sql')
+        self._execute_sql_file("omop_lite/scripts/pg/primary_keys.sql")
+        self._execute_sql_file("omop_lite/scripts/pg/constraints.sql")
+        self._execute_sql_file("omop_lite/scripts/pg/indices.sql")
 
     def _load_csv_data(self, file_path: Path) -> List[Dict[str, Any]]:
         """
@@ -131,7 +133,11 @@ class Database:
             "DOMAIN",
         ]
 
-        data_dir = Path("synthetic") if settings.synthetic else Path(settings.data_dir)
+        data_dir = (
+            Path("omop_lite/synthetic")
+            if settings.synthetic
+            else Path(settings.data_dir)
+        )
         logger.info(f"Loading data from {data_dir}")
 
         for table_name in omop_tables:

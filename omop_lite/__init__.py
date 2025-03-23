@@ -23,8 +23,8 @@ def main() -> None:
             logger.info(f"Schema '{settings.schema_name}' already exists")
             return
         else:
-            db.create_schema(settings.schema_name) 
-    
+            db.create_schema(settings.schema_name)
+
     # Continue with table creation, data loading, etc.
     db.create_tables()
     db.load_data()
