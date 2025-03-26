@@ -15,16 +15,11 @@ services:
       dockerfile: Dockerfile
     environment:
       - DB_HOST=omop-ts
-      - DB_PORT=5432
-      - DB_USER=postgres
       - DB_PASSWORD=password
-      - DB_NAME=omop
-      - SCHEMA_NAME=omop
-      - VOCAB_DATA_DIR=vocabs
       - SCHEMA_NAME=cdm
       - FTS_CREATE=1
     volumes:
-      - ./vocabs:/vocabs
+      - ./data:/data
     depends_on:
       - omop-ts
    

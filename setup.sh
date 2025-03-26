@@ -70,10 +70,19 @@ echo "OMOP CDM creation finished."
 
 if [ -n "$FTS_CREATE" ]; then
   echo "Adding full-text search on concept table"
-  input_file="${script_dir}/fts.sql"
-  temp_file="${temp_dir}/temp_fts.sql"
+  echo "Materialising the column"
+  input_file_column="${script_dir}/fts.sql"
+  temp_file_column="${temp_dir}/temp_fts.sql"
 
-  sed "s/@cdmDatabaseSchema/${SCHEMA_NAME}/g" "$input_file" > "$temp_file"
-  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$temp_file"
-  rm "$temp_file"
+  sed "s/@cdmDatabaseSchema/${SCHEMA_NAME}/g" "$input_file_column" > "$temp_file_column"
+  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$temp_file_column"
+  rm "$temp_file_column"
+
+  echo "Creating the full-text index"
+  input_file_index="${script_dir}/fts_index.sql"
+  temp_file_index="${temp_dir}/temp_fts_index.sql"
+
+  sed "s/@cdmDatabaseSchema/${SCHEMA_NAME}/g" "$input_file_index" > "$temp_file_index"
+  PGPASSWORD="$DB_PASSWORD" psql -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -f "$temp_file_index"
+  rm "$temp_file_index"
 fi
