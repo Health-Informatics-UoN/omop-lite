@@ -1,90 +1,63 @@
-from sqlalchemy import create_engine, MetaData, text, inspect
+from abc import ABC, abstractmethod
+from sqlalchemy import create_engine, MetaData, text, inspect, Engine
 from omop_lite.settings import settings
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union, Optional
 import csv
 import logging
 from importlib.resources import files
+from importlib.abc import Traversable
 
 logger = logging.getLogger(__name__)
 
 
-class Database:
-    SUPPORTED_DIALECTS = {
-        "postgresql": "PostgreSQL",
-        "mssql": "Microsoft SQL Server",
-    }
-
+class Database(ABC):
+    """Abstract base class for database operations"""
+    
     def __init__(self) -> None:
-        # Handle different dialects
-        if settings.dialect == "postgresql":
-            self.db_url = f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}"
-        elif settings.dialect == "mssql":
-            # SQL Server connection string with TrustServerCertificate
-            self.db_url = f"mssql+pyodbc://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
-        else:
-            raise ValueError(f"Unsupported dialect: {settings.dialect}")
-
-        self.engine = create_engine(self.db_url)
-        self.dialect = settings.dialect
-
-        if self.dialect not in self.SUPPORTED_DIALECTS:
-            raise ValueError(f"Unsupported database dialect: {self.dialect}")
-
-        # Create metadata with schema
-        self.metadata = MetaData(schema=settings.schema_name)
-        self.metadata.reflect(bind=self.engine)
-
+        self.engine: Optional[Engine] = None  # Will be set by subclasses
+        self.metadata: Optional[MetaData] = None  # Will be set by subclasses
+    
+    def _file_exists(self, file_path: Union[Path, Traversable]) -> bool:
+        """Check if a file exists, handling both Path and Traversable types."""
+        if isinstance(file_path, Traversable):
+            return file_path.is_file()
+        return file_path.exists()
+    
+    @abstractmethod
     def refresh_metadata(self) -> None:
-        """
-        Refresh the metadata to pick up newly created tables.
-        """
-        self.metadata.reflect(bind=self.engine)
-
+        """Refresh the metadata to pick up newly created tables."""
+        pass
+    
+    @abstractmethod
     def schema_exists(self, schema_name: str) -> bool:
-        """
-        Check if a schema exists using SQLAlchemy's database-agnostic inspect interface.
-        """
-        inspector = inspect(self.engine)
-        return schema_name in inspector.get_schema_names()
-
+        """Check if a schema exists."""
+        pass
+    
+    @abstractmethod
     def create_schema(self, schema_name: str) -> None:
-        with self.engine.connect() as connection:
-            connection.execute(text(f'CREATE SCHEMA "{schema_name}"'))
-            logger.info(f"Schema '{schema_name}' created.")
-            connection.commit()
+        """Create a new schema."""
+        pass
+    
+    @abstractmethod
+    def create_tables(self) -> None:
+        """Create the tables in the database."""
+        pass
+    
+    @abstractmethod
+    def add_constraints(self) -> None:
+        """Add constraints, indices, and primary keys."""
+        pass
+    
+    @abstractmethod
+    def load_data(self) -> None:
+        """Load data into tables."""
+        pass
 
-    def _execute_sql_file(
-        self, file_path: str, schema_replacement: bool = True
-    ) -> None:
-        """
-        Execute a SQL file directly using psycopg2.
-
-        Args:
-            file_path: Path to the SQL file to execute
-            schema_replacement: Whether to replace @cdmDatabaseSchema with schema name (default: True)
-        """
-        with open(file_path, "r") as f:
-            sql = f.read()
-
-        if schema_replacement:
-            sql = sql.replace("@cdmDatabaseSchema", settings.schema_name)
-
-        connection = self.engine.raw_connection()
-        try:
-            with connection.cursor() as cursor:
-                try:
-                    cursor.execute(sql)
-                    connection.commit()
-                except Exception as e:
-                    logger.error(f"Error executing {file_path}: {str(e)}")
-                    connection.rollback()
-        finally:
-            connection.close()
-
-    def _get_data_dir(self) -> Path:
+    def _get_data_dir(self) -> Union[Path, Traversable]:
         """
         Return the data directory based on the synthetic flag.
+        Common implementation for all databases.
         """
         if settings.synthetic:
             return files("omop_lite.synthetic")
@@ -94,105 +67,99 @@ class Database:
                 raise FileNotFoundError(f"Data directory {data_dir} does not exist")
             return data_dir
 
+    def _execute_sql_file(self, file_path: Union[str, Traversable]) -> None:
+        """
+        Execute a SQL file directly.
+        Common implementation for all databases.
+        """
+        if isinstance(file_path, Traversable):
+            file_path = str(file_path)
+            
+        with open(file_path, "r") as f:
+            sql = f.read().replace("@cdmDatabaseSchema", settings.schema_name)
+
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+            
+        connection = self.engine.raw_connection()
+        try:
+            cursor = connection.cursor()
+            try:
+                cursor.execute(sql)
+                connection.commit()
+            except Exception as e:
+                logger.error(f"Error executing {file_path}: {str(e)}")
+                connection.rollback()
+            finally:
+                cursor.close()
+        finally:
+            connection.close()
+
+
+class PostgresDatabase(Database):
+    def __init__(self) -> None:
+        super().__init__()
+        self.db_url = f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}"
+        self.engine = create_engine(self.db_url)
+        self.metadata = MetaData(schema=settings.schema_name)
+        self.metadata.reflect(bind=self.engine)
+
+    def refresh_metadata(self) -> None:
+        if not self.metadata or not self.engine:
+            raise RuntimeError("Database not properly initialized")
+        self.metadata.reflect(bind=self.engine)
+
+    def schema_exists(self, schema_name: str) -> bool:
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        inspector = inspect(self.engine)
+        return schema_name in inspector.get_schema_names()
+
+    def create_schema(self, schema_name: str) -> None:
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        with self.engine.connect() as connection:
+            connection.execute(text(f'CREATE SCHEMA "{schema_name}"'))
+            logger.info(f"Schema '{schema_name}' created.")
+            connection.commit()
+
     def create_tables(self) -> None:
-        """
-        Create the tables in the database by executing the DDL SQL file directly.
-        """
-        if self.dialect == "postgresql":
-            self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("ddl.sql"))
-        elif self.dialect == "mssql":
-            self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("ddl.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("ddl.sql"))
         self.refresh_metadata()
 
     def add_constraints(self) -> None:
-        """
-        Add constraints, indices, and primary keys to the tables.
-        """
-        if self.dialect == "postgresql":
-            self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("primary_keys.sql"))
-            self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("constraints.sql"))
-            self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("indices.sql"))
-        elif self.dialect == "mssql":
-            self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("primary_keys.sql"))
-            self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("constraints.sql"))
-            self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("indices.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("primary_keys.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("constraints.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.pg").joinpath("indices.sql"))
 
-    def _load_csv_data(self, file_path: Path) -> List[Dict[str, Any]]:
-        """
-        Load data from a CSV file into a list of dictionaries.
-        """
-        data = []
-        with open(file_path, "r", encoding="utf-8") as f:
-            reader = csv.DictReader(f, delimiter="\t")
-            for row in reader:
-                # Clean up empty strings to None for NULL values
-                cleaned_row = {k: (v if v != "" else None) for k, v in row.items()}
-                data.append(cleaned_row)
-        return data
-
-    def _bulk_load_postgres(self, table_name: str, file_path: Path) -> None:
-        """PostgreSQL-specific bulk loading using COPY"""
+    def _bulk_load(self, table_name: str, file_path: Union[Path, Traversable]) -> None:
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
         connection = self.engine.raw_connection()
         try:
-            with connection.cursor() as cursor:
-                with open(file_path, 'r') as f:
+            cursor = connection.cursor()
+            try:
+                with open(str(file_path), 'r') as f:
                     cursor.copy_expert(
                         f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'\t', NULL '', QUOTE E'\b', HEADER, ENCODING 'UTF8')",
                         f
                     )
-            connection.commit()
-        finally:
-            connection.close()
-
-    def _bulk_load_mssql(self, table_name: str, file_path: Path) -> None:
-        """SQL Server-specific bulk loading using BULK INSERT"""
-        connection = self.engine.raw_connection()
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute(f"""
-                    BULK INSERT {settings.schema_name}.{table_name}
-                    FROM '{file_path}'
-                    WITH (
-                        FORMAT = 'CSV',
-                        FIELDTERMINATOR = '\t',
-                        FIRSTROW = 2,
-                        ROWTERMINATOR = '\n',
-                        ENCODING = 'UTF8'
-                    )
-                """)
-            connection.commit()
+                connection.commit()
+            finally:
+                cursor.close()
         finally:
             connection.close()
 
     def load_data(self) -> None:
-        """
-        Load data from CSV files into the database tables
-        using native database bulk loading.
-        """
         omop_tables = [
-            "CDM_SOURCE",
-            "DRUG_STRENGTH",
-            "CONCEPT",
-            "CONCEPT_RELATIONSHIP",
-            "CONCEPT_ANCESTOR",
-            "CONCEPT_SYNONYM",
-            "CONDITION_ERA",
-            "CONDITION_OCCURRENCE",
-            "DEATH",
-            "DRUG_ERA",
-            "DRUG_EXPOSURE",
-            "DRUG_STRENGTH",
-            "LOCATION",
-            "MEASUREMENT",
-            "OBSERVATION",
-            "OBSERVATION_PERIOD",
-            "PERSON",
-            "PROCEDURE_OCCURRENCE",
-            "VOCABULARY",
-            "VISIT_OCCURRENCE",
-            "RELATIONSHIP",
-            "CONCEPT_CLASS",
-            "DOMAIN",
+            "CDM_SOURCE", "DRUG_STRENGTH", "CONCEPT",
+            "CONCEPT_RELATIONSHIP", "CONCEPT_ANCESTOR", "CONCEPT_SYNONYM",
+            "CONDITION_ERA", "CONDITION_OCCURRENCE", "DEATH",
+            "DRUG_ERA", "DRUG_EXPOSURE", "DRUG_STRENGTH",
+            "LOCATION", "MEASUREMENT", "OBSERVATION",
+            "OBSERVATION_PERIOD", "PERSON", "PROCEDURE_OCCURRENCE",
+            "VOCABULARY", "VISIT_OCCURRENCE", "RELATIONSHIP",
+            "CONCEPT_CLASS", "DOMAIN",
         ]
         
         data_dir = self._get_data_dir()
@@ -202,20 +169,116 @@ class Database:
             table_lower = table_name.lower()
             csv_file = data_dir / f"{table_name}.csv"
 
-            if not csv_file.exists():
+            if not self._file_exists(csv_file):
                 logger.warning(f"Warning: {csv_file} not found, skipping...")
                 continue
 
             logger.info(f"Loading: {table_name}")
 
             try:
-                if self.dialect == "postgresql":
-                    self._bulk_load_postgres(table_lower, csv_file)
-                elif self.dialect == "mssql":
-                    self._bulk_load_mssql(table_lower, csv_file)
-                else:
-                    raise ValueError(f"Unsupported dialect for bulk loading: {self.dialect}")
-                
+                self._bulk_load(table_lower, csv_file)
                 logger.info(f"Successfully loaded {table_name}")
             except Exception as e:
                 logger.error(f"Error loading {table_name}: {str(e)}")
+
+
+class SQLServerDatabase(Database):
+    def __init__(self) -> None:
+        super().__init__()
+        self.db_url = f"mssql+pyodbc://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
+        self.engine = create_engine(self.db_url)
+        self.metadata = MetaData(schema=settings.schema_name)
+        self.metadata.reflect(bind=self.engine)
+
+    def refresh_metadata(self) -> None:
+        if not self.metadata or not self.engine:
+            raise RuntimeError("Database not properly initialized")
+        self.metadata.reflect(bind=self.engine)
+
+    def schema_exists(self, schema_name: str) -> bool:
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        inspector = inspect(self.engine)
+        return schema_name in inspector.get_schema_names()
+
+    def create_schema(self, schema_name: str) -> None:
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        with self.engine.connect() as connection:
+            connection.execute(text(f'CREATE SCHEMA [{schema_name}]'))
+            logger.info(f"Schema '{schema_name}' created.")
+            connection.commit()
+
+    def create_tables(self) -> None:
+        self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("ddl.sql"))
+        self.refresh_metadata()
+
+    def add_constraints(self) -> None:
+        self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("primary_keys.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("constraints.sql"))
+        self._execute_sql_file(files("omop_lite.scripts.mssql").joinpath("indices.sql"))
+
+    def _bulk_load(self, table_name: str, file_path: Union[Path, Traversable]) -> None:
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        connection = self.engine.raw_connection()
+        try:
+            cursor = connection.cursor()
+            try:
+                cursor.execute(f"""
+                    BULK INSERT {settings.schema_name}.{table_name}
+                    FROM '{str(file_path)}'
+                    WITH (
+                        FORMAT = 'CSV',
+                        FIELDTERMINATOR = '\t',
+                        FIRSTROW = 2,
+                        ROWTERMINATOR = '\n',
+                        ENCODING = 'UTF8'
+                    )
+                """)
+                connection.commit()
+            finally:
+                cursor.close()
+        finally:
+            connection.close()
+
+    def load_data(self) -> None:
+        omop_tables = [
+            "CDM_SOURCE", "DRUG_STRENGTH", "CONCEPT",
+            "CONCEPT_RELATIONSHIP", "CONCEPT_ANCESTOR", "CONCEPT_SYNONYM",
+            "CONDITION_ERA", "CONDITION_OCCURRENCE", "DEATH",
+            "DRUG_ERA", "DRUG_EXPOSURE", "DRUG_STRENGTH",
+            "LOCATION", "MEASUREMENT", "OBSERVATION",
+            "OBSERVATION_PERIOD", "PERSON", "PROCEDURE_OCCURRENCE",
+            "VOCABULARY", "VISIT_OCCURRENCE", "RELATIONSHIP",
+            "CONCEPT_CLASS", "DOMAIN",
+        ]
+        
+        data_dir = self._get_data_dir()
+        logger.info(f"Loading data from {data_dir}")
+
+        for table_name in omop_tables:
+            table_lower = table_name.lower()
+            csv_file = data_dir / f"{table_name}.csv"
+
+            if not self._file_exists(csv_file):
+                logger.warning(f"Warning: {csv_file} not found, skipping...")
+                continue
+
+            logger.info(f"Loading: {table_name}")
+
+            try:
+                self._bulk_load(table_lower, csv_file)
+                logger.info(f"Successfully loaded {table_name}")
+            except Exception as e:
+                logger.error(f"Error loading {table_name}: {str(e)}")
+
+
+def create_database() -> Database:
+    """Factory function to create the appropriate database instance."""
+    if settings.dialect == "postgresql":
+        return PostgresDatabase()
+    elif settings.dialect == "mssql":
+        return SQLServerDatabase()
+    else:
+        raise ValueError(f"Unsupported dialect: {settings.dialect}")
