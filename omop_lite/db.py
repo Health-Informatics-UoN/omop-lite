@@ -130,10 +130,44 @@ class Database:
                 data.append(cleaned_row)
         return data
 
+    def _bulk_load_postgres(self, table_name: str, file_path: Path) -> None:
+        """PostgreSQL-specific bulk loading using COPY"""
+        connection = self.engine.raw_connection()
+        try:
+            with connection.cursor() as cursor:
+                with open(file_path, 'r') as f:
+                    cursor.copy_expert(
+                        f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'\t', NULL '', QUOTE E'\b', HEADER, ENCODING 'UTF8')",
+                        f
+                    )
+            connection.commit()
+        finally:
+            connection.close()
+
+    def _bulk_load_mssql(self, table_name: str, file_path: Path) -> None:
+        """SQL Server-specific bulk loading using BULK INSERT"""
+        connection = self.engine.raw_connection()
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(f"""
+                    BULK INSERT {settings.schema_name}.{table_name}
+                    FROM '{file_path}'
+                    WITH (
+                        FORMAT = 'CSV',
+                        FIELDTERMINATOR = '\t',
+                        FIRSTROW = 2,
+                        ROWTERMINATOR = '\n',
+                        ENCODING = 'UTF8'
+                    )
+                """)
+            connection.commit()
+        finally:
+            connection.close()
+
     def load_data(self) -> None:
         """
         Load data from CSV files into the database tables
-        using SQLAlchemy's database-agnostic insert functionality.
+        using native database bulk loading.
         """
         omop_tables = [
             "CDM_SOURCE",
@@ -160,8 +194,8 @@ class Database:
             "CONCEPT_CLASS",
             "DOMAIN",
         ]
-        data_dir = self._get_data_dir()
         
+        data_dir = self._get_data_dir()
         logger.info(f"Loading data from {data_dir}")
 
         for table_name in omop_tables:
@@ -175,27 +209,13 @@ class Database:
             logger.info(f"Loading: {table_name}")
 
             try:
-                # Look up table with schema prefix
-                qualified_table = f"{settings.schema_name}.{table_lower}"
-                if qualified_table not in self.metadata.tables:
-                    logger.error(
-                        f"Available tables: {list(self.metadata.tables.keys())}"
-                    )
-                    raise KeyError(f"Table {qualified_table} not found in metadata")
-
-                table = self.metadata.tables[qualified_table]
-
-                # Load and insert data
-                data = self._load_csv_data(csv_file)
-
-                chunk_size = 1000
-                with self.engine.connect() as connection:
-                    for i in range(0, len(data), chunk_size):
-                        chunk = data[i : i + chunk_size]
-                        if chunk:
-                            connection.execute(table.insert(), chunk)
-                    connection.commit()
-
+                if self.dialect == "postgresql":
+                    self._bulk_load_postgres(table_lower, csv_file)
+                elif self.dialect == "mssql":
+                    self._bulk_load_mssql(table_lower, csv_file)
+                else:
+                    raise ValueError(f"Unsupported dialect for bulk loading: {self.dialect}")
+                
                 logger.info(f"Successfully loaded {table_name}")
             except Exception as e:
                 logger.error(f"Error loading {table_name}: {str(e)}")
