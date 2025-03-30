@@ -20,7 +20,8 @@ class Database:
         if settings.dialect == "postgresql":
             self.db_url = f"postgresql+psycopg2://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}"
         elif settings.dialect == "mssql":
-            self.db_url = f"mssql+pyodbc://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}?driver=ODBC+Driver+18+for+SQL+Server"
+            # SQL Server connection string with TrustServerCertificate
+            self.db_url = f"mssql+pyodbc://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
         else:
             raise ValueError(f"Unsupported dialect: {settings.dialect}")
 
