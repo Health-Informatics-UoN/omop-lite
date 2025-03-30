@@ -1,5 +1,5 @@
 from omop_lite.settings import settings
-from omop_lite.db import Database
+from omop_lite.db import create_database
 import logging
 from importlib.metadata import version
 
@@ -15,7 +15,7 @@ def main() -> None:
     logger = logging.getLogger(__name__)
     logger.info(f"Starting OMOP Lite {version('omop-lite')}")
     logger.debug(f"Settings: {settings.model_dump()}")
-    db = Database()
+    db = create_database()
 
     # Handle schema creation if not using 'public'
     if settings.schema_name != "public":
