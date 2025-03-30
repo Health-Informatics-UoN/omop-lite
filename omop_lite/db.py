@@ -2,8 +2,7 @@ from abc import ABC, abstractmethod
 from sqlalchemy import create_engine, MetaData, text, inspect, Engine
 from omop_lite.settings import settings
 from pathlib import Path
-from typing import Dict, Any, List, Union, Optional
-import csv
+from typing import Union, Optional
 import logging
 from importlib.resources import files
 from importlib.abc import Traversable
