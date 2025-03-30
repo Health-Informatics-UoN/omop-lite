@@ -21,6 +21,17 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 # ------
 FROM python:3.13-slim
 
+# Install required packages and SQL Server ODBC driver
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 && \
+    # Clean up
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 # Create a non-root user and group
 RUN groupadd -r app && useradd --no-log-init -r -g app app
 
@@ -35,12 +46,6 @@ LABEL org.opencontainers.image.licenses=MIT
 COPY --from=builder --chown=app:app /app/.venv /app/.venv
 
 ENV PATH="/app/.venv/bin:$PATH" 
-
-# Add SQL Server ODBC driver
-RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
-curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
-apt-get update && \
-ACCEPT_EULA=Y apt-get install -y msodbcsql18
 
 # Switch to the non-root user
 USER app
