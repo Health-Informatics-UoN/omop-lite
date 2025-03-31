@@ -14,11 +14,9 @@ class Database(ABC):
     """Abstract base class for database operations"""
 
     def __init__(self) -> None:
-        self.engine: Optional[Engine] = None  # Will be set by subclasses
-        self.metadata: Optional[MetaData] = None  # Will be set by subclasses
-        self.file_path: Optional[Union[Path, Traversable]] = (
-            None  # Override in subclasses
-        )
+        self.engine: Optional[Engine] = None
+        self.metadata: Optional[MetaData] = None
+        self.file_path: Optional[Union[Path, Traversable]] = None
         self.omop_tables = [
             "CDM_SOURCE",
             "DRUG_STRENGTH",
