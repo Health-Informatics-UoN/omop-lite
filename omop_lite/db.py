@@ -161,25 +161,18 @@ class PostgresDatabase(Database):
             raise RuntimeError("Database engine not initialized")
 
         with open(str(file_path), "r") as f:
-            csv_headers = next(f).strip().split("\t")
-
             connection = self.engine.raw_connection()
             try:
                 cursor = connection.cursor()
-
-                columns = ", ".join(f"[{col}]" for col in csv_headers)
-                placeholders = ", ".join(["?" for _ in csv_headers])
-                insert_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
-
-                rows = [
-                    line.strip().split("\t")
-                    + [None] * (len(csv_headers) - len(line.strip().split("\t")))
-                    for line in f
-                ]
-
-                cursor.executemany(insert_sql, rows)
-                connection.commit()
-                cursor.close()
+                try:
+                    with open(str(file_path), "r") as f:
+                        cursor.copy_expert(
+                            f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'\t', NULL '', QUOTE E'\b', HEADER, ENCODING 'UTF8')",
+                            f,
+                        )
+                    connection.commit()
+                finally:
+                    cursor.close()
             finally:
                 connection.close()
 
