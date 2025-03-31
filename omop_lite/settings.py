@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     schema_name: str = "public"
     dialect: Literal["postgresql", "mssql"] = "postgresql"
     log_level: str = "INFO"
+    fts_create: bool = False
 
     class Config:
         env_file = ".env"
