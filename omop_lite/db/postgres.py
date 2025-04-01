@@ -28,7 +28,11 @@ class PostgresDatabase(Database):
             connection.commit()
 
     def add_constraints(self) -> None:
-        """Add primary keys, constraints, and indices."""
+        """
+        Add primary keys, constraints, and indices.
+        
+        Override to add full-text search.
+        """
         super().add_constraints()
         self._add_full_text_search()
 

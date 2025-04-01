@@ -55,21 +55,28 @@ class Database(ABC):
         return file_path.exists()
 
     def refresh_metadata(self) -> None:
+        """Refresh the metadata for the database."""
         if not self.metadata or not self.engine:
             raise RuntimeError("Database not properly initialized")
         self.metadata.reflect(bind=self.engine)
 
     def schema_exists(self, schema_name: str) -> bool:
+        """Check if a schema exists in the database."""
         if not self.engine:
             raise RuntimeError("Database engine not initialized")
         inspector = inspect(self.engine)
         return schema_name in inspector.get_schema_names()
 
     def create_tables(self) -> None:
+        """Create the tables in the database."""
         self._execute_sql_file(self.file_path.joinpath("ddl.sql"))
         self.refresh_metadata()
 
     def add_constraints(self) -> None:
+        """Add constraints to the tables in the database.
+        
+        Executes the sql files for the given data directory.
+        """
         self._execute_sql_file(self.file_path.joinpath("primary_keys.sql"))
         self._execute_sql_file(self.file_path.joinpath("constraints.sql"))
         self._execute_sql_file(self.file_path.joinpath("indices.sql"))
