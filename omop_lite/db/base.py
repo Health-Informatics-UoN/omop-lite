@@ -19,14 +19,15 @@ class Database(ABC):
         self.file_path: Optional[Union[Path, Traversable]] = None
         self.omop_tables = [
             "CDM_SOURCE",
-            "DRUG_STRENGTH",
             "CONCEPT",
-            "CONCEPT_RELATIONSHIP",
             "CONCEPT_ANCESTOR",
+            "CONCEPT_CLASS",
+            "CONCEPT_RELATIONSHIP",
             "CONCEPT_SYNONYM",
             "CONDITION_ERA",
             "CONDITION_OCCURRENCE",
             "DEATH",
+            "DOMAIN",
             "DRUG_ERA",
             "DRUG_EXPOSURE",
             "DRUG_STRENGTH",
@@ -36,6 +37,9 @@ class Database(ABC):
             "OBSERVATION_PERIOD",
             "PERSON",
             "PROCEDURE_OCCURRENCE",
+            "RELATIONSHIP",
+            "VISIT_OCCURRENCE",
+            "VOCABULARY",
         ]
 
     @abstractmethod
