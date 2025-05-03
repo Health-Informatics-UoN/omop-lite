@@ -4,10 +4,10 @@ image:
   pullPolicy: IfNotPresent
 
 env:
-  dbHost: your-postgres-service
+  dbHost: postgres
   dbPort: "5432"
   dbUser: postgres
-  dbPassword: password
+  dbPassword: postgres
   dbName: omop
   dialect: postgresql
   schemaName: public
@@ -15,20 +15,3 @@ env:
   synthetic: true
 
 backoffLimit: 1
-
-serviceAccount:
-  create: false
-  automount: false
-
-# Placeholder values to prevent template errors
-ingress:
-  enabled: false
-
-service:
-  type: ClusterIP
-  port: 8080
-
-persistence:
-  enabled: false
-  size: 10Gi
-  storageClass: standard 
