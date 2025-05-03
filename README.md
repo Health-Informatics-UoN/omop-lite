@@ -56,7 +56,7 @@ helm repo update
 helm install omop-lite omop-lite/omop-lite
 ```
 
-The Helm chart deploys OMOP Lite as a Kubernetes Job that creates an OMOP CDM in a PostgreSQL database. You can customize the installation using a values file:
+The Helm chart deploys OMOP Lite as a Kubernetes Job that creates an OMOP CDM in a database. You can customise the installation using a values file:
 
 ```yaml
 # values.yaml
