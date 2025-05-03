@@ -20,6 +20,8 @@ You can configure the Docker container using the following environment variables
 
 ## Usage
 
+### Docker
+
 `docker run -v ./data:/data ghcr.io/health-informatics-uon/omop-lite`
 
 ```yaml
@@ -39,6 +41,40 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+```
+
+### Helm
+
+To install using Helm:
+
+```bash
+# Add the Helm repository
+helm repo add omop-lite https://health-informatics-uon.github.io/omop-lite
+helm repo update
+
+# Install the chart
+helm install omop-lite omop-lite/omop-lite
+```
+
+The Helm chart deploys OMOP Lite as a Kubernetes Job that creates an OMOP CDM in a PostgreSQL database. You can customize the installation using a values file:
+
+```yaml
+# values.yaml
+env:
+  dbHost: postgres
+  dbPort: "5432"
+  dbUser: postgres
+  dbPassword: postgres
+  dbName: omop
+  dialect: postgresql
+  schemaName: public
+  synthetic: "true"
+```
+
+Install with custom values:
+
+```bash
+helm install omop-lite omop-lite/omop-lite -f values.yaml
 ```
 
 ## Synthetic Data
