@@ -12,6 +12,28 @@ env:
   dialect: postgresql
   schemaName: public
   dataDir: /data
-  synthetic: true
+  synthetic: false
 
 backoffLimit: 1
+
+# Data mounting configuration
+data:
+  persistentVolumeClaim:
+    enabled: false
+    existingClaim: ""  # Use an existing PVC
+    create: false      # Create a new PVC
+    size: 10Gi
+    storageClass: standard
+    accessModes:
+      - ReadOnlyMany
+
+  # Use a ConfigMap for smaller data
+  configMap:
+    enabled: false
+    name: ""  # Use an existing ConfigMap
+    create: false  # Create a new ConfigMap from a directory
+
+  # Data preparation configuration
+  prepare:
+    enabled: false
+    sourcePath: ""  # Path to data directory on the node

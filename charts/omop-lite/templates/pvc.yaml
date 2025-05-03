@@ -1,0 +1,17 @@
+{{- if .Values.data.persistentVolumeClaim.create -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "omop-lite.fullname" . }}-data
+  labels:
+    {{- include "omop-lite.labels" . | nindent 4 }}
+spec:
+  accessModes:
+    {{- toYaml .Values.data.persistentVolumeClaim.accessModes | nindent 4 }}
+  resources:
+    requests:
+      storage: {{ .Values.data.persistentVolumeClaim.size }}
+  {{- if .Values.data.persistentVolumeClaim.storageClass }}
+  storageClassName: {{ .Values.data.persistentVolumeClaim.storageClass }}
+  {{- end }}
+{{- end }} 

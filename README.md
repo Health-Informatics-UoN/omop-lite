@@ -65,10 +65,25 @@ env:
   dbPort: "5432"
   dbUser: postgres
   dbPassword: postgres
-  dbName: omop
+  dbName: omop_helm
   dialect: postgresql
   schemaName: public
-  synthetic: "true"
+  synthetic: "false" 
+
+# Data mounting configuration
+data:
+  persistentVolumeClaim:
+    enabled: true
+    create: true
+    size: 10Gi
+    storageClass: standard
+    accessModes:
+      - ReadOnlyMany
+  
+  # Optional: Prepare data from a local directory
+  prepare:
+    enabled: true
+    sourcePath: "/path/to/your/data"  # Path on the node where data is stored
 ```
 
 Install with custom values:
@@ -76,6 +91,20 @@ Install with custom values:
 ```bash
 helm install omop-lite omop-lite/omop-lite -f values.yaml
 ```
+
+#### Using Your Own Data
+
+To use your own data with the Helm chart:
+
+1. **Option 1: Use the built-in data preparation**
+   - Set `data.prepare.enabled: true`
+   - Set `data.prepare.sourcePath` to the path on your node where the data is stored
+   - The chart will automatically copy your data to the PVC before running the OMOP Lite job
+
+2. **Option 2: Manual data preparation**
+   - Create a PVC (either through the chart or manually)
+   - Copy your data to the PVC using kubectl or another method
+   - Set `data.persistentVolumeClaim.enabled: true` and provide the PVC name
 
 ## Synthetic Data
 
