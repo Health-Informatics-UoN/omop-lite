@@ -1514,3 +1514,4 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 4323688	Cough at rest	Condition	SNOMED	Clinical Finding	S	7142008	2002-01-31	2099-12-31	
 35626061	No cough strength	Condition	SNOMED	Clinical Finding	S	769211009	2018-07-31	2099-12-31	
 4266009	Ability to smell	Observation	SNOMED	Clinical Finding	S	397726002	2003-07-31	2099-12-31	
+21490742	Airway resistance --during inspiration	Measurement	LOINC	Clinical Observation	S	75948-0	2016-06-24	2099-12-31	
