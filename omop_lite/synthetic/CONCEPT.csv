@@ -1515,3 +1515,5 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 35626061	No cough strength	Condition	SNOMED	Clinical Finding	S	769211009	2018-07-31	2099-12-31	
 4266009	Ability to smell	Observation	SNOMED	Clinical Finding	S	397726002	2003-07-31	2099-12-31	
 21490742	Airway resistance --during inspiration	Measurement	LOINC	Clinical Observation	S	75948-0	2016-06-24	2099-12-31	
+32020	EHR encounter diagnosis	Type Concept	Condition Type	Condition Type		OMOP4822160	1970-01-01	2099-12-31	
+45905770	Patient Self-Reported Condition	Type Concept	Condition Type	Condition Type		OMOP4822157	1970-01-01	2099-12-31	
