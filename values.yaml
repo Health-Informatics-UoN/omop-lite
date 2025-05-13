@@ -1,0 +1,22 @@
+env:
+  dbHost: postgres
+  dbPort: "5432"
+  dbUser: postgres
+  dbPassword: postgres
+  dbName: omop_helm
+  dialect: postgresql
+  schemaName: public
+  synthetic: "false"
+
+data:
+  persistentVolumeClaim:
+    enabled: true
+    create: true
+    size: 10Gi
+    storageClass: standard
+    accessModes:
+      - ReadOnlyMany
+  
+  prepare:
+    enabled: true
+    sourcePath: "/Users/ar/Developer/github.com/health-informatics/omop-lite/data"  # Full path to your data directory 

@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: Dockerfile
     environment:
-      - SCHEMA_NAME=cdm
+      - SCHEMA_NAME=public
       - SYNTHETIC=true
     volumes:
       - ./data:/data
@@ -14,9 +14,44 @@ services:
       - db
 
   db:
-    image: postgres:latest
+    image: postgres:16
     environment:
       - POSTGRES_DB=omop
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+
+  omop-lite-sqlserver:
+    platform: "linux/amd64"
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - SCHEMA_NAME=cdm
+      - SYNTHETIC=true
+      - DB_NAME=master
+      - DB_USER=sa
+      - DB_PASSWORD=Password123!
+      - DB_HOST=sqlserver
+      - DB_PORT=1433
+      - DIALECT=mssql
+    volumes:
+      - ./data:/data
+    depends_on:
+      - sqlserver
+
+  sqlserver:
+    platform: "linux/amd64"
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Password123!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    healthcheck:
+      test: /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P "Password123!" -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 10
+      start_period: 10s

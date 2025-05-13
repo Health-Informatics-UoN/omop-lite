@@ -1,25 +1,53 @@
-FROM alpine:latest
+# Install uv
+FROM python:3.13-slim AS builder
+COPY --from=ghcr.io/astral-sh/uv:0.6.9 /uv /uvx /bin/
 
-RUN addgroup -S appgroup && adduser -S appuser -G appgroup
-RUN apk --no-cache add bash postgresql-client wait4x
+# Change the working directory to the `app` directory
+WORKDIR /app
 
-USER appuser
+# Install dependencies
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-editable --no-dev
+    
+# Copy the project into the intermediate image
+COPY . /app
 
-# Set environment variables
-ENV DB_HOST="db"
-ENV DB_PORT="5432"
-ENV DB_USER="postgres"
-ENV DB_PASSWORD="password"
-ENV DB_NAME="omop"
-ENV SCHEMA_NAME="public"
-ENV DATA_DIR="data"
-ENV SYNTHETIC="false"
+# Sync the project
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-editable --no-dev
 
-# Copy files
-COPY --chown=appuser:appgroup synthetic /synthetic
-COPY --chown=appuser:appgroup scripts /scripts
-COPY --chown=appuser:appgroup setup.sh /setup.sh
-RUN chmod +x /setup.sh
+# ------
+FROM python:3.13-slim
 
-# Set entrypoint
-ENTRYPOINT ["/bin/bash", "/setup.sh"]
+# Install required packages and SQL Server ODBC driver
+RUN apt-get update && \
+    apt-get install -y curl gnupg2 && \
+    curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
+    curl https://packages.microsoft.com/config/debian/11/prod.list > /etc/apt/sources.list.d/mssql-release.list && \
+    apt-get update && \
+    ACCEPT_EULA=Y apt-get install -y msodbcsql18 && \
+    # Clean up
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Create a non-root user and group
+RUN groupadd -r app && useradd --no-log-init -r -g app app
+
+LABEL org.opencontainers.image.title=OMOP\ Lite
+LABEL org.opencontainers.image.description=Get\ an\ OMOP\ CDM\ database\ running\ quickly.
+LABEL org.opencontainers.image.vendor=University\ of\ Nottingham
+LABEL org.opencontainers.image.url=https://github.com/Health-Informatics-UoN/omop-lite/pkgs/container/omop-lite
+LABEL org.opencontainers.image.source=https://github.com/Health-Informatics-UoN/omop-lite
+LABEL org.opencontainers.image.licenses=MIT
+
+# Copy the environment, but not the source code
+COPY --from=builder --chown=app:app /app/.venv /app/.venv
+
+ENV PATH="/app/.venv/bin:$PATH" 
+
+# Switch to the non-root user
+USER app
+
+CMD ["omop-lite"]

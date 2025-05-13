@@ -1,0 +1,74 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "omop-lite.fullname" . }}
+  labels:
+    {{- include "omop-lite.labels" . | nindent 4 }}
+spec:
+  ttlSecondsAfterFinished: 3600
+  backoffLimit: {{ .Values.backoffLimit }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "omop-lite.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "omop-lite.serviceAccountName" . }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.data.persistentVolumeClaim.enabled }}
+          volumeMounts:
+            - name: data
+              mountPath: {{ .Values.env.dataDir }}
+              readOnly: true
+          {{- end }}
+          env:
+            - name: DB_HOST
+              value: {{ .Values.env.dbHost | quote }}
+            - name: DB_PORT
+              value: {{ .Values.env.dbPort | quote }}
+            - name: DB_USER
+              value: {{ .Values.env.dbUser | quote }}
+            - name: DB_PASSWORD
+              value: {{ .Values.env.dbPassword | quote }}
+            - name: DB_NAME
+              value: {{ .Values.env.dbName | quote }}
+            - name: DIALECT
+              value: {{ .Values.env.dialect | quote }}
+            - name: SCHEMA_NAME
+              value: {{ .Values.env.schemaName | quote }}
+            - name: DATA_DIR
+              value: {{ .Values.env.dataDir | quote }}
+            - name: SYNTHETIC
+              value: {{ .Values.env.synthetic | quote }}
+      {{- if .Values.data.persistentVolumeClaim.enabled }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ if .Values.data.persistentVolumeClaim.existingClaim }}{{ .Values.data.persistentVolumeClaim.existingClaim }}{{ else }}{{ include "omop-lite.fullname" . }}-data{{ end }}
+      {{- end }}
+      restartPolicy: Never
