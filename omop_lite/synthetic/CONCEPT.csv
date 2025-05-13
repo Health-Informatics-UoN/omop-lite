@@ -187,6 +187,7 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 2617724	CLINICIAN HAS NOT PROVIDED CARE FOR THE AGE-RELATED MACULAR DEGENERATION PATIENT FOR THE REQUIRED TIME FOR MACULAR EXAMINATION MEASUREMENT (Deprecated)	Observation	HCPCS	HCPCS	S	G8316	1970-01-01	2011-10-30	
 2617787	For patients with er or pr positive	Observation	HCPCS	HCPCS	S	G8380	1970-01-01	2014-11-11	
 2617921	CLINICIAN DOCUMENTED THAT PATIENT WAS NOT AN ELIGIBLE CANDIDATE FOR ANTIPLATELET THERAPY (Deprecated)	Observation	HCPCS	HCPCS	S	G8522	1970-01-01	2014-01-01	
+2900848	Sinutab	Drug	RxNorm Extension	Brand Name		OMOP5118241	2016-11-01	2099-12-31
 3000276	Heart rate Peripheral artery by US.doppler	Measurement	LOINC	Clinical Observation	S	8892-2	1970-01-01	2099-12-31	
 3000874	Acetylene [Mass/volume] in Serum or Plasma	Measurement	LOINC	Lab Test	S	12899-1	1970-01-01	2099-12-31	
 3001372	Albumin/Globulin [Mass Ratio] in Semen	Measurement	LOINC	Lab Test	S	14436-0	1970-01-01	2099-12-31	
