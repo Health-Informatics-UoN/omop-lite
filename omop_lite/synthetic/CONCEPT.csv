@@ -99,7 +99,7 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 507019	PARR-30 (Patients at Risk of Re-hospitalisation within 30 days of discharge) algorithm	Measurement	SNOMED	Staging / Scales	S	1057281000000109	2016-10-01	2099-12-31	
 507324	Referral for Early Help Assessment	Observation	SNOMED	Procedure	S	1060581000000100	2016-10-01	2099-12-31	
 507526	Dietetic Intervention for Adult Obesity TOM (Therapy Outcome Measure) carer wellbeing score	Measurement	SNOMED	Observable Entity	S	1063031000000101	2016-10-01	2099-12-31	
-581513	LITTLE REMEDIES NEW BABY ESSENTIALS - acetaminophen, simethicone, zinc oxide kit	Drug	SPL	OTC Drug	C	4b1b7294-aca6-45fa-a008-c1869131b2a3	2019-03-11	2099-12-31
+581513	LITTLE REMEDIES NEW BABY ESSENTIALS - acetaminophen, simethicone, zinc oxide kit	Drug	SPL	OTC Drug	C	4b1b7294-aca6-45fa-a008-c1869131b2a3	2019-03-11	2099-12-31	
 601309	Trichopsylloides	Observation	SNOMED	Organism	S	4.63971E+14	2021-03-01	2099-12-31	
 601390	Amphipsylla	Observation	SNOMED	Organism	S	4.64971E+14	2021-03-01	2099-12-31	
 601446	Starmerella etchellsii	Observation	SNOMED	Organism	S	4.65761E+14	2021-03-01	2099-12-31	
@@ -145,15 +145,15 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 765295	Open fracture of phalanx of ring finger of left hand	Condition	SNOMED	Disorder	S	10824011000119101	2015-03-01	2099-12-31	
 765774	Occlusion and stenosis of anterior cerebral artery without infarction	Condition	SNOMED	Disorder	S	4.30841E+14	2012-09-01	2099-12-31	
 765783	Ineffective medication administration routine at home	Observation	SNOMED	Clinical Finding	S	5.611E+12	2016-03-01	2099-12-31	
-715871	homatropine methylbromide; systemic	Drug	ATC	ATC 5th	C	A03BB06	1970-01-01	2099-12-31
+715871	homatropine methylbromide; systemic	Drug	ATC	ATC 5th	C	A03BB06	1970-01-01	2099-12-31	
 915776	I intend to report the diabetic retinopathy measures group (Deprecated)	Observation	HCPCS	HCPCS	S	G9671	2016-01-01	2016-12-31	
-923645	omeprazole	Drug	RxNorm	Ingredient	S	7646	1970-01-01	2099-12-31  
+923645	omeprazole	Drug	RxNorm	Ingredient	S	7646	1970-01-01	2099-12-31  	
 953317	Leg pain was measured by the visual analog scale (vas) within three months preoperatively and at one year (9 to 15 months) postoperatively (Deprecated)	Observation	HCPCS	HCPCS	S	M1053	2019-01-01	2019-12-31	
 1001716	XR Middle phalanx of fifth finger Bone development stage	Measurement	LOINC	Clinical Observation	S	93141-0	2019-12-13	2099-12-31	
 1001904	Total score [Quality of Working Life Questionnaire for Cancer Survivors]	Observation	LOINC	Survey	S	93112-1	2019-12-13	2099-12-31	
 1001995	Left atrial End-systolic volume/Body surface area [Volume/Area] by US.2D.A4C+Calculated by single plane method of disks	Measurement	LOINC	Clinical Observation	S	93639-3	2019-12-13	2099-12-31	
-1125315	acetaminophen	Drug	RxNorm	Ingredient	S	161	1970-01-01	2099-12-31  
-1201620	codeine	Drug	RxNorm	Ingredient	S	2670	1970-01-01	2099-12-31  
+1125315	acetaminophen	Drug	RxNorm	Ingredient	S	161	1970-01-01	2099-12-31  	
+1201620	codeine	Drug	RxNorm	Ingredient	S	2670	1970-01-01	2099-12-31  	
 1242398	Qualitative distribution of primary malignant neoplasm of nasal cavity and/or nasal sinus in excised tissue specimen	Observation	SNOMED	Observable Entity	S	1287121008	2023-09-01	2099-12-31	
 1243734	Thermomyces lanuginosus	Observation	SNOMED	Organism	S	1300165001	2024-02-01	2099-12-31	
 1244250	Central cord syndrome of cervical spinal cord due to closed dislocation of cervical spine	Condition	SNOMED	Disorder	S	1269527001	2023-12-01	2099-12-31	
@@ -187,7 +187,7 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 2617724	CLINICIAN HAS NOT PROVIDED CARE FOR THE AGE-RELATED MACULAR DEGENERATION PATIENT FOR THE REQUIRED TIME FOR MACULAR EXAMINATION MEASUREMENT (Deprecated)	Observation	HCPCS	HCPCS	S	G8316	1970-01-01	2011-10-30	
 2617787	For patients with er or pr positive	Observation	HCPCS	HCPCS	S	G8380	1970-01-01	2014-11-11	
 2617921	CLINICIAN DOCUMENTED THAT PATIENT WAS NOT AN ELIGIBLE CANDIDATE FOR ANTIPLATELET THERAPY (Deprecated)	Observation	HCPCS	HCPCS	S	G8522	1970-01-01	2014-01-01	
-2900848	Sinutab	Drug	RxNorm Extension	Brand Name		OMOP5118241	2016-11-01	2099-12-31
+2900848	Sinutab	Drug	RxNorm Extension	Brand Name		OMOP5118241	2016-11-01	2099-12-31	
 3000276	Heart rate Peripheral artery by US.doppler	Measurement	LOINC	Clinical Observation	S	8892-2	1970-01-01	2099-12-31	
 3000874	Acetylene [Mass/volume] in Serum or Plasma	Measurement	LOINC	Lab Test	S	12899-1	1970-01-01	2099-12-31	
 3001372	Albumin/Globulin [Mass Ratio] in Semen	Measurement	LOINC	Lab Test	S	14436-0	1970-01-01	2099-12-31	
@@ -1148,7 +1148,7 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 36031449	Date of most recent lab test for condition of interest	Observation	LOINC	Clinical Observation	S	96550-9	2020-12-15	2099-12-31	
 36203578	Enterococcus sp DNA [Presence] by NAA with non-probe detection in Positive blood culture	Measurement	LOINC	Lab Test	S	85775-5	2017-06-23	2099-12-31	
 36204502	1 step (curb) - functional ability during 3 day assessment period [CMS Assessment]	Observation	LOINC	Survey	S	83196-6	2017-06-23	2099-12-31	
-36246691	Painaid BRF Oral Product	Drug	RxNorm	Branded Dose Group	C	1359101	2016-08-01	2099-12-31
+36246691	Painaid BRF Oral Product	Drug	RxNorm	Branded Dose Group	C	1359101	2016-08-01	2099-12-31	
 36304460	Acinetobacter sp rpsA gene [Presence] by Probe in Positive blood culture	Measurement	LOINC	Lab Test	S	88244-9	2018-06-15	2099-12-31	
 36304641	MDS v3.0 - RAI v1.16.1 - Health conditions - NP	Observation	LOINC	Survey	S	88959-2	2018-06-15	2099-12-31	
 36304674	Patient history and diagnoses - transfer or discharge from agency during assessment period [CMS Assessment]	Observation	LOINC	Survey	S	86256-5	2018-06-15	2099-12-31	
@@ -1419,7 +1419,7 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 42689973	Difficulty recognising generalised pain	Observation	SNOMED	Clinical Finding	S	1070721000000101	2017-04-01	2099-12-31	
 42690185	Does feel confident	Observation	SNOMED	Clinical Finding	S	1073391000000109	2017-04-01	2099-12-31	
 42690289	Unable to be hopeful for future	Observation	SNOMED	Clinical Finding	S	1074741000000103	2017-04-01	2099-12-31	
-42715927	Acetaminophen 0.0934 MG/MG / Ascorbic Acid 0.0333 MG/MG / Pheniramine 0.00333 MG/MG Oral Granules [FERVEX RHUME PARACETAMOL/VITAMINE C] Box of 8	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2741590	2017-08-24	2099-12-31
+42715927	Acetaminophen 0.0934 MG/MG / Ascorbic Acid 0.0333 MG/MG / Pheniramine 0.00333 MG/MG Oral Granules [FERVEX RHUME PARACETAMOL/VITAMINE C] Box of 8	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2741590	2017-08-24	2099-12-31	
 42869234	I have had trouble recalling the name of an object while talking to someone in the past 7 days [FACIT]	Observation	LOINC	Survey	S	70766-1	2012-03-08	2099-12-31	
 42869709	Ages and Stages Questionnaires [ASQ]	Observation	LOINC	Survey	S	71954-2	2012-09-14	2099-12-31	
 42870020	Comprehensive care [FACIT]	Observation	LOINC	Survey	S	71076-4	2012-03-15	2099-12-31	

@@ -505,4 +505,4 @@ concept_id_1	concept_id_2	relationship_id	valid_start_date	valid_end_date	invali
 32024	32021	Is a	1970-01-01	2099-12-31	
 32025	32023	Is a	1970-01-01	2099-12-31	
 58	5	Concept replaces	2015-10-16	2099-12-31	
-1125315	2900848	Has brand name	2021-06-30	2099-12-31
+1125315	2900848	Has brand name	2021-06-30	2099-12-31	
