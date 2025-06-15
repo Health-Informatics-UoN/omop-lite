@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     dialect: Literal["postgresql", "mssql"] = "postgresql"
     log_level: str = "INFO"
     fts_create: bool = False
+    delimiter: str = "\t"
 
     class Config:
         env_file = ".env"

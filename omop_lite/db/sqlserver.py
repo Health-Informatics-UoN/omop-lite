@@ -31,8 +31,10 @@ class SQLServerDatabase(Database):
         if not self.engine:
             raise RuntimeError("Database engine not initialized")
 
+        delimiter = self._get_delimiter()
+
         with open(str(file_path), "r") as f:
-            csv_headers = next(f).strip().split("\t")
+            csv_headers = next(f).strip().split(delimiter)
 
             connection = self.engine.raw_connection()
             try:
@@ -43,8 +45,8 @@ class SQLServerDatabase(Database):
                 insert_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
 
                 rows = [
-                    line.strip().split("\t")
-                    + [None] * (len(csv_headers) - len(line.strip().split("\t")))
+                    line.strip().split(delimiter)
+                    + [None] * (len(csv_headers) - len(line.strip().split(delimiter)))
                     for line in f
                 ]
 

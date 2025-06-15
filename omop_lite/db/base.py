@@ -120,6 +120,24 @@ class Database(ABC):
         if not data_dir.exists():
             raise FileNotFoundError(f"Data directory {data_dir} does not exist")
         return data_dir
+    
+    def _get_delimiter(self) -> str:
+        """
+        Return the delimiter based on the dialect.
+        Common implementation for all databases.
+
+        - Synthetic 100 is `\t`
+        - Synthetic 1000 is `,`
+        - Default is `\t`
+
+        This is used to determine the delimiter for the COPY command.
+        """
+        if settings.synthetic:
+            return settings.delimiter
+        elif settings.synthetic_1000:
+            return ","
+        else:
+            return settings.delimiter
 
     def _execute_sql_file(self, file_path: Union[str, Traversable]) -> None:
         """
