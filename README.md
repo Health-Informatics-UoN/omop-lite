@@ -17,7 +17,7 @@ You can configure the Docker container using the following environment variables
 - `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `public`.
 - `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
 - `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
-- `SYNTHETIC_1000`: Load Synthea 1k data (boolean). Default is `false`
+- `SYNTHETIC_1000`: Load [Synthea 1k](https://registry.opendata.aws/synthea-omop/) data (boolean). Default is `false`
 - `DELIMITER`: The delimiter used to separate data. Default is `tab`, can also be `,`
 
 ## Usage
