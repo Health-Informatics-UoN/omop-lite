@@ -113,7 +113,9 @@ class Database(ABC):
         """
 
         if settings.synthetic:
-            return files("omop_lite.synthetic")
+            return files("omop_lite.synthetic.100")
+        elif settings.synthetic_1000:
+            return files("omop_lite.synthetic.1000")
         data_dir = Path(settings.data_dir)
         if not data_dir.exists():
             raise FileNotFoundError(f"Data directory {data_dir} does not exist")
