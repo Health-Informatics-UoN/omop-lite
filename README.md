@@ -149,3 +149,7 @@ docker compose -f compose-omop-ts.yml
 
 To do this, you need to have `embeddings/embeddings.parquet`, containing concept_ids and embeddings.
 This uses [pgvector](https://github.com/pgvector/pgvector) to create an `embeddings` table.
+
+## omop-lite testing
+If you're a developer and want to iterate on omop-lite quickly, there's a small subset of the vocabularies sufficient to build in `synthetic/`.
+If you wish to test the vector search, there are matching embeddings in `embeddings/embeddings.parquet`.
