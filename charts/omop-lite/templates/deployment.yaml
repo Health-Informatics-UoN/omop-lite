@@ -65,6 +65,10 @@ spec:
               value: {{ .Values.env.dataDir | quote }}
             - name: SYNTHETIC
               value: {{ .Values.env.synthetic | quote }}
+            - name: SYNTHETIC_NUMBER
+              value: {{ .Values.env.synthetic_number | quote }}
+            - name: LOG_LEVEL
+              value: {{ .Values.env.log_level | quote }}
       {{- if .Values.data.persistentVolumeClaim.enabled }}
       volumes:
         - name: data
