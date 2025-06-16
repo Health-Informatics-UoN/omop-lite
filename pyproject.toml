@@ -20,7 +20,8 @@ build-backend = "hatchling.build"
 include = [
     "omop_lite/**/*.py",
     "omop_lite/scripts/**/*.sql",
-    "omop_lite/synthetic/*.csv",
+    "omop_lite/synthetic/100/*.csv",
+    "omop_lite/synthetic/1000/*.csv",
 ]
 
 [project.scripts]

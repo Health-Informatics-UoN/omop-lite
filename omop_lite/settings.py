@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     db_password: str = "password"
     db_name: str = "omop"
     synthetic: bool = False
-    synthetic_1000: bool = False
+    synthetic_number: int = 100
     data_dir: str = "data"
     schema_name: str = "public"
     dialect: Literal["postgresql", "mssql"] = "postgresql"

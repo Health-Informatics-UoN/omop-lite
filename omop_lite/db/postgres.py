@@ -62,6 +62,7 @@ class PostgresDatabase(Database):
             raise RuntimeError("Database engine not initialized")
         
         delimiter = self._get_delimiter()
+        quote = self._get_quote()
 
         with open(str(file_path), "r") as f:
             connection = self.engine.raw_connection()
@@ -70,7 +71,7 @@ class PostgresDatabase(Database):
                 try:
                     with open(str(file_path), "r") as f:
                         cursor.copy_expert(
-                            f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'\b', HEADER, ENCODING 'UTF8')",
+                            f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')",
                             f,
                         )
                     connection.commit()
