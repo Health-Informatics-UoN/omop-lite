@@ -33,25 +33,23 @@ class SQLServerDatabase(Database):
 
         delimiter = self._get_delimiter()
 
-        with open(str(file_path), "r") as f:
-            csv_headers = next(f).strip().split(delimiter)
+        with open(str(file_path), "r", encoding="utf-8", newline="") as f:
+            reader = csv.reader(f, delimiter=delimiter)
+            headers = next(reader)
+            
+            columns = ", ".join(f"[{col}]" for col in headers)
+            placeholders = ", ".join(["?" for _ in headers])
+            insert_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
 
-            connection = self.engine.raw_connection()
+            conn = self.engine.raw_connection()
             try:
-                cursor = connection.cursor()
-
-                columns = ", ".join(f"[{col}]" for col in csv_headers)
-                placeholders = ", ".join(["?" for _ in csv_headers])
-                insert_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
-
-                rows = [
-                    line.strip().split(delimiter)
-                    + [None] * (len(csv_headers) - len(line.strip().split(delimiter)))
-                    for line in f
-                ]
-
-                cursor.executemany(insert_sql, rows)
-                connection.commit()
-                cursor.close()
+                cursor = conn.cursor()
+                for line_no, row in enumerate(reader, start=2):
+                    if len(row) != len(headers):
+                        print(f"Row {line_no} skipped: expected {len(headers)} values, got {len(row)} – {row}")
+                        continue
+                    cursor.execute(insert_sql, row)
+                conn.commit()
             finally:
-                connection.close()
+                cursor.close()
+                conn.close()
