@@ -1,3 +1,4 @@
+import csv
 from sqlalchemy import create_engine, MetaData, text
 from importlib.resources import files
 import logging
