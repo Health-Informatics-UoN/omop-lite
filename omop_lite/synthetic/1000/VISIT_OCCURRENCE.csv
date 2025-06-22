@@ -1,4 +1,4 @@
-visit_occurrence_id,person_id,visit_concept_id,visit_start_date,visit_start_datetime,visit_end_date,visit_end_datetime,visit_type_concept_id,provider_id,care_site_id,visit_source_value,visit_source_concept_id,admitting_source_concept_id,admitting_source_value,discharge_to_concept_id,discharge_to_source_value,preceding_visit_occurrence_id
+visit_occurrence_id,person_id,visit_concept_id,visit_start_date,visit_start_datetime,visit_end_date,visit_end_datetime,visit_type_concept_id,provider_id,care_site_id,visit_source_value,visit_source_concept_id,admitted_from_concept_id,admitted_from_source_value,discharged_to_concept_id,discharged_to_source_value,preceding_visit_occurrence_id
 5,1,9202,2011-08-19,2011-08-19,2011-08-19,2011-08-19,44818517,,,5c9f315e-8df5-41ae-8a6f-6c22bd11699b,0,0,,0,,
 2,1,9202,2013-07-05,2013-07-05,2013-07-05,2013-07-05,44818517,,,b094397f-03de-47cd-bd8e-ed59e8c04fd7,0,0,,0,,5
 4,1,9202,2014-08-22,2014-08-22,2014-08-22,2014-08-22,44818517,,,34f61a48-1b1c-4802-94fd-d25b63cd1ef9,0,0,,0,,2
