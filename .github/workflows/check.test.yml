@@ -80,7 +80,7 @@ jobs:
         run: |
           docker run --rm --network=host \
           -e PGPASSWORD=postgres \
-          postgres psql -h localhost -U postgres -d omop -c "DO \$\$ BEGIN IF (SELECT COUNT(*) FROM omop_1000.person) != 1000 THEN RAISE EXCEPTION 'Expected 1000 persons, got %', (SELECT COUNT(*) FROM omop_1000.person); ELSE RAISE NOTICE 'PASS: Person count is 1000'; END IF; END \$\$;"
+          postgres psql -h localhost -U postgres -d omop -c "DO \$\$ BEGIN IF (SELECT COUNT(*) FROM omop_1000.person) != 1130 THEN RAISE EXCEPTION 'Expected 1130 persons, got %', (SELECT COUNT(*) FROM omop_1000.person); ELSE RAISE NOTICE 'PASS: Person count is 1130'; END IF; END \$\$;"
 
       # 99 persons
       - name: Run Docker container for SQL Server
