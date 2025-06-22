@@ -43,6 +43,7 @@ jobs:
       - name: Build Docker image
         run: docker build -t omop-lite .
 
+      # 100 persons
       - name: Run Docker container for PostgreSQL
         run: |
           docker run --rm --network=host \
@@ -59,8 +60,29 @@ jobs:
         run: |
           docker run --rm --network=host \
           -e PGPASSWORD=postgres \
-          postgres psql -h localhost -U postgres -d omop -c "SELECT COUNT(*) FROM omop.person;"
+          postgres psql -h localhost -U postgres -d omop -c "DO \$\$ BEGIN IF (SELECT COUNT(*) FROM omop.person) != 100 THEN RAISE EXCEPTION 'Expected 100 persons, got %', (SELECT COUNT(*) FROM omop.person); ELSE RAISE NOTICE 'PASS: Person count is 100'; END IF; END \$\$;"
 
+      # 1000 persons
+      - name: Run Docker container for PostgreSQL
+        run: |
+          docker run --rm --network=host \
+          -e DB_HOST=localhost \
+          -e DB_PASSWORD=postgres \
+          -e DB_NAME=omop \
+          -e SCHEMA_NAME=omop \
+          -e DB_USER=postgres \
+          -e DB_PORT=5432 \
+          -e SYNTHETIC=true \
+          -e SYNTHETIC_NUMBER=1000 \
+          omop-lite
+
+      - name: Verify data in PostgreSQL
+        run: |
+          docker run --rm --network=host \
+          -e PGPASSWORD=postgres \
+          postgres psql -h localhost -U postgres -d omop -c "DO \$\$ BEGIN IF (SELECT COUNT(*) FROM omop.person) != 1000 THEN RAISE EXCEPTION 'Expected 1000 persons, got %', (SELECT COUNT(*) FROM omop.person); ELSE RAISE NOTICE 'PASS: Person count is 1000'; END IF; END \$\$;"
+
+      # 100 persons
       - name: Run Docker container for SQL Server
         run: |
           docker run --rm --network=host \
@@ -78,8 +100,9 @@ jobs:
         run: |
           docker run --rm --network=host \
           mcr.microsoft.com/mssql-tools \
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "SELECT COUNT(*) FROM omop.person;"
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "IF (SELECT COUNT(*) FROM omop.person) != 100 BEGIN RAISERROR('Expected 100 persons, got %d', 16, 1, (SELECT COUNT(*) FROM omop.person)) END ELSE SELECT 'PASS: Person count is 100' as result;"
 
+      # 1000 persons
       - name: Run Docker container for SQL Server
         run: |
           docker run --rm --network=host \
@@ -98,4 +121,4 @@ jobs:
         run: |
           docker run --rm --network=host \
           mcr.microsoft.com/mssql-tools \
-          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "SELECT COUNT(*) FROM omop_1000.person;"
+          /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "IF (SELECT COUNT(*) FROM omop_1000.person) != 1130 BEGIN RAISERROR('Expected 1130 persons, got %d', 16, 1, (SELECT COUNT(*) FROM omop_1000.person)) END ELSE SELECT 'PASS: Person count is 1130' as result;"
