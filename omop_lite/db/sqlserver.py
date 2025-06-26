@@ -49,9 +49,9 @@ class SQLServerDatabase(Database):
                     # Pad short rows
                     if len(row) < len(headers):
                         row += [None] * (len(headers) - len(row))
-                        print(f"Row {line_no} padded: {row}")
+                        logger.info(f"Row {line_no} padded: {row}")
                     elif len(row) > len(headers):
-                        print(f"Row {line_no} trimmed: too many values ({len(row)}), expected {len(headers)} – trimming.")
+                        logger.info(f"Row {line_no} trimmed: too many values ({len(row)}), expected {len(headers)} – trimming.")
                         row = row[:len(headers)]
 
                     cursor.execute(insert_sql, row)
