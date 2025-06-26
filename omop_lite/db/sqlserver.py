@@ -37,7 +37,7 @@ class SQLServerDatabase(Database):
         with open(str(file_path), "r", encoding="utf-8", newline="") as f:
             reader = csv.reader(f, delimiter=delimiter)
             headers = next(reader)
-            
+
             columns = ", ".join(f"[{col}]" for col in headers)
             placeholders = ", ".join(["?" for _ in headers])
             insert_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
@@ -46,9 +46,14 @@ class SQLServerDatabase(Database):
             try:
                 cursor = conn.cursor()
                 for line_no, row in enumerate(reader, start=2):
-                    if len(row) != len(headers):
-                        print(f"Row {line_no} skipped: expected {len(headers)} values, got {len(row)} – {row}")
-                        continue
+                    # Pad short rows
+                    if len(row) < len(headers):
+                        row += [None] * (len(headers) - len(row))
+                        print(f"Row {line_no} padded: {row}")
+                    elif len(row) > len(headers):
+                        print(f"Row {line_no} trimmed: too many values ({len(row)}), expected {len(headers)} – trimming.")
+                        row = row[:len(headers)]
+
                     cursor.execute(insert_sql, row)
                 conn.commit()
             finally:
