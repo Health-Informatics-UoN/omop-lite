@@ -1,6 +1,6 @@
 [project]
 name = "omop-lite"
-version = "0.0.17"
+version = "0.0.18"
 description = "Get an OMOP CDM database running quickly."
 readme = "README.md"
 requires-python = ">=3.13"
