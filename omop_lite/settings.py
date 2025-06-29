@@ -12,12 +12,18 @@ class Settings(BaseSettings):
     db_password: str = Field(default="password", description="Database password")
     db_name: str = Field(default="omop", description="Database name")
     synthetic: bool = Field(default=False, description="Use synthetic data")
-    synthetic_number: int = Field(default=100, description="Number of synthetic records")
+    synthetic_number: int = Field(
+        default=100, description="Number of synthetic records"
+    )
     data_dir: str = Field(default="data", description="Data directory")
     schema_name: str = Field(default="public", description="Database schema name")
-    dialect: Literal["postgresql", "mssql"] = Field(default="postgresql", description="Database dialect")
+    dialect: Literal["postgresql", "mssql"] = Field(
+        default="postgresql", description="Database dialect"
+    )
     log_level: str = Field(default="INFO", description="Logging level")
-    fts_create: bool = Field(default=False, description="Create full-text search indexes")
+    fts_create: bool = Field(
+        default=False, description="Create full-text search indexes"
+    )
     delimiter: str = Field(default="\t", description="CSV delimiter")
 
     class Config:

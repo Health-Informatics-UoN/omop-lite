@@ -23,31 +23,29 @@ with psycopg.connect(uri) as conn:
     register_vector(conn)
     print("Registered vector type")
     with conn.cursor() as cursor:
-                
         # This drops the table, then creates a new one to fill with embeddings,
-        #so it should only be run when you're building the database for the first time
-        #or if you want to replace your embeddings
-        #if we want to load multiple embeddings datasets, we can make the table name configurable from the environment
-        
+        # so it should only be run when you're building the database for the first time
+        # or if you want to replace your embeddings
+        # if we want to load multiple embeddings datasets, we can make the table name configurable from the environment
+
         cursor.execute(
-                """
+            """
                 DROP TABLE IF EXISTS cdm.embeddings;
                 """
-                )
+        )
         print(f"Creating a table for {vector_length} dimensional vectors")
         cursor.execute(
-                f"""
+            f"""
                 CREATE TABLE cdm.embeddings (
                     concept_id  int,
                     embedding  vector({vector_length})
                 );
                 """
-                )
-        
-        
+        )
+
         # Open the Parquet file in streaming mode
         parquet_file = pq.ParquetFile("embeddings/embeddings.parquet")
-        
+
         # Each row will occupy 8514-ish bytes at the end
         # To keep the memory usage below 4 Gb, setting the batch size to 200_000
         print("Copying in vectors")
@@ -58,7 +56,7 @@ with psycopg.connect(uri) as conn:
                 # use set_types for binary copy
                 # https://www.psycopg.org/psycopg3/docs/basic/copy.html#binary-copy
                 copy.set_types(["int4", "vector"])
-        
+
                 for entry in zip(batch[0], batch[2]):
                     copy.write_row((entry[0].as_py(), entry[1].as_py()))
         print("Vectors in!")

@@ -31,7 +31,7 @@ def _create_settings(
     # Validate dialect
     if dialect not in ["postgresql", "mssql"]:
         raise typer.BadParameter("dialect must be either 'postgresql' or 'mssql'")
-    
+
     return Settings(
         db_host=db_host,
         db_port=db_port,
@@ -60,26 +60,61 @@ def _setup_logging(settings: Settings) -> logging.Logger:
 
 @app.command()
 def main(
-    db_host: str = typer.Option("db", "--db-host", "-h", envvar="DB_HOST", help="Database host"),
-    db_port: int = typer.Option(5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"),
-    db_user: str = typer.Option("postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"),
-    db_password: str = typer.Option("password", "--db-password", envvar="DB_PASSWORD", help="Database password"),
-    db_name: str = typer.Option("omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"),
-    synthetic: bool = typer.Option(False, "--synthetic", envvar="SYNTHETIC", help="Use synthetic data"),
-    synthetic_number: int = typer.Option(100, "--synthetic-number", envvar="SYNTHETIC_NUMBER", help="Number of synthetic records"),
-    data_dir: str = typer.Option("data", "--data-dir", envvar="DATA_DIR", help="Data directory"),
-    schema_name: str = typer.Option("public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"),
-    dialect: str = typer.Option("postgresql", "--dialect", envvar="DIALECT", help="Database dialect (postgresql or mssql)"),
-    log_level: str = typer.Option("INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"),
-    fts_create: bool = typer.Option(False, "--fts-create", envvar="FTS_CREATE", help="Create full-text search indexes"),
-    delimiter: str = typer.Option("\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"),
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    synthetic: bool = typer.Option(
+        False, "--synthetic", envvar="SYNTHETIC", help="Use synthetic data"
+    ),
+    synthetic_number: int = typer.Option(
+        100,
+        "--synthetic-number",
+        envvar="SYNTHETIC_NUMBER",
+        help="Number of synthetic records",
+    ),
+    data_dir: str = typer.Option(
+        "data", "--data-dir", envvar="DATA_DIR", help="Data directory"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+    fts_create: bool = typer.Option(
+        False,
+        "--fts-create",
+        envvar="FTS_CREATE",
+        help="Create full-text search indexes",
+    ),
+    delimiter: str = typer.Option(
+        "\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"
+    ),
 ) -> None:
     """
     Create the OMOP Lite database (default command).
 
     This command will create the schema if it doesn't exist,
     create the tables, load the data, and run the update migrations.
-    
+
     All settings can be configured via environment variables or command-line arguments.
     Command-line arguments take precedence over environment variables.
     """
@@ -98,7 +133,7 @@ def main(
         fts_create=fts_create,
         delimiter=delimiter,
     )
-    
+
     logger = _setup_logging(settings)
     db = create_database(settings)
 
@@ -120,17 +155,34 @@ def main(
 
 @app.command()
 def test(
-    db_host: str = typer.Option("db", "--db-host", "-h", envvar="DB_HOST", help="Database host"),
-    db_port: int = typer.Option(5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"),
-    db_user: str = typer.Option("postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"),
-    db_password: str = typer.Option("password", "--db-password", envvar="DB_PASSWORD", help="Database password"),
-    db_name: str = typer.Option("omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"),
-    dialect: str = typer.Option("postgresql", "--dialect", envvar="DIALECT", help="Database dialect (postgresql or mssql)"),
-    log_level: str = typer.Option("INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"),
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
 ) -> None:
     """
     Test database connectivity and basic operations.
-    
+
     This command tests the database connection and performs basic operations
     without creating tables or loading data.
     """
@@ -143,21 +195,21 @@ def test(
         dialect=dialect,
         log_level=log_level,
     )
-    
+
     logger = _setup_logging(settings)
-    
+
     try:
         db = create_database(settings)
         logger.info("✅ Database connection successful")
-        
+
         # Test basic operations
         if db.schema_exists("public"):
             logger.info("✅ Public schema exists")
         else:
             logger.info("ℹ️  Public schema does not exist (this is normal)")
-            
+
         logger.info("✅ Database test completed successfully")
-        
+
     except Exception as e:
         logger.error(f"❌ Database test failed: {e}")
         raise typer.Exit(1)
@@ -169,4 +221,4 @@ def main_cli():
 
 
 if __name__ == "__main__":
-    main_cli() 
+    main_cli()

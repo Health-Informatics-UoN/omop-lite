@@ -51,8 +51,10 @@ class SQLServerDatabase(Database):
                         row += [None] * (len(headers) - len(row))
                         logger.info(f"Row {line_no} padded: {row}")
                     elif len(row) > len(headers):
-                        logger.info(f"Row {line_no} trimmed: too many values ({len(row)}), expected {len(headers)} – trimming.")
-                        row = row[:len(headers)]
+                        logger.info(
+                            f"Row {line_no} trimmed: too many values ({len(row)}), expected {len(headers)} – trimming."
+                        )
+                        row = row[: len(headers)]
 
                     cursor.execute(insert_sql, row)
                 conn.commit()

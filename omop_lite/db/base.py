@@ -78,7 +78,7 @@ class Database(ABC):
 
     def add_constraints(self) -> None:
         """Add constraints to the tables in the database.
-        
+
         Executes the sql files for the given data directory.
         """
         self._execute_sql_file(self.file_path.joinpath("primary_keys.sql"))
@@ -120,7 +120,7 @@ class Database(ABC):
         if not data_dir.exists():
             raise FileNotFoundError(f"Data directory {data_dir} does not exist")
         return data_dir
-    
+
     def _get_delimiter(self) -> str:
         """
         Return the delimiter based on the dialect.
@@ -138,7 +138,7 @@ class Database(ABC):
             return self.settings.delimiter
         else:
             return self.settings.delimiter
-        
+
     def _get_quote(self) -> str:
         """
         Return the quote based on the dialect.
@@ -147,7 +147,7 @@ class Database(ABC):
         if self.settings.synthetic:
             if self.settings.synthetic_number == 1000:
                 return '"'
-        return '\b'
+        return "\b"
 
     def _execute_sql_file(self, file_path: Union[str, Traversable]) -> None:
         """

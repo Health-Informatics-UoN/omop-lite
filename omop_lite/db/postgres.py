@@ -30,7 +30,7 @@ class PostgresDatabase(Database):
     def add_constraints(self) -> None:
         """
         Add primary keys, constraints, and indices.
-        
+
         Override to add full-text search.
         """
         super().add_constraints()
@@ -60,7 +60,7 @@ class PostgresDatabase(Database):
     def _bulk_load(self, table_name: str, file_path: Union[Path, Traversable]) -> None:
         if not self.engine:
             raise RuntimeError("Database engine not initialized")
-        
+
         delimiter = self._get_delimiter()
         quote = self._get_quote()
 
