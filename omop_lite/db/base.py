@@ -76,14 +76,26 @@ class Database(ABC):
         self._execute_sql_file(self.file_path.joinpath("ddl.sql"))
         self.refresh_metadata()
 
-    def add_constraints(self) -> None:
-        """Add constraints to the tables in the database.
-
-        Executes the sql files for the given data directory.
-        """
+    def add_primary_keys(self) -> None:
+        """Add primary keys to the tables in the database."""
         self._execute_sql_file(self.file_path.joinpath("primary_keys.sql"))
+
+    def add_constraints(self) -> None:
+        """Add constraints to the tables in the database."""
         self._execute_sql_file(self.file_path.joinpath("constraints.sql"))
+
+    def add_indices(self) -> None:
+        """Add indices to the tables in the database."""
         self._execute_sql_file(self.file_path.joinpath("indices.sql"))
+
+    def add_all_constraints(self) -> None:
+        """Add all constraints, primary keys, and indices to the tables in the database.
+
+        This is a convenience method that calls all three constraint methods.
+        """
+        self.add_primary_keys()
+        self.add_constraints()
+        self.add_indices()
 
     def load_data(self) -> None:
         """Load data into tables."""

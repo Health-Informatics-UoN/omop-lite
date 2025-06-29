@@ -152,7 +152,7 @@ def callback(
         # Continue with table creation, data loading, etc.
         db.create_tables()
         db.load_data()
-        db.add_constraints()
+        db.add_all_constraints()
 
         logger.info("OMOP Lite database created successfully")
 
