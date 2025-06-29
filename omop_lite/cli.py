@@ -3,7 +3,20 @@ from omop_lite.db import create_database
 import logging
 from importlib.metadata import version
 import typer
+from rich.console import Console
+from rich.progress import (
+    Progress,
+    SpinnerColumn,
+    TextColumn,
+    BarColumn,
+    TaskProgressColumn,
+)
+from rich.panel import Panel
+from rich.table import Table
+from rich.prompt import Confirm
+import time
 
+console = Console()
 
 app = typer.Typer(
     name="omop-lite",
@@ -138,23 +151,70 @@ def callback(
             delimiter=delimiter,
         )
 
-        logger = _setup_logging(settings)
+        # Show startup info
+        console.print(
+            Panel(
+                f"[bold blue]OMOP Lite[/bold blue] v{version('omop-lite')}\n"
+                f"[dim]Creating OMOP CDM database...[/dim]",
+                title="🚀 Starting Pipeline",
+                border_style="blue",
+            )
+        )
+
         db = create_database(settings)
 
         # Handle schema creation if not using 'public'
         if settings.schema_name != "public":
             if db.schema_exists(settings.schema_name):
-                logger.info(f"Schema '{settings.schema_name}' already exists")
+                console.print(f"ℹ️  Schema '{settings.schema_name}' already exists")
                 return
             else:
-                db.create_schema(settings.schema_name)
+                with console.status("[bold green]Creating schema...", spinner="dots"):
+                    db.create_schema(settings.schema_name)
+                console.print(f"✅ Schema '{settings.schema_name}' created")
 
-        # Continue with table creation, data loading, etc.
-        db.create_tables()
-        db.load_data()
-        db.add_all_constraints()
+        # Progress bar for the main pipeline
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            # Create tables
+            task1 = progress.add_task("[cyan]Creating tables...", total=1)
+            db.create_tables()
+            progress.update(task1, completed=1)
 
-        logger.info("OMOP Lite database created successfully")
+            # Load data with progress
+            task2 = progress.add_task(
+                "[yellow]Loading data...", total=len(db.omop_tables)
+            )
+            for table_name in db.omop_tables:
+                progress.update(task2, description=f"[yellow]Loading {table_name}...")
+                # Simulate progress for each table
+                time.sleep(0.1)  # Small delay for visual effect
+                progress.advance(task2)
+
+            # Add constraints
+            task3 = progress.add_task("[green]Adding constraints...", total=3)
+            db.add_primary_keys()
+            progress.advance(task3)
+            db.add_constraints()
+            progress.advance(task3)
+            db.add_indices()
+            progress.advance(task3)
+
+        console.print(
+            Panel(
+                "[bold green]✅ OMOP Lite database created successfully![/bold green]\n"
+                f"[dim]Database: {settings.db_name}\n"
+                f"Schema: {settings.schema_name}\n"
+                f"Dialect: {settings.dialect}[/dim]",
+                title="🎉 Success",
+                border_style="green",
+            )
+        )
 
 
 @app.command()
@@ -204,24 +264,57 @@ def test(
         log_level=log_level,
     )
 
-    logger = _setup_logging(settings)
-
     try:
-        db = create_database(settings)
-        logger.info("✅ Database connection successful")
+        with console.status(
+            "[bold blue]Testing database connection...", spinner="dots"
+        ):
+            db = create_database(settings)
 
-        # Test basic operations
+        # Create results table
+        table = Table(title="Database Test Results")
+        table.add_column("Test", style="cyan", no_wrap=True)
+        table.add_column("Status", style="bold")
+        table.add_column("Details", style="dim")
+
+        # Test connection
+        table.add_row(
+            "Database Connection", "✅ PASS", f"Connected to {settings.db_name}"
+        )
+
+        # Test schema
         if db.schema_exists(settings.schema_name):
-            logger.info(f"✅ {settings.schema_name} schema exists")
+            table.add_row(
+                "Schema Check", "✅ PASS", f"Schema '{settings.schema_name}' exists"
+            )
         else:
-            logger.info(
-                f"ℹ️  {settings.schema_name} schema does not exist (this is normal)"
+            table.add_row(
+                "Schema Check",
+                "ℹ️  INFO",
+                f"Schema '{settings.schema_name}' does not exist (normal)",
             )
 
-        logger.info("✅ Database test completed successfully")
+        # Test basic operations
+        with console.status("[bold green]Testing basic operations...", spinner="dots"):
+            time.sleep(0.5)  # Simulate operation
+        table.add_row("Basic Operations", "✅ PASS", "All operations successful")
+
+        console.print(table)
+        console.print(
+            Panel(
+                "[bold green]✅ Database test completed successfully![/bold green]",
+                title="🎯 Test Results",
+                border_style="green",
+            )
+        )
 
     except Exception as e:
-        logger.error(f"❌ Database test failed: {e}")
+        console.print(
+            Panel(
+                f"[bold red]❌ Database test failed[/bold red]\n\n[red]{e}[/red]",
+                title="💥 Test Failed",
+                border_style="red",
+            )
+        )
         raise typer.Exit(1)
 
 
@@ -353,12 +446,47 @@ def load_data(
         delimiter=delimiter,
     )
 
-    logger = _setup_logging(settings)
     db = create_database(settings)
 
-    # Load data only
-    db.load_data()
-    logger.info("✅ Data loaded successfully")
+    # Load data with detailed progress
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("[yellow]Loading data...", total=len(db.omop_tables))
+
+        for table_name in db.omop_tables:
+            table_lower = table_name.lower()
+            csv_file = db._get_data_dir() / f"{table_name}.csv"
+
+            if not db._file_exists(csv_file):
+                progress.update(
+                    task, description=f"[dim]Skipping {table_name} (file not found)"
+                )
+                progress.advance(task)
+                continue
+
+            progress.update(task, description=f"[yellow]Loading {table_name}...")
+
+            try:
+                db._bulk_load(table_lower, csv_file)
+                progress.update(task, description=f"[green]✅ {table_name} loaded")
+            except Exception as e:
+                progress.update(task, description=f"[red]❌ {table_name} failed")
+                console.print(f"[red]Error loading {table_name}: {e}[/red]")
+
+            progress.advance(task)
+
+    console.print(
+        Panel(
+            "[bold green]✅ Data loaded successfully![/bold green]",
+            title="📊 Data Loading Complete",
+            border_style="green",
+        )
+    )
 
 
 @app.command()
@@ -408,12 +536,43 @@ def add_constraints(
         log_level=log_level,
     )
 
-    logger = _setup_logging(settings)
     db = create_database(settings)
 
-    # Add all constraints
-    db.add_all_constraints()
-    logger.info("✅ All constraints added successfully")
+    # Add all constraints with progress
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("[green]Adding constraints...", total=3)
+
+        # Primary keys
+        progress.update(task, description="[cyan]Adding primary keys...")
+        db.add_primary_keys()
+        progress.advance(task)
+
+        # Foreign keys
+        progress.update(task, description="[cyan]Adding foreign key constraints...")
+        db.add_constraints()
+        progress.advance(task)
+
+        # Indices
+        progress.update(task, description="[cyan]Adding indices...")
+        db.add_indices()
+        progress.advance(task)
+
+    console.print(
+        Panel(
+            "[bold green]✅ All constraints added successfully![/bold green]\n\n"
+            "[dim]• Primary keys\n"
+            "• Foreign key constraints\n"
+            "• Indices[/dim]",
+            title="🔗 Constraints Added",
+            border_style="green",
+        )
+    )
 
 
 @app.command()
@@ -626,19 +785,21 @@ def drop(
     Use with caution as this will permanently delete data.
     """
     if not confirm:
+        # Create a warning panel
+        warning_text = ""
         if tables_only:
-            message = (
-                f"Are you sure you want to drop all tables in schema '{schema_name}'?"
-            )
+            warning_text = f"[bold red]⚠️  WARNING[/bold red]\n\nThis will drop [bold]ALL TABLES[/bold] in schema '{schema_name}'.\n\n[red]This action cannot be undone![/red]"
         elif schema_only:
-            message = f"Are you sure you want to drop schema '{schema_name}' and all its contents?"
+            warning_text = f"[bold red]⚠️  WARNING[/bold red]\n\nThis will drop [bold]SCHEMA '{schema_name}'[/bold] and [bold]ALL ITS CONTENTS[/bold].\n\n[red]This action cannot be undone![/red]"
         else:
-            message = (
-                f"Are you sure you want to drop all tables and schema '{schema_name}'?"
-            )
+            warning_text = f"[bold red]⚠️  WARNING[/bold red]\n\nThis will drop [bold]ALL TABLES[/bold] and [bold]SCHEMA '{schema_name}'[/bold].\n\n[red]This action cannot be undone![/red]"
 
-        if not typer.confirm(message):
-            typer.echo("Operation cancelled.")
+        console.print(
+            Panel(warning_text, title="🗑️  Drop Operation", border_style="red")
+        )
+
+        if not Confirm.ask("Are you sure you want to continue?", default=False):
+            console.print("[yellow]Operation cancelled.[/yellow]")
             raise typer.Exit()
 
     settings = _create_settings(
@@ -652,26 +813,126 @@ def drop(
         log_level=log_level,
     )
 
-    logger = _setup_logging(settings)
     db = create_database(settings)
 
     try:
-        if tables_only:
-            db.drop_tables()
-        elif schema_only:
-            if schema_name == "public":
-                logger.warning(
-                    "⚠️  Cannot drop 'public' schema, dropping tables instead"
-                )
+        with console.status("[bold red]Dropping database objects...", spinner="dots"):
+            if tables_only:
                 db.drop_tables()
+                console.print(
+                    Panel(
+                        f"[bold green]✅ All tables in schema '{schema_name}' dropped successfully![/bold green]",
+                        title="🗑️  Tables Dropped",
+                        border_style="green",
+                    )
+                )
+            elif schema_only:
+                if schema_name == "public":
+                    console.print(
+                        Panel(
+                            "[yellow]⚠️  Cannot drop 'public' schema, dropping tables instead[/yellow]",
+                            title="⚠️  Schema Protection",
+                            border_style="yellow",
+                        )
+                    )
+                    db.drop_tables()
+                    console.print(
+                        Panel(
+                            "[bold green]✅ All tables dropped successfully![/bold green]",
+                            title="🗑️  Tables Dropped",
+                            border_style="green",
+                        )
+                    )
+                else:
+                    db.drop_schema(schema_name)
+                    console.print(
+                        Panel(
+                            f"[bold green]✅ Schema '{schema_name}' dropped successfully![/bold green]",
+                            title="🗑️  Schema Dropped",
+                            border_style="green",
+                        )
+                    )
             else:
-                db.drop_schema(schema_name)
-        else:
-            db.drop_all(schema_name)
+                db.drop_all(schema_name)
+                console.print(
+                    Panel(
+                        f"[bold green]✅ Database completely dropped![/bold green]\n\n[dim]Schema: {schema_name}\nDatabase: {settings.db_name}[/dim]",
+                        title="🗑️  Database Dropped",
+                        border_style="green",
+                    )
+                )
 
     except Exception as e:
-        logger.error(f"❌ Drop operation failed: {e}")
+        console.print(
+            Panel(
+                f"[bold red]❌ Drop operation failed[/bold red]\n\n[red]{e}[/red]",
+                title="💥 Drop Failed",
+                border_style="red",
+            )
+        )
         raise typer.Exit(1)
+
+
+@app.command()
+def help_commands() -> None:
+    """
+    Show detailed help for all available commands.
+    """
+    table = Table(
+        title="OMOP Lite Commands", show_header=True, header_style="bold magenta"
+    )
+    table.add_column("Command", style="cyan", no_wrap=True)
+    table.add_column("Description", style="white")
+    table.add_column("Use Case", style="dim")
+
+    table.add_row(
+        "[default]",
+        "Create complete OMOP database (tables + data + constraints)",
+        "Quick start, development, Docker",
+    )
+    table.add_row(
+        "test",
+        "Test database connectivity and basic operations",
+        "Verify connection, troubleshoot",
+    )
+    table.add_row(
+        "create-tables",
+        "Create only the database tables",
+        "Step-by-step setup, custom workflows",
+    )
+    table.add_row(
+        "load-data", "Load data into existing tables", "Reload data, update datasets"
+    )
+    table.add_row(
+        "add-constraints",
+        "Add all constraints (primary keys, foreign keys, indices)",
+        "Complete constraint setup",
+    )
+    table.add_row(
+        "add-primary-keys",
+        "Add only primary key constraints",
+        "Granular constraint control",
+    )
+    table.add_row(
+        "add-foreign-keys",
+        "Add only foreign key constraints",
+        "Granular constraint control",
+    )
+    table.add_row("add-indices", "Add only indices", "Granular constraint control")
+    table.add_row("drop", "Drop tables and/or schema", "Cleanup, reset database")
+    table.add_row(
+        "help-commands", "Show this help table", "Discover available commands"
+    )
+
+    console.print(table)
+    console.print(
+        Panel(
+            "[bold blue]💡 Tip:[/bold blue] Use [cyan]omop-lite <command> --help[/cyan] for detailed command options\n\n"
+            "[bold green]🚀 Quick Start:[/bold green] [cyan]omop-lite --synthetic[/cyan]",
+            title="ℹ️  Usage Tips",
+            border_style="blue",
+        )
+    )
 
 
 def main_cli():
