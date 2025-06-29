@@ -9,6 +9,7 @@ app = typer.Typer(
     name="omop-lite",
     help="Get an OMOP CDM database running quickly.",
     add_completion=False,
+    no_args_is_help=False,
 )
 
 
@@ -58,8 +59,9 @@ def _setup_logging(settings: Settings) -> logging.Logger:
     return logger
 
 
-@app.command()
-def main(
+@app.callback(invoke_without_command=True)
+def callback(
+    ctx: typer.Context,
     db_host: str = typer.Option(
         "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
     ),
@@ -118,39 +120,41 @@ def main(
     All settings can be configured via environment variables or command-line arguments.
     Command-line arguments take precedence over environment variables.
     """
-    settings = _create_settings(
-        db_host=db_host,
-        db_port=db_port,
-        db_user=db_user,
-        db_password=db_password,
-        db_name=db_name,
-        synthetic=synthetic,
-        synthetic_number=synthetic_number,
-        data_dir=data_dir,
-        schema_name=schema_name,
-        dialect=dialect,
-        log_level=log_level,
-        fts_create=fts_create,
-        delimiter=delimiter,
-    )
+    if ctx.invoked_subcommand is None:
+        # This is the default command (no subcommand specified)
+        settings = _create_settings(
+            db_host=db_host,
+            db_port=db_port,
+            db_user=db_user,
+            db_password=db_password,
+            db_name=db_name,
+            synthetic=synthetic,
+            synthetic_number=synthetic_number,
+            data_dir=data_dir,
+            schema_name=schema_name,
+            dialect=dialect,
+            log_level=log_level,
+            fts_create=fts_create,
+            delimiter=delimiter,
+        )
 
-    logger = _setup_logging(settings)
-    db = create_database(settings)
+        logger = _setup_logging(settings)
+        db = create_database(settings)
 
-    # Handle schema creation if not using 'public'
-    if settings.schema_name != "public":
-        if db.schema_exists(settings.schema_name):
-            logger.info(f"Schema '{settings.schema_name}' already exists")
-            return
-        else:
-            db.create_schema(settings.schema_name)
+        # Handle schema creation if not using 'public'
+        if settings.schema_name != "public":
+            if db.schema_exists(settings.schema_name):
+                logger.info(f"Schema '{settings.schema_name}' already exists")
+                return
+            else:
+                db.create_schema(settings.schema_name)
 
-    # Continue with table creation, data loading, etc.
-    db.create_tables()
-    db.load_data()
-    db.add_constraints()
+        # Continue with table creation, data loading, etc.
+        db.create_tables()
+        db.load_data()
+        db.add_constraints()
 
-    logger.info("OMOP Lite database created successfully")
+        logger.info("OMOP Lite database created successfully")
 
 
 @app.command()
