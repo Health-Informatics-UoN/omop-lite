@@ -6,6 +6,7 @@ import logging
 from importlib.resources import files
 from importlib.abc import Traversable
 from omop_lite.settings import Settings
+from sqlalchemy.sql import text
 
 logger = logging.getLogger(__name__)
 
@@ -42,6 +43,11 @@ class Database(ABC):
             "VISIT_OCCURRENCE",
             "VOCABULARY",
         ]
+
+    @property
+    def dialect(self) -> str:
+        """Get the database dialect."""
+        return self.settings.dialect
 
     @abstractmethod
     def create_schema(self, schema_name: str) -> None:
@@ -96,6 +102,40 @@ class Database(ABC):
         self.add_primary_keys()
         self.add_constraints()
         self.add_indices()
+
+    def drop_tables(self) -> None:
+        """Drop all tables in the database."""
+        if not self.metadata or not self.engine:
+            raise RuntimeError("Database not properly initialized")
+
+        # Drop all tables in reverse dependency order
+        self.metadata.drop_all(bind=self.engine)
+        logger.info("✅ All tables dropped successfully")
+
+    def drop_schema(self, schema_name: str) -> None:
+        """Drop a schema and all its contents."""
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+
+        with self.engine.connect() as connection:
+            if self.dialect == "postgresql":
+                connection.execute(
+                    text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE')
+                )
+            else:  # SQL Server
+                connection.execute(text(f"DROP SCHEMA IF EXISTS [{schema_name}]"))
+            connection.commit()
+            logger.info(f"✅ Schema '{schema_name}' dropped successfully")
+
+    def drop_all(self, schema_name: str) -> None:
+        """Drop everything: tables and schema.
+
+        This is a convenience method that drops tables first, then the schema.
+        """
+        self.drop_tables()
+        if schema_name != "public":
+            self.drop_schema(schema_name)
+        logger.info("✅ Database completely dropped")
 
     def load_data(self) -> None:
         """Load data into tables."""

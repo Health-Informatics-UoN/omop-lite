@@ -582,6 +582,98 @@ def add_indices(
     logger.info("✅ Indices added successfully")
 
 
+@app.command()
+def drop(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+    tables_only: bool = typer.Option(
+        False, "--tables-only", help="Drop only tables, not the schema"
+    ),
+    schema_only: bool = typer.Option(
+        False, "--schema-only", help="Drop only the schema (and all its contents)"
+    ),
+    confirm: bool = typer.Option(False, "--confirm", help="Skip confirmation prompt"),
+) -> None:
+    """
+    Drop tables and/or schema from the database.
+
+    This command can drop tables, schema, or everything.
+    Use with caution as this will permanently delete data.
+    """
+    if not confirm:
+        if tables_only:
+            message = (
+                f"Are you sure you want to drop all tables in schema '{schema_name}'?"
+            )
+        elif schema_only:
+            message = f"Are you sure you want to drop schema '{schema_name}' and all its contents?"
+        else:
+            message = (
+                f"Are you sure you want to drop all tables and schema '{schema_name}'?"
+            )
+
+        if not typer.confirm(message):
+            typer.echo("Operation cancelled.")
+            raise typer.Exit()
+
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    try:
+        if tables_only:
+            db.drop_tables()
+        elif schema_only:
+            if schema_name == "public":
+                logger.warning(
+                    "⚠️  Cannot drop 'public' schema, dropping tables instead"
+                )
+                db.drop_tables()
+            else:
+                db.drop_schema(schema_name)
+        else:
+            db.drop_all(schema_name)
+
+    except Exception as e:
+        logger.error(f"❌ Drop operation failed: {e}")
+        raise typer.Exit(1)
+
+
 def main_cli():
     """Entry point for the CLI."""
     app()
