@@ -94,6 +94,10 @@ Install with custom values:
 helm install omop-lite omop-lite/omop-lite -f values.yaml
 ```
 
+### CLI
+
+`uv run omop-lite --help`
+
 #### Using Your Own Data
 
 To use your own data with the Helm chart:
