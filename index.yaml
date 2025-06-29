@@ -2,6 +2,17 @@ apiVersion: v1
 entries:
   omop-lite:
   - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-06-29T19:29:04.747664789Z"
+    description: A Helm chart for deploying OMOP Lite as a Kubernetes Job to create
+      OMOP CDM
+    digest: e43969ba1a4867bda358c75e55f8d10f41dd829cd75e06821e09ddaf266a50b8
+    name: omop-lite
+    type: application
+    urls:
+    - https://github.com/Health-Informatics-UoN/omop-lite/releases/download/omop-lite-0.2.0/omop-lite-0.2.0.tgz
+    version: 0.2.0
+  - apiVersion: v2
     appVersion: 0.0.18
     created: "2025-06-26T16:24:51.170819915Z"
     description: A Helm chart for deploying OMOP Lite as a Kubernetes Job to create
@@ -111,4 +122,4 @@ entries:
     urls:
     - omop-lite-0.1.0.tgz
     version: 0.1.0
-generated: "2025-06-26T16:24:51.170852927Z"
+generated: "2025-06-29T19:29:04.747709984Z"
