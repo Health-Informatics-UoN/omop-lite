@@ -174,6 +174,9 @@ def test(
     db_name: str = typer.Option(
         "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
     ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
     dialect: str = typer.Option(
         "postgresql",
         "--dialect",
@@ -196,6 +199,7 @@ def test(
         db_user=db_user,
         db_password=db_password,
         db_name=db_name,
+        schema_name=schema_name,
         dialect=dialect,
         log_level=log_level,
     )
@@ -207,10 +211,12 @@ def test(
         logger.info("✅ Database connection successful")
 
         # Test basic operations
-        if db.schema_exists("public"):
-            logger.info("✅ Public schema exists")
+        if db.schema_exists(settings.schema_name):
+            logger.info(f"✅ {settings.schema_name} schema exists")
         else:
-            logger.info("ℹ️  Public schema does not exist (this is normal)")
+            logger.info(
+                f"ℹ️  {settings.schema_name} schema does not exist (this is normal)"
+            )
 
         logger.info("✅ Database test completed successfully")
 
