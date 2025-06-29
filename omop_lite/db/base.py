@@ -5,7 +5,7 @@ from typing import Union, Optional
 import logging
 from importlib.resources import files
 from importlib.abc import Traversable
-from omop_lite.settings import settings
+from omop_lite.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -13,7 +13,8 @@ logger = logging.getLogger(__name__)
 class Database(ABC):
     """Abstract base class for database operations"""
 
-    def __init__(self) -> None:
+    def __init__(self, settings: Settings) -> None:
+        self.settings = settings
         self.engine: Optional[Engine] = None
         self.metadata: Optional[MetaData] = None
         self.file_path: Optional[Union[Path, Traversable]] = None
@@ -111,11 +112,11 @@ class Database(ABC):
         Common implementation for all databases.
         """
 
-        if settings.synthetic:
-            if settings.synthetic_number == 1000:
+        if self.settings.synthetic:
+            if self.settings.synthetic_number == 1000:
                 return files("omop_lite.synthetic.1000")
             return files("omop_lite.synthetic.100")
-        data_dir = Path(settings.data_dir)
+        data_dir = Path(self.settings.data_dir)
         if not data_dir.exists():
             raise FileNotFoundError(f"Data directory {data_dir} does not exist")
         return data_dir
@@ -131,20 +132,20 @@ class Database(ABC):
 
         This is used to determine the delimiter for the COPY command.
         """
-        if settings.synthetic:
-            if settings.synthetic_number == 1000:
+        if self.settings.synthetic:
+            if self.settings.synthetic_number == 1000:
                 return ","
-            return settings.delimiter
+            return self.settings.delimiter
         else:
-            return settings.delimiter
+            return self.settings.delimiter
         
     def _get_quote(self) -> str:
         """
         Return the quote based on the dialect.
         Common implementation for all databases.
         """
-        if settings.synthetic:
-            if settings.synthetic_number == 1000:
+        if self.settings.synthetic:
+            if self.settings.synthetic_number == 1000:
                 return '"'
         return '\b'
 
@@ -157,7 +158,7 @@ class Database(ABC):
             file_path = str(file_path)
 
         with open(file_path, "r") as f:
-            sql = f.read().replace("@cdmDatabaseSchema", settings.schema_name)
+            sql = f.read().replace("@cdmDatabaseSchema", self.settings.schema_name)
 
         if not self.engine:
             raise RuntimeError("Database engine not initialized")

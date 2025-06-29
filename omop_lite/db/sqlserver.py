@@ -3,7 +3,7 @@ from sqlalchemy import create_engine, MetaData, text
 from importlib.resources import files
 import logging
 from .base import Database
-from omop_lite.settings import settings
+from omop_lite.settings import Settings
 from typing import Union
 from pathlib import Path
 from importlib.abc import Traversable
@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class SQLServerDatabase(Database):
-    def __init__(self) -> None:
-        super().__init__()
+    def __init__(self, settings: Settings) -> None:
+        super().__init__(settings)
         self.db_url = f"mssql+pyodbc://{settings.db_user}:{settings.db_password}@{settings.db_host}:{settings.db_port}/{settings.db_name}?driver=ODBC+Driver+18+for+SQL+Server&TrustServerCertificate=yes"
         self.engine = create_engine(self.db_url)
         self.metadata = MetaData(schema=settings.schema_name)
@@ -40,7 +40,7 @@ class SQLServerDatabase(Database):
 
             columns = ", ".join(f"[{col}]" for col in headers)
             placeholders = ", ".join(["?" for _ in headers])
-            insert_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
+            insert_sql = f"INSERT INTO {self.settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
 
             conn = self.engine.raw_connection()
             try:
