@@ -186,24 +186,15 @@ def callback(
             db.create_tables()
             progress.update(task1, completed=1)
 
-            # Load data with progress
-            task2 = progress.add_task(
-                "[yellow]Loading data...", total=len(db.omop_tables)
-            )
-            for table_name in db.omop_tables:
-                progress.update(task2, description=f"[yellow]Loading {table_name}...")
-                # Simulate progress for each table
-                time.sleep(0.1)  # Small delay for visual effect
-                progress.advance(task2)
+            # Load data
+            task2 = progress.add_task("[yellow]Loading data...", total=1)
+            db.load_data()
+            progress.update(task2, completed=1)
 
             # Add constraints
-            task3 = progress.add_task("[green]Adding constraints...", total=3)
-            db.add_primary_keys()
-            progress.advance(task3)
-            db.add_constraints()
-            progress.advance(task3)
-            db.add_indices()
-            progress.advance(task3)
+            task3 = progress.add_task("[green]Adding constraints...", total=1)
+            db.add_all_constraints()
+            progress.update(task3, completed=1)
 
         console.print(
             Panel(
@@ -448,7 +439,7 @@ def load_data(
 
     db = create_database(settings)
 
-    # Load data with detailed progress
+    # Load data with progress
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
@@ -456,29 +447,9 @@ def load_data(
         TaskProgressColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("[yellow]Loading data...", total=len(db.omop_tables))
-
-        for table_name in db.omop_tables:
-            table_lower = table_name.lower()
-            csv_file = db._get_data_dir() / f"{table_name}.csv"
-
-            if not db._file_exists(csv_file):
-                progress.update(
-                    task, description=f"[dim]Skipping {table_name} (file not found)"
-                )
-                progress.advance(task)
-                continue
-
-            progress.update(task, description=f"[yellow]Loading {table_name}...")
-
-            try:
-                db._bulk_load(table_lower, csv_file)
-                progress.update(task, description=f"[green]✅ {table_name} loaded")
-            except Exception as e:
-                progress.update(task, description=f"[red]❌ {table_name} failed")
-                console.print(f"[red]Error loading {table_name}: {e}[/red]")
-
-            progress.advance(task)
+        task = progress.add_task("[yellow]Loading data...", total=1)
+        db.load_data()
+        progress.update(task, completed=1)
 
     console.print(
         Panel(
