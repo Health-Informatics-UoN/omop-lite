@@ -225,6 +225,363 @@ def test(
         raise typer.Exit(1)
 
 
+@app.command()
+def create_tables(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+) -> None:
+    """
+    Create only the database tables.
+
+    This command creates the schema (if needed) and the tables,
+    but does not load data or add constraints.
+    """
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    # Handle schema creation if not using 'public'
+    if settings.schema_name != "public":
+        if db.schema_exists(settings.schema_name):
+            logger.info(f"Schema '{settings.schema_name}' already exists")
+        else:
+            db.create_schema(settings.schema_name)
+
+    # Create tables only
+    db.create_tables()
+    logger.info("✅ Tables created successfully")
+
+
+@app.command()
+def load_data(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    synthetic: bool = typer.Option(
+        False, "--synthetic", envvar="SYNTHETIC", help="Use synthetic data"
+    ),
+    synthetic_number: int = typer.Option(
+        100,
+        "--synthetic-number",
+        envvar="SYNTHETIC_NUMBER",
+        help="Number of synthetic records",
+    ),
+    data_dir: str = typer.Option(
+        "data", "--data-dir", envvar="DATA_DIR", help="Data directory"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+    delimiter: str = typer.Option(
+        "\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"
+    ),
+) -> None:
+    """
+    Load data into existing tables.
+
+    This command loads data into tables that must already exist.
+    Use create-tables first if tables don't exist.
+    """
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        synthetic=synthetic,
+        synthetic_number=synthetic_number,
+        data_dir=data_dir,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+        delimiter=delimiter,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    # Load data only
+    db.load_data()
+    logger.info("✅ Data loaded successfully")
+
+
+@app.command()
+def add_constraints(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+) -> None:
+    """
+    Add all constraints (primary keys, foreign keys, and indices).
+
+    This command adds all types of constraints to existing tables.
+    Tables must exist and should have data loaded.
+    """
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    # Add all constraints
+    db.add_all_constraints()
+    logger.info("✅ All constraints added successfully")
+
+
+@app.command()
+def add_primary_keys(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+) -> None:
+    """
+    Add only primary keys to existing tables.
+
+    This command adds primary key constraints to existing tables.
+    Tables must exist and should have data loaded.
+    """
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    # Add primary keys only
+    db.add_primary_keys()
+    logger.info("✅ Primary keys added successfully")
+
+
+@app.command()
+def add_foreign_keys(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+) -> None:
+    """
+    Add only foreign key constraints to existing tables.
+
+    This command adds foreign key constraints to existing tables.
+    Tables must exist and should have data loaded.
+    Primary keys should be added first.
+    """
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    # Add foreign key constraints only
+    db.add_constraints()
+    logger.info("✅ Foreign key constraints added successfully")
+
+
+@app.command()
+def add_indices(
+    db_host: str = typer.Option(
+        "db", "--db-host", "-h", envvar="DB_HOST", help="Database host"
+    ),
+    db_port: int = typer.Option(
+        5432, "--db-port", "-p", envvar="DB_PORT", help="Database port"
+    ),
+    db_user: str = typer.Option(
+        "postgres", "--db-user", "-u", envvar="DB_USER", help="Database user"
+    ),
+    db_password: str = typer.Option(
+        "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
+    ),
+    db_name: str = typer.Option(
+        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+    ),
+    schema_name: str = typer.Option(
+        "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
+    ),
+    dialect: str = typer.Option(
+        "postgresql",
+        "--dialect",
+        envvar="DIALECT",
+        help="Database dialect (postgresql or mssql)",
+    ),
+    log_level: str = typer.Option(
+        "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
+    ),
+) -> None:
+    """
+    Add only indices to existing tables.
+
+    This command adds indices to existing tables.
+    Tables must exist and should have data loaded.
+    """
+    settings = _create_settings(
+        db_host=db_host,
+        db_port=db_port,
+        db_user=db_user,
+        db_password=db_password,
+        db_name=db_name,
+        schema_name=schema_name,
+        dialect=dialect,
+        log_level=log_level,
+    )
+
+    logger = _setup_logging(settings)
+    db = create_database(settings)
+
+    # Add indices only
+    db.add_indices()
+    logger.info("✅ Indices added successfully")
+
+
 def main_cli():
     """Entry point for the CLI."""
     app()
