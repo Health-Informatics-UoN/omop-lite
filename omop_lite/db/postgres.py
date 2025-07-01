@@ -23,7 +23,7 @@ class PostgresDatabase(Database):
         if not self.engine:
             raise RuntimeError("Database engine not initialized")
         with self.engine.connect() as connection:
-            connection.execute(text(f'CREATE SCHEMA "{schema_name}"'))
+            connection.execute(text(f'CREATE SCHEMA IF NOT EXISTS "{schema_name}"'))
             logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
