@@ -2,13 +2,14 @@ import pytest
 from sqlalchemy import inspect, text
 
 from omop_lite.db.postgres import PostgresDatabase
+from omop_lite.db.sqlserver import SQLServerDatabase
 from omop_lite.settings import Settings
 
 
 @pytest.fixture
-def test_db(integration_settings):
+def test_db(integration_settings, db_class):
     """Create a test database connection."""
-    db = PostgresDatabase(integration_settings)
+    db = db_class(integration_settings)
     yield db
     try:
         db.drop_all(integration_settings.schema_name)
@@ -16,9 +17,8 @@ def test_db(integration_settings):
         pass
 
 
-def test_create_schema_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_create_schema_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for schema creation."""
     # Arrange
     assert not test_db.schema_exists(integration_settings.schema_name)
@@ -33,9 +33,8 @@ def test_create_schema_integration(
     assert integration_settings.schema_name in schemas
 
 
-def test_create_tables_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_create_tables_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for table creation."""
     # Arrange
     test_db.create_schema(integration_settings.schema_name)
@@ -98,8 +97,9 @@ def test_create_tables_integration(
         assert col in person_column_names, f"Column {col} missing from person table"
 
 
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
 def test_add_primary_keys_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
+    test_db, integration_settings: Settings, db_class
 ):
     """Integration test for adding primary keys."""
     # Arrange
@@ -111,14 +111,24 @@ def test_add_primary_keys_integration(
 
     # Assert
     with test_db.engine.connect() as conn:
-        result = conn.execute(
-            text(f"""
-            SELECT COUNT(*) 
-            FROM information_schema.table_constraints 
-            WHERE constraint_type = 'PRIMARY KEY' 
-            AND table_schema = '{integration_settings.schema_name}'
-        """)
-        )
+        if db_class == PostgresDatabase:
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM information_schema.table_constraints 
+                WHERE constraint_type = 'PRIMARY KEY' 
+                AND table_schema = '{integration_settings.schema_name}'
+            """)
+            )
+        else:  # SQL Server
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM information_schema.table_constraints 
+                WHERE constraint_type = 'PRIMARY KEY' 
+                AND table_schema = '{integration_settings.schema_name}'
+            """)
+            )
         pk_count = result.scalar()
         assert pk_count > 0, "Should have primary key constraints"
 
@@ -137,9 +147,8 @@ def test_add_primary_keys_integration(
             assert pk_exists == 1, f"Table {table} should have exactly one primary key"
 
 
-def test_add_indices_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_add_indices_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for adding indices."""
     # Arrange
     test_db.create_schema(integration_settings.schema_name)
@@ -150,44 +159,56 @@ def test_add_indices_integration(
 
     # Assert
     with test_db.engine.connect() as conn:
-        result = conn.execute(
-            text(f"""
-            SELECT COUNT(*) 
-            FROM pg_indexes 
-            WHERE schemaname = '{integration_settings.schema_name}'
-        """)
-        )
-        index_count = result.scalar()
-        assert index_count > 0, "Should have indices"
-
-        key_indices = [
-            ("person", "idx_person_id"),
-            ("person", "idx_gender"),
-            ("condition_occurrence", "idx_condition_person_id_1"),
-            ("drug_exposure", "idx_drug_person_id_1"),
-            ("measurement", "idx_measurement_person_id_1"),
-            ("concept", "idx_concept_concept_id"),
-        ]
-
-        for table, index_name in key_indices:
+        if db_class == PostgresDatabase:
             result = conn.execute(
                 text(f"""
                 SELECT COUNT(*) 
                 FROM pg_indexes 
                 WHERE schemaname = '{integration_settings.schema_name}'
-                AND tablename = '{table}'
-                AND indexname = '{index_name}'
             """)
             )
-            index_exists = result.scalar()
-            assert (
-                index_exists == 1
-            ), f"Index {index_name} should exist on table {table}"
+        else:  # SQL Server
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM sys.indexes i
+                JOIN sys.tables t ON i.object_id = t.object_id
+                JOIN sys.schemas s ON t.schema_id = s.schema_id
+                WHERE s.name = '{integration_settings.schema_name}'
+                AND i.is_hypothetical = 0
+            """)
+            )
+        index_count = result.scalar()
+        assert index_count > 0, "Should have indices"
+
+        if db_class == PostgresDatabase:
+            key_indices = [
+                ("person", "idx_person_id"),
+                ("person", "idx_gender"),
+                ("condition_occurrence", "idx_condition_person_id_1"),
+                ("drug_exposure", "idx_drug_person_id_1"),
+                ("measurement", "idx_measurement_person_id_1"),
+                ("concept", "idx_concept_concept_id"),
+            ]
+
+            for table, index_name in key_indices:
+                result = conn.execute(
+                    text(f"""
+                    SELECT COUNT(*) 
+                    FROM pg_indexes 
+                    WHERE schemaname = '{integration_settings.schema_name}'
+                    AND tablename = '{table}'
+                    AND indexname = '{index_name}'
+                """)
+                )
+                index_exists = result.scalar()
+                assert (
+                    index_exists == 1
+                ), f"Index {index_name} should exist on table {table}"
 
 
-def test_add_constraints_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_add_constraints_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for adding foreign key constraints."""
     # Arrange
     test_db.create_schema(integration_settings.schema_name)
@@ -235,8 +256,9 @@ def test_add_constraints_integration(
             ), f"Foreign key {constraint_name} should exist on table {table}"
 
 
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
 def test_add_all_constraints_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
+    test_db, integration_settings: Settings, db_class
 ):
     """Integration test for adding all constraints (primary keys, indices, foreign keys)."""
     # Arrange
@@ -270,13 +292,25 @@ def test_add_all_constraints_integration(
         fk_count = result.scalar()
         assert fk_count > 0, "Should have foreign key constraints"
 
-        result = conn.execute(
-            text(f"""
-            SELECT COUNT(*) 
-            FROM pg_indexes 
-            WHERE schemaname = '{integration_settings.schema_name}'
-        """)
-        )
+        if db_class == PostgresDatabase:
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM pg_indexes 
+                WHERE schemaname = '{integration_settings.schema_name}'
+            """)
+            )
+        else:  # SQL Server
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM sys.indexes i
+                JOIN sys.tables t ON i.object_id = t.object_id
+                JOIN sys.schemas s ON t.schema_id = s.schema_id
+                WHERE s.name = '{integration_settings.schema_name}'
+                AND i.is_hypothetical = 0
+            """)
+            )
         index_count = result.scalar()
         assert index_count > 0, "Should have indices"
 
@@ -285,8 +319,9 @@ def test_add_all_constraints_integration(
         assert index_count >= 50, f"Expected at least 50 indices, got {index_count}"
 
 
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
 def test_load_synthetic_data_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
+    test_db, integration_settings: Settings, db_class
 ):
     """Integration test for loading synthetic data."""
     # Arrange
@@ -355,8 +390,9 @@ def test_load_synthetic_data_integration(
         assert relationship_count > 0, "Relationship table should have data"
 
 
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
 def test_load_synthetic_data_sample_verification(
-    test_db: PostgresDatabase, integration_settings: Settings
+    test_db, integration_settings: Settings, db_class
 ):
     """Integration test to verify sample data quality."""
     # Arrange
@@ -405,9 +441,8 @@ def test_load_synthetic_data_sample_verification(
             assert concept.domain_id is not None, "Domain ID should not be null"
 
 
-def test_full_pipeline_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_full_pipeline_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for the full pipeline: schema, tables, data, constraints."""
     # Arrange
     integration_settings.synthetic = True
@@ -438,19 +473,43 @@ def test_full_pipeline_integration(
         pk_count = result.scalar()
         assert pk_count > 0, "Should have primary key constraints"
 
-        result = conn.execute(
-            text(f"""
-            SELECT COUNT(*) 
-            FROM pg_indexes 
-            WHERE schemaname = '{integration_settings.schema_name}'
-        """)
-        )
+        if db_class == PostgresDatabase:
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM pg_indexes 
+                WHERE schemaname = '{integration_settings.schema_name}'
+            """)
+            )
+        else:  # SQL Server
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM sys.indexes i
+                JOIN sys.tables t ON i.object_id = t.object_id
+                JOIN sys.schemas s ON t.schema_id = s.schema_id
+                WHERE s.name = '{integration_settings.schema_name}'
+                AND i.is_hypothetical = 0
+            """)
+            )
         index_count = result.scalar()
         assert index_count > 0, "Should have indexes"
 
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM information_schema.table_constraints 
+            WHERE constraint_type = 'FOREIGN KEY' 
+            AND table_schema = '{integration_settings.schema_name}'
+        """)
+        )
+        fk_count = result.scalar()
+        assert fk_count > 0, "Should have foreign key constraints"
 
+
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
 def test_create_tables_twice_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
+    test_db, integration_settings: Settings, db_class
 ):
     """Test that creating tables twice doesn't fail."""
     # Arrange
@@ -466,9 +525,8 @@ def test_create_tables_twice_integration(
     assert len(tables) == 39
 
 
-def test_drop_schema_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_drop_schema_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for schema dropping."""
     # Arrange
     test_db.create_schema(integration_settings.schema_name)
@@ -484,9 +542,8 @@ def test_drop_schema_integration(
     assert integration_settings.schema_name not in schemas
 
 
-def test_schema_exists_integration(
-    test_db: PostgresDatabase, integration_settings: Settings
-):
+@pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
+def test_schema_exists_integration(test_db, integration_settings: Settings, db_class):
     """Integration test for schema existence checking."""
     # Arrange & Act & Assert
     assert not test_db.schema_exists("non_existent_schema")
