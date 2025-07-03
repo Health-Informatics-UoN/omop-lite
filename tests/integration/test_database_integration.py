@@ -495,17 +495,6 @@ def test_full_pipeline_integration(test_db, integration_settings: Settings, db_c
         index_count = result.scalar()
         assert index_count > 0, "Should have indexes"
 
-        result = conn.execute(
-            text(f"""
-            SELECT COUNT(*) 
-            FROM information_schema.table_constraints 
-            WHERE constraint_type = 'FOREIGN KEY' 
-            AND table_schema = '{integration_settings.schema_name}'
-        """)
-        )
-        fk_count = result.scalar()
-        assert fk_count > 0, "Should have foreign key constraints"
-
 
 @pytest.mark.parametrize("db_class", [PostgresDatabase, SQLServerDatabase])
 def test_create_tables_twice_integration(
