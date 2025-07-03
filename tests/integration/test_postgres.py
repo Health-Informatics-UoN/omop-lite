@@ -2,6 +2,7 @@ import pytest
 from sqlalchemy import inspect, text
 
 from omop_lite.db.postgres import PostgresDatabase
+from omop_lite.settings import Settings
 
 
 @pytest.fixture
@@ -21,7 +22,9 @@ def test_db(integration_settings):
         pass
 
 
-def test_create_schema_integration(test_db, integration_settings):
+def test_create_schema_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
     """Integration test for schema creation."""
     # Test that schema doesn't exist initially
     assert not test_db.schema_exists(integration_settings.schema_name)
@@ -38,7 +41,9 @@ def test_create_schema_integration(test_db, integration_settings):
     assert integration_settings.schema_name in schemas
 
 
-def test_create_tables_integration(test_db, integration_settings):
+def test_create_tables_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
     """Integration test for table creation."""
     # Create schema first
     test_db.create_schema(integration_settings.schema_name)
@@ -104,7 +109,206 @@ def test_create_tables_integration(test_db, integration_settings):
         assert col in person_column_names, f"Column {col} missing from person table"
 
 
-def test_load_synthetic_data_integration(test_db, integration_settings):
+def test_add_primary_keys_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
+    """Integration test for adding primary keys."""
+    # Create schema and tables
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+
+    # Add primary keys
+    test_db.add_primary_keys()
+
+    # Verify primary keys were added
+    with test_db.engine.connect() as conn:
+        # Check that primary key constraints exist
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM information_schema.table_constraints 
+            WHERE constraint_type = 'PRIMARY KEY' 
+            AND table_schema = '{integration_settings.schema_name}'
+        """)
+        )
+        pk_count = result.scalar()
+        assert pk_count > 0, "Should have primary key constraints"
+
+        # Check specific primary keys for key tables
+        key_tables = ["person", "concept", "condition_occurrence", "drug_exposure"]
+        for table in key_tables:
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM information_schema.table_constraints 
+                WHERE constraint_type = 'PRIMARY KEY' 
+                AND table_schema = '{integration_settings.schema_name}'
+                AND table_name = '{table}'
+            """)
+            )
+            pk_exists = result.scalar()
+            assert pk_exists == 1, f"Table {table} should have exactly one primary key"
+
+
+def test_add_indices_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
+    """Integration test for adding indices."""
+    # Create schema and tables
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+
+    # Add indices
+    test_db.add_indices()
+
+    # Verify indices were added
+    with test_db.engine.connect() as conn:
+        # Check that indices exist
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM pg_indexes 
+            WHERE schemaname = '{integration_settings.schema_name}'
+        """)
+        )
+        index_count = result.scalar()
+        assert index_count > 0, "Should have indices"
+
+        # Check specific indices for key tables
+        key_indices = [
+            ("person", "idx_person_id"),
+            ("person", "idx_gender"),
+            ("condition_occurrence", "idx_condition_person_id_1"),
+            ("drug_exposure", "idx_drug_person_id_1"),
+            ("measurement", "idx_measurement_person_id_1"),
+            ("concept", "idx_concept_concept_id"),
+        ]
+
+        for table, index_name in key_indices:
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM pg_indexes 
+                WHERE schemaname = '{integration_settings.schema_name}'
+                AND tablename = '{table}'
+                AND indexname = '{index_name}'
+            """)
+            )
+            index_exists = result.scalar()
+            assert (
+                index_exists == 1
+            ), f"Index {index_name} should exist on table {table}"
+
+
+def test_add_constraints_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
+    """Integration test for adding foreign key constraints."""
+    # Arrange
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+    test_db.add_primary_keys()
+
+    # Act
+    test_db.add_constraints()
+
+    # Assert
+    with test_db.engine.connect() as conn:
+        # Check that foreign key constraints exist
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM information_schema.table_constraints 
+            WHERE constraint_type = 'FOREIGN KEY' 
+            AND table_schema = '{integration_settings.schema_name}'
+        """)
+        )
+        fk_count = result.scalar()
+        assert fk_count > 0, "Should have foreign key constraints"
+
+        # Check specific foreign keys for key tables
+        key_foreign_keys = [
+            ("person", "fpk_person_gender_concept_id"),
+            ("person", "fpk_person_race_concept_id"),
+            ("condition_occurrence", "fpk_condition_occurrence_person_id"),
+            ("drug_exposure", "fpk_drug_exposure_person_id"),
+            ("measurement", "fpk_measurement_person_id"),
+        ]
+
+        for table, constraint_name in key_foreign_keys:
+            result = conn.execute(
+                text(f"""
+                SELECT COUNT(*) 
+                FROM information_schema.table_constraints 
+                WHERE constraint_type = 'FOREIGN KEY' 
+                AND table_schema = '{integration_settings.schema_name}'
+                AND table_name = '{table}'
+                AND constraint_name = '{constraint_name}'
+            """)
+            )
+            fk_exists = result.scalar()
+            assert (
+                fk_exists == 1
+            ), f"Foreign key {constraint_name} should exist on table {table}"
+
+
+def test_add_all_constraints_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
+    """Integration test for adding all constraints (primary keys, indices, foreign keys)."""
+    # Create schema and tables
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+
+    # Add all constraints
+    test_db.add_all_constraints()
+
+    # Verify all types of constraints were added
+    with test_db.engine.connect() as conn:
+        # Check primary keys
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM information_schema.table_constraints 
+            WHERE constraint_type = 'PRIMARY KEY' 
+            AND table_schema = '{integration_settings.schema_name}'
+        """)
+        )
+        pk_count = result.scalar()
+        assert pk_count > 0, "Should have primary key constraints"
+
+        # Check foreign keys
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM information_schema.table_constraints 
+            WHERE constraint_type = 'FOREIGN KEY' 
+            AND table_schema = '{integration_settings.schema_name}'
+        """)
+        )
+        fk_count = result.scalar()
+        assert fk_count > 0, "Should have foreign key constraints"
+
+        # Check indices
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM pg_indexes 
+            WHERE schemaname = '{integration_settings.schema_name}'
+        """)
+        )
+        index_count = result.scalar()
+        assert index_count > 0, "Should have indices"
+
+        # Verify specific constraint counts match expectations
+        assert pk_count >= 25, f"Expected at least 25 primary keys, got {pk_count}"
+        assert fk_count >= 100, f"Expected at least 100 foreign keys, got {fk_count}"
+        assert index_count >= 50, f"Expected at least 50 indices, got {index_count}"
+
+
+def test_load_synthetic_data_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
     """Integration test for loading synthetic data."""
     # Configure settings for synthetic 100 data
     integration_settings.synthetic = True
@@ -182,7 +386,9 @@ def test_load_synthetic_data_integration(test_db, integration_settings):
         assert relationship_count > 0, "Relationship table should have data"
 
 
-def test_load_synthetic_data_sample_verification(test_db, integration_settings):
+def test_load_synthetic_data_sample_verification(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
     """Integration test to verify sample data quality."""
     # Configure settings for synthetic 100 data
     integration_settings.synthetic = True
@@ -234,7 +440,9 @@ def test_load_synthetic_data_sample_verification(test_db, integration_settings):
             assert concept.domain_id is not None, "Domain ID should not be null"
 
 
-def test_full_pipeline_integration(test_db, integration_settings):
+def test_full_pipeline_integration(
+    test_db: PostgresDatabase, integration_settings: Settings
+):
     """Integration test for the full pipeline: schema, tables, data, constraints."""
     # Configure settings for synthetic 100 data
     integration_settings.synthetic = True
