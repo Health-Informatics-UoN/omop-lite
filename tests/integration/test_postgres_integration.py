@@ -1,5 +1,5 @@
 import pytest
-from sqlalchemy import inspect
+from sqlalchemy import inspect, text
 
 from omop_lite.db.postgres import PostgresDatabase
 
@@ -102,6 +102,181 @@ def test_create_tables_integration(test_db, integration_settings):
 
     for col in expected_person_columns:
         assert col in person_column_names, f"Column {col} missing from person table"
+
+
+def test_load_synthetic_data_integration(test_db, integration_settings):
+    """Integration test for loading synthetic data."""
+    # Configure settings for synthetic 100 data
+    integration_settings.synthetic = True
+    integration_settings.synthetic_number = 100
+
+    # Create schema and tables
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+
+    # Load synthetic data
+    test_db.load_data()
+
+    # Verify data was loaded by checking row counts
+    with test_db.engine.connect() as conn:
+        # Check person table
+        result = conn.execute(
+            text(f"SELECT COUNT(*) FROM {integration_settings.schema_name}.person")
+        )
+        person_count = result.scalar()
+        assert person_count == 99, f"Expected 99 persons, got {person_count}"
+
+        # Check concept table
+        result = conn.execute(
+            text(f"SELECT COUNT(*) FROM {integration_settings.schema_name}.concept")
+        )
+        concept_count = result.scalar()
+        assert concept_count > 0, "Concept table should have data"
+
+        # Check condition_occurrence table
+        result = conn.execute(
+            text(
+                f"SELECT COUNT(*) FROM {integration_settings.schema_name}.condition_occurrence"
+            )
+        )
+        condition_count = result.scalar()
+        assert condition_count > 0, "Condition occurrence table should have data"
+
+        # Check domain table
+        result = conn.execute(
+            text(f"SELECT COUNT(*) FROM {integration_settings.schema_name}.domain")
+        )
+        domain_count = result.scalar()
+        assert domain_count > 0, "Domain table should have data"
+
+        # Check drug_strength table
+        result = conn.execute(
+            text(
+                f"SELECT COUNT(*) FROM {integration_settings.schema_name}.drug_strength"
+            )
+        )
+        drug_count = result.scalar()
+        assert drug_count > 0, "Drug strength table should have data"
+
+        # Check measurement table
+        result = conn.execute(
+            text(f"SELECT COUNT(*) FROM {integration_settings.schema_name}.measurement")
+        )
+        measurement_count = result.scalar()
+        assert measurement_count > 0, "Measurement table should have data"
+
+        # Check observation table
+        result = conn.execute(
+            text(f"SELECT COUNT(*) FROM {integration_settings.schema_name}.observation")
+        )
+        observation_count = result.scalar()
+        assert observation_count > 0, "Observation table should have data"
+
+        # Check relationship table
+        result = conn.execute(
+            text(
+                f"SELECT COUNT(*) FROM {integration_settings.schema_name}.relationship"
+            )
+        )
+        relationship_count = result.scalar()
+        assert relationship_count > 0, "Relationship table should have data"
+
+
+def test_load_synthetic_data_sample_verification(test_db, integration_settings):
+    """Integration test to verify sample data quality."""
+    # Configure settings for synthetic 100 data
+    integration_settings.synthetic = True
+    integration_settings.synthetic_number = 100
+
+    # Create schema and tables
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+
+    # Load synthetic data
+    test_db.load_data()
+
+    # Verify sample data quality
+    with test_db.engine.connect() as conn:
+        # Check that person data looks reasonable
+        result = conn.execute(
+            text(f"""
+            SELECT person_id, gender_concept_id, year_of_birth 
+            FROM {integration_settings.schema_name}.person 
+            LIMIT 5
+        """)
+        )
+        persons = result.fetchall()
+        assert len(persons) > 0, "Should have person data"
+
+        for person in persons:
+            assert person.person_id is not None, "Person ID should not be null"
+            assert (
+                person.gender_concept_id is not None
+            ), "Gender concept ID should not be null"
+            assert (
+                1900 <= person.year_of_birth <= 2024
+            ), f"Year of birth {person.year_of_birth} should be reasonable"
+
+        # Check that concept data looks reasonable
+        result = conn.execute(
+            text(f"""
+            SELECT concept_id, concept_name, domain_id 
+            FROM {integration_settings.schema_name}.concept 
+            LIMIT 5
+        """)
+        )
+        concepts = result.fetchall()
+        assert len(concepts) > 0, "Should have concept data"
+
+        for concept in concepts:
+            assert concept.concept_id is not None, "Concept ID should not be null"
+            assert concept.concept_name is not None, "Concept name should not be null"
+            assert concept.domain_id is not None, "Domain ID should not be null"
+
+
+def test_full_pipeline_integration(test_db, integration_settings):
+    """Integration test for the full pipeline: schema, tables, data, constraints."""
+    # Configure settings for synthetic 100 data
+    integration_settings.synthetic = True
+    integration_settings.synthetic_number = 100
+
+    # Full pipeline: schema -> tables -> data -> constraints
+    test_db.create_schema(integration_settings.schema_name)
+    test_db.create_tables()
+    test_db.load_data()
+    test_db.add_all_constraints()
+
+    # Verify everything worked
+    with test_db.engine.connect() as conn:
+        # Check data exists
+        result = conn.execute(
+            text(f"SELECT COUNT(*) FROM {integration_settings.schema_name}.person")
+        )
+        person_count = result.scalar()
+        assert person_count == 99, f"Expected 99 persons, got {person_count}"
+
+        # Check constraints exist (primary keys)
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM information_schema.table_constraints 
+            WHERE constraint_type = 'PRIMARY KEY' 
+            AND table_schema = '{integration_settings.schema_name}'
+        """)
+        )
+        pk_count = result.scalar()
+        assert pk_count > 0, "Should have primary key constraints"
+
+        # Check indexes exist
+        result = conn.execute(
+            text(f"""
+            SELECT COUNT(*) 
+            FROM pg_indexes 
+            WHERE schemaname = '{integration_settings.schema_name}'
+        """)
+        )
+        index_count = result.scalar()
+        assert index_count > 0, "Should have indexes"
 
 
 def test_create_tables_twice_integration(test_db, integration_settings):
