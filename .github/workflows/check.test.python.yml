@@ -4,19 +4,28 @@ on:
   pull_request:
 
 jobs:
-  run-tests-postgres:
-    name: Run Tests (Postgres)
+  run-tests:
+    name: Run Tests (Postgres + SQL Server)
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: write
     env:
-      DATASOURCE_DB_USERNAME: postgres
-      DATASOURCE_DB_PASSWORD: postgres
-      DATASOURCE_DB_DATABASE: omop
-      DATASOURCE_DB_SCHEMA: public
-      DATASOURCE_DB_PORT: 5432
-      DATASOURCE_DB_HOST: localhost
+      # PostgreSQL environment variables
+      POSTGRES_DB_USERNAME: postgres
+      POSTGRES_DB_PASSWORD: postgres
+      POSTGRES_DB_DATABASE: omop
+      POSTGRES_DB_SCHEMA: public
+      POSTGRES_DB_PORT: 5432
+      POSTGRES_DB_HOST: localhost
+      # SQL Server environment variables  
+      SQLSERVER_DB_USERNAME: sa
+      SQLSERVER_DB_PASSWORD: Password123!
+      SQLSERVER_DB_DATABASE: master
+      SQLSERVER_DB_SCHEMA: omop
+      SQLSERVER_DB_PORT: 1433
+      SQLSERVER_DB_HOST: localhost
+      SQLSERVER_DB_DRIVERNAME: mssql
       SYNTHETIC: true
 
     services:
@@ -33,55 +42,6 @@ jobs:
         ports:
           - 5432:5432
 
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup uv
-        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
-        with:
-          version: "0.5.16"
-          enable-cache: true
-          cache-dependency-glob: "uv.lock"
-      
-      - name: Setup Python
-        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
-        with:
-          python-version-file: ".python-version"
-
-      - name: uv sync
-        run: uv sync --frozen --dev
-
-      - name: Run tests
-        run: |
-          set -e
-          uv run pytest tests --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=omop_lite tests | tee pytest-coverage.txt
-          test ${PIPESTATUS[0]} -eq 0
-
-      - name: Pytest coverage comment
-        # Forks do not have the necessary permission to add a comment.
-        if: github.event.pull_request.head.repo.fork == false
-        uses: MishaKav/pytest-coverage-comment@81882822c5b22af01f91bd3eacb1cefb6ad73dc2
-        with:
-          pytest-coverage-path: pytest-coverage.txt
-          junitxml-path: pytest.xml
-  
-  run-tests-sqlserver:
-    name: Run Tests (SQL Server)
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      DATASOURCE_DB_USERNAME: sa
-      DATASOURCE_DB_PASSWORD: Password123!
-      DATASOURCE_DB_DATABASE: master
-      DATASOURCE_DB_SCHEMA: omop
-      DATASOURCE_DB_PORT: 1433
-      DATASOURCE_DB_HOST: localhost
-      DATASOURCE_DB_DRIVERNAME: mssql
-      SYNTHETIC: true
-
-    services:
       sqlserver:
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
@@ -112,4 +72,12 @@ jobs:
       - name: Run tests
         run: |
           set -e
-          uv run pytest tests
+          uv run pytest tests --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=omop_lite tests | tee pytest-coverage.txt
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Pytest coverage comment
+        if: github.event.pull_request.head.repo.fork == false
+        uses: MishaKav/pytest-coverage-comment@81882822c5b22af01f91bd3eacb1cefb6ad73dc2
+        with:
+          pytest-coverage-path: pytest-coverage.txt
+          junitxml-path: pytest.xml
