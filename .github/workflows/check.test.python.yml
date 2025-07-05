@@ -67,7 +67,7 @@ jobs:
           python-version-file: ".python-version"
 
       - name: uv sync
-        run: uv sync --frozen --dev
+        run: uv sync --frozen --all-groups
 
       - name: Run tests
         run: |
