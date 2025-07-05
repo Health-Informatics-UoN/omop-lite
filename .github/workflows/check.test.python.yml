@@ -66,13 +66,8 @@ jobs:
         with:
           python-version-file: ".python-version"
 
-      - name: Install SQL Server ODBC Driver
-        run: |
-          curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
-          curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-release.list
-          apt-get update
-          ACCEPT_EULA=Y apt-get install -y msodbcsql18
-          apt-get install -y unixodbc-dev
+      - name: Install Microsoft ODBC
+        run: sudo ACCEPT_EULA=Y apt-get install msodbcsql18 -y
 
       - name: uv sync
         run: uv sync --frozen --all-groups
