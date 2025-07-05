@@ -23,40 +23,26 @@ app = typer.Typer(
 )
 
 # Import and add all subcommands
-from .commands import test_command
+from .commands import (  # noqa: E402
+    test_command,
+    create_tables_command,
+    load_data_command,
+    add_constraints_command,
+    add_primary_keys_command,
+    add_foreign_keys_command,
+    add_indices_command,
+    drop_command,
+    help_commands_command,
+)
 
 app.add_typer(test_command(), name="test")
-
-from .commands import create_tables_command
-
 app.add_typer(create_tables_command(), name="create-tables")
-
-from .commands import load_data_command
-
 app.add_typer(load_data_command(), name="load-data")
-
-from .commands import add_constraints_command
-
 app.add_typer(add_constraints_command(), name="add-constraints")
-
-from .commands import add_primary_keys_command
-
 app.add_typer(add_primary_keys_command(), name="add-primary-keys")
-
-from .commands import add_foreign_keys_command
-
 app.add_typer(add_foreign_keys_command(), name="add-foreign-keys")
-
-from .commands import add_indices_command
-
 app.add_typer(add_indices_command(), name="add-indices")
-
-from .commands import drop_command
-
 app.add_typer(drop_command(), name="drop")
-
-from .commands import help_commands_command
-
 app.add_typer(help_commands_command(), name="help-commands")
 
 
