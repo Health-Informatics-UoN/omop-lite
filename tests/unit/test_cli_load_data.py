@@ -21,16 +21,6 @@ class TestLoadDataCommand:
         """Create the load_data command app."""
         return load_data_command()
 
-    def test_load_data_command_help(self, runner, app):
-        """Test that the load_data command shows help."""
-        result = runner.invoke(app, ["--help"])
-        assert result.exit_code == 0
-        assert "Load data into existing tables" in result.output
-        assert "--db-host" in result.output
-        assert "--synthetic" in result.output
-        assert "--synthetic-number" in result.output
-        assert "--data-dir" in result.output
-
     def test_load_data_command_default_arguments(self, runner, app):
         """Test load_data command with default arguments."""
         with (

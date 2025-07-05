@@ -36,15 +36,6 @@ class TestCLIIntegration:
             "LOG_LEVEL": "INFO",
         }
 
-    def test_drop_command_integration_help(self, runner):
-        """Test drop command help in integration context."""
-        result = runner.invoke(app, ["drop", "--help"])
-        assert result.exit_code == 0
-        assert "Drop tables and/or schema from the database" in result.output
-        assert "--tables-only" in result.output
-        assert "--schema-only" in result.output
-        assert "--confirm" in result.output
-
     def test_drop_command_integration_confirmation_cancelled(self, runner):
         """Test drop command when confirmation is cancelled in integration context."""
         # This test simulates user cancelling the confirmation

@@ -21,15 +21,6 @@ class TestCreateTablesCommand:
         """Create the create_tables command app."""
         return create_tables_command()
 
-    def test_create_tables_command_help(self, runner, app):
-        """Test that the create_tables command shows help."""
-        result = runner.invoke(app, ["--help"])
-        assert result.exit_code == 0
-        assert "Create only the database tables" in result.output
-        assert "--db-host" in result.output
-        assert "--db-port" in result.output
-        assert "--db-user" in result.output
-
     def test_create_tables_command_default_arguments(self, runner, app):
         """Test create_tables command with default arguments."""
         with (

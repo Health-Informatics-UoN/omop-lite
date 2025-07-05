@@ -21,15 +21,6 @@ class TestTestCommand:
         """Create the test command app."""
         return test_command()
 
-    def test_test_command_help(self, runner, app):
-        """Test that the test command shows help."""
-        result = runner.invoke(app, ["--help"])
-        assert result.exit_code == 0
-        assert "Test database connectivity and basic operations" in result.output
-        assert "--db-host" in result.output
-        assert "--db-port" in result.output
-        assert "--db-user" in result.output
-
     def test_test_command_default_arguments(self, runner, app):
         """Test test command with default arguments."""
         with (

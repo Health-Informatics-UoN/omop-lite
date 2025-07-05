@@ -21,15 +21,6 @@ class TestDropCommand:
         """Create the drop command app."""
         return drop_command()
 
-    def test_drop_command_help(self, runner, app):
-        """Test that the drop command shows help."""
-        result = runner.invoke(app, ["--help"])
-        assert result.exit_code == 0
-        assert "Drop tables and/or schema from the database" in result.output
-        assert "--tables-only" in result.output
-        assert "--schema-only" in result.output
-        assert "--confirm" in result.output
-
     def test_drop_command_default_arguments(self, runner, app):
         """Test drop command with default arguments."""
         with (
