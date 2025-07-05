@@ -1,7 +1,7 @@
 name: Run Python Tests
 
 on:
-  push:
+  pull_request:
 
 jobs:
   run-tests:
