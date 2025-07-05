@@ -1,0 +1,86 @@
+name: Run Python Tests
+
+on:
+  pull_request:
+
+jobs:
+  run-tests:
+    name: Run Tests (Postgres + SQL Server)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      # PostgreSQL environment variables
+      POSTGRES_DB_USERNAME: postgres
+      POSTGRES_DB_PASSWORD: postgres
+      POSTGRES_DB_DATABASE: omop
+      POSTGRES_DB_SCHEMA: test
+      POSTGRES_DB_PORT: 5432
+      POSTGRES_DB_HOST: localhost
+      # SQL Server environment variables  
+      SQLSERVER_DB_USERNAME: sa
+      SQLSERVER_DB_PASSWORD: Password123!
+      SQLSERVER_DB_DATABASE: master
+      SQLSERVER_DB_SCHEMA: omop
+      SQLSERVER_DB_PORT: 1433
+      SQLSERVER_DB_HOST: localhost
+      SQLSERVER_DB_DRIVERNAME: mssql
+      SYNTHETIC: true
+
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: omop
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: "Y"
+          MSSQL_SA_PASSWORD: Password123!
+          MSSQL_PID: Developer
+        ports:
+          - 1433:1433
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@f94ec6bedd8674c4426838e6b50417d36b6ab231 # v5.3.1
+        with:
+          version: "0.5.16"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      
+      - name: Setup Python
+        uses: actions/setup-python@42375524e23c412d93fb67b49958b491fce71c38 # v5.4.0
+        with:
+          python-version-file: ".python-version"
+
+      - name: Install Microsoft ODBC
+        run: sudo ACCEPT_EULA=Y apt-get install msodbcsql18 -y
+
+      - name: uv sync
+        run: uv sync --frozen --all-groups
+
+      - name: Run tests
+        run: |
+          set -e
+          uv run pytest tests --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=omop_lite tests | tee pytest-coverage.txt
+          test ${PIPESTATUS[0]} -eq 0
+
+      - name: Pytest coverage comment
+        if: github.event.pull_request.head.repo.fork == false
+        uses: MishaKav/pytest-coverage-comment@81882822c5b22af01f91bd3eacb1cefb6ad73dc2
+        with:
+          pytest-coverage-path: pytest-coverage.txt
+          junitxml-path: pytest.xml
