@@ -410,7 +410,6 @@ def test_load_synthetic_data_sample_verification(
             text(f"""
             SELECT person_id, gender_concept_id, year_of_birth 
             FROM {integration_settings.schema_name}.person 
-            LIMIT 5
         """)
         )
         persons = result.fetchall()
@@ -429,7 +428,6 @@ def test_load_synthetic_data_sample_verification(
             text(f"""
             SELECT concept_id, concept_name, domain_id 
             FROM {integration_settings.schema_name}.concept 
-            LIMIT 5
         """)
         )
         concepts = result.fetchall()
