@@ -24,7 +24,13 @@ class SQLServerDatabase(Database):
         if not self.engine:
             raise RuntimeError("Database engine not initialized")
         with self.engine.connect() as connection:
-            connection.execute(text(f"CREATE SCHEMA [{schema_name}]"))
+            sql = f"""
+            IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema_name}')
+            BEGIN
+                EXEC('CREATE SCHEMA [{schema_name}]')
+            END
+            """
+            connection.execute(text(sql))
             logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
