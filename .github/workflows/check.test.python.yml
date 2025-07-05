@@ -15,7 +15,7 @@ jobs:
       POSTGRES_DB_USERNAME: postgres
       POSTGRES_DB_PASSWORD: postgres
       POSTGRES_DB_DATABASE: omop
-      POSTGRES_DB_SCHEMA: public
+      POSTGRES_DB_SCHEMA: test
       POSTGRES_DB_PORT: 5432
       POSTGRES_DB_HOST: localhost
       # SQL Server environment variables  
