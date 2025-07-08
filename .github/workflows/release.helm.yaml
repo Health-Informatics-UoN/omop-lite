@@ -11,6 +11,7 @@ on:
 # Add permissions block
 permissions:
   contents: write
+  packages: write
 
 jobs:
   release:
