@@ -39,5 +39,3 @@ jobs:
           oci_password: ${{ secrets.GITHUB_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           mark_as_latest: false
-          skip_existing: true
-  
