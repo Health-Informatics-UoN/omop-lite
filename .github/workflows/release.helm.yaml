@@ -3,7 +3,7 @@ name: Release Helm Chart
 on:
   push:
     branches:
-      - main
+      - feat/helm-oci
     paths:
       - 'charts/omop-lite/**'
   workflow_dispatch:
@@ -32,10 +32,12 @@ jobs:
           version: '3.12.0'
 
       - name: Run chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        uses: bitdeps/helm-oci-charts-releaser@v0.1.3
         with:
-          charts_dir: charts
-          skip_existing: true
+          oci_registry: ghcr.io/${{ github.repository_owner }}
+          oci_username: ghcr.io/${{ github.triggering_actor }}
+          oci_password: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
           mark_as_latest: false
+          skip_existing: true
+  
