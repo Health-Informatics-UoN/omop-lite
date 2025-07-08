@@ -24,8 +24,8 @@ You can configure the Docker container using the following environment variables
 
 ### CLI
 
-`uv add omop-lite`
-`uv run omop-lite --help`
+`pip install omop-lite`
+`python omop-lite --help`
 
 ### Docker
 
@@ -56,7 +56,7 @@ To install using Helm:
 
 ```bash
 # Add the Helm repository
-helm install my-omop oci://ghcr.io/health-informatics-uon/charts/omop-lite --version 0.2.2
+helm install omop-lite oci://ghcr.io/health-informatics-uon/charts/omop-lite --version 0.2.2
 ```
 
 The Helm chart deploys OMOP Lite as a Kubernetes Job that creates an OMOP CDM in a database. You can customise the installation using a values file:
@@ -72,21 +72,6 @@ env:
   dialect: postgresql
   schemaName: public
   synthetic: "false" 
-
-# Data mounting configuration
-data:
-  persistentVolumeClaim:
-    enabled: true
-    create: true
-    size: 10Gi
-    storageClass: standard
-    accessModes:
-      - ReadOnlyMany
-  
-  # Optional: Prepare data from a local directory
-  prepare:
-    enabled: true
-    sourcePath: "/path/to/your/data"  # Path on the node where data is stored
 ```
 
 Install with custom values:
@@ -94,20 +79,6 @@ Install with custom values:
 ```bash
 helm install omop-lite omop-lite/omop-lite -f values.yaml
 ```
-
-#### Using Your Own Data
-
-To use your own data with the Helm chart:
-
-1. **Option 1: Use the built-in data preparation**
-   - Set `data.prepare.enabled: true`
-   - Set `data.prepare.sourcePath` to the path on your node where the data is stored
-   - The chart will automatically copy your data to the PVC before running the OMOP Lite job
-
-2. **Option 2: Manual data preparation**
-   - Create a PVC (either through the chart or manually)
-   - Copy your data to the PVC using kubectl or another method
-   - Set `data.persistentVolumeClaim.enabled: true` and provide the PVC name
 
 ## Synthetic Data
 
@@ -123,7 +94,6 @@ You can provide your own data for loading into the tables by placing your files 
 
 To match the vocabulary files from Athena, this data should be tab-separated, but as a `.csv` file extension.
 You can override the delimiter with `DELIMITER` configuration.
-
 
 ## Text search OMOP
 
@@ -144,6 +114,7 @@ docker compose -f compose-omop-ts.yml
 To do this, you need to have `embeddings/embeddings.parquet`, containing concept_ids and embeddings.
 This uses [pgvector](https://github.com/pgvector/pgvector) to create an `embeddings` table.
 
-## omop-lite testing
+## Testing
+
 If you're a developer and want to iterate on omop-lite quickly, there's a small subset of the vocabularies sufficient to build in `synthetic/`.
 If you wish to test the vector search, there are matching embeddings in `embeddings/embeddings.parquet`.

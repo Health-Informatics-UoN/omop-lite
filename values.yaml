@@ -6,7 +6,6 @@ env:
   dbName: omop
   dialect: postgresql
   schemaName: public
-  dataDir: /data
   synthetic: true
   synthetic_number: 1000
   log_level: DEBUG

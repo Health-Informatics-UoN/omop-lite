@@ -40,12 +40,7 @@ spec:
           resources:
             {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if .Values.data.persistentVolumeClaim.enabled }}
-          volumeMounts:
-            - name: data
-              mountPath: {{ .Values.env.dataDir }}
-              readOnly: true
-          {{- end }}
+
           env:
             - name: DB_HOST
               value: {{ .Values.env.dbHost | quote }}
@@ -69,10 +64,4 @@ spec:
               value: {{ .Values.env.synthetic_number | quote }}
             - name: LOG_LEVEL
               value: {{ .Values.env.log_level | quote }}
-      {{- if .Values.data.persistentVolumeClaim.enabled }}
-      volumes:
-        - name: data
-          persistentVolumeClaim:
-            claimName: {{ if .Values.data.persistentVolumeClaim.existingClaim }}{{ .Values.data.persistentVolumeClaim.existingClaim }}{{ else }}{{ include "omop-lite.fullname" . }}-data{{ end }}
-      {{- end }}
       restartPolicy: Never
