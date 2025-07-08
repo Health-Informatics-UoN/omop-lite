@@ -11,9 +11,9 @@ A small container to get an OMOP CDM database running quickly, with support for 
 
 Drop your data into `data/`, and run the container.
 
-## Environment Variables
+## Configuration
 
-You can configure the Docker container using the following environment variables:
+You can configure the container or CLI using the following environment variables:
 
 - `DB_HOST`: The hostname of the database. Default is `db`.
 - `DB_PORT`: The port number of the database. Default is `5432`.
