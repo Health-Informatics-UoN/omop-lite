@@ -22,6 +22,11 @@ You can configure the Docker container using the following environment variables
 
 ## Usage
 
+### CLI
+
+`uv add omop-lite`
+`uv run omop-lite --help`
+
 ### Docker
 
 `docker run -v ./data:/data ghcr.io/health-informatics-uon/omop-lite`
@@ -51,11 +56,7 @@ To install using Helm:
 
 ```bash
 # Add the Helm repository
-helm repo add omop-lite https://health-informatics-uon.github.io/omop-lite
-helm repo update
-
-# Install the chart
-helm install omop-lite omop-lite/omop-lite
+helm install my-omop oci://ghcr.io/health-informatics-uon/charts/omop-lite --version 0.2.2
 ```
 
 The Helm chart deploys OMOP Lite as a Kubernetes Job that creates an OMOP CDM in a database. You can customise the installation using a values file:
@@ -94,10 +95,6 @@ Install with custom values:
 helm install omop-lite omop-lite/omop-lite -f values.yaml
 ```
 
-### CLI
-
-`uv run omop-lite --help`
-
 #### Using Your Own Data
 
 To use your own data with the Helm chart:
@@ -127,13 +124,6 @@ You can provide your own data for loading into the tables by placing your files 
 To match the vocabulary files from Athena, this data should be tab-separated, but as a `.csv` file extension.
 You can override the delimiter with `DELIMITER` configuration.
 
-## Setup Script
-
-The `setup.sh` script included in the Docker image will:
-
-1. Create the schema if it does not already exist.
-2. Execute the SQL files to set up the database schema, constraints, and indexes.
-3. Load data from the `.csv` files located in the `DATA_DIR`.
 
 ## Text search OMOP
 
