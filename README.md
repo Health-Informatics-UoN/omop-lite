@@ -1,10 +1,11 @@
 # omop-lite
 
-[![MIT License][license-badge]]
+![MIT License][license-badge]
 [![omop-lite Releases][omop-lite-releases-badge]][omop-lite-releases]
 [![omop-lite Tests][omop-lite-tests-badge]][omop-lite-tests]
 ![Python][python-badge]
 [![omop-lite Containers][docker-badge]][omop-lite-containers]
+[![omop-lite helm][helm-badge]][omop-lite-containers]
 
 A small container to get an OMOP CDM database running quickly, with support for both PostgreSQL and SQL Server.
 
@@ -134,3 +135,4 @@ If you wish to test the vector search, there are matching embeddings in `embeddi
 [license-badge]: https://img.shields.io/github/license/health-informatics-uon/omop-lite.svg
 [python-badge]: https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white
 [docker-badge]: https://img.shields.io/badge/docker-%230db7ed.svg?style=flat-square&logo=docker&logoColor=white
+[helm-badge]: https://img.shields.io/badge/Helm-0F1689?logo=helm&logoColor=fff&style=flat-square
