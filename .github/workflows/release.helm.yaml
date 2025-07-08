@@ -3,9 +3,9 @@ name: Release Helm Chart
 on:
   push:
     branches:
-      - main
-    paths:
-      - 'charts/omop-lite/**'
+      - fix/helm
+    # paths:
+    #   - 'charts/omop-lite/**'
   workflow_dispatch:
 
 # Add permissions block
