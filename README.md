@@ -1,5 +1,11 @@
 # omop-lite
 
+[![MIT License][license-badge]]
+[![omop-lite Releases][omop-lite-releases-badge]][omop-lite-releases]
+[![omop-lite Tests][omop-lite-tests-badge]][omop-lite-tests]
+![Python][python-badge]
+[![omop-lite Containers][docker-badge]][omop-lite-containers]
+
 A small container to get an OMOP CDM database running quickly, with support for both PostgreSQL and SQL Server.
 
 Drop your data into `data/`, and run the container.
@@ -118,3 +124,13 @@ This uses [pgvector](https://github.com/pgvector/pgvector) to create an `embeddi
 
 If you're a developer and want to iterate on omop-lite quickly, there's a small subset of the vocabularies sufficient to build in `synthetic/`.
 If you wish to test the vector search, there are matching embeddings in `embeddings/embeddings.parquet`.
+
+[omop-lite-containers]: https://github.com/orgs/Health-Informatics-UoN/packages?repo_name=omop-lite
+[omop-lite-releases]: https://github.com/Health-Informatics-UoN/omop-lite/releases
+[omop-lite-tests]: https://github.com/Health-Informatics-UoN/omop-lite/actions/workflows/check.test.python.yml
+[omop-lite-releases-badge]: https://img.shields.io/github/v/tag/Health-Informatics-UoN/omop-lite
+[omop-lite-tests-badge]: https://github.com/Health-Informatics-UoN/omop-lite/actions/workflows/check.test.python.yml/badge.svg
+
+[license-badge]: https://img.shields.io/github/license/health-informatics-uon/omop-lite.svg
+[python-badge]: https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white
+[docker-badge]: https://img.shields.io/badge/docker-%230db7ed.svg?style=flat-square&logo=docker&logoColor=white
