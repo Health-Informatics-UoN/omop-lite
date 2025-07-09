@@ -137,12 +137,27 @@ class Database(ABC):
             self.drop_schema(schema_name)
         logger.info("✅ Database completely dropped")
 
-    def load_data(self) -> None:
-        """Load data into tables."""
+    def load_data(self, required_tables: list[str]) -> None:
+        """Load data into tables.
+
+        Args:
+            required_tables: A list of table names to load. If not provided, all tables will be loaded.
+        """
         data_dir = self._get_data_dir()
         logger.info(f"Loading data from {data_dir}")
 
-        for table_name in self.omop_tables:
+        # If no required tables are provided, load all tables
+        if not required_tables:
+            required_tables = self.omop_tables
+
+        # Filter the tables to only include the required tables 
+        tables_to_load = [
+            table_name
+            for table_name in self.omop_tables
+            if table_name.lower() in [table.lower() for table in required_tables]
+        ]
+
+        for table_name in tables_to_load:
             table_lower = table_name.lower()
             csv_file = data_dir / f"{table_name}.csv"
 

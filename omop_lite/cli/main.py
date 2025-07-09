@@ -97,6 +97,12 @@ def callback(
     delimiter: str = typer.Option(
         "\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"
     ),
+    required_tables: list[str] = typer.Option(
+        [],
+        "--required-tables",
+        envvar="REQUIRED_TABLES",
+        help="Required tables to load",
+    ),
 ) -> None:
     """
     Create the OMOP Lite database (default command).
@@ -162,7 +168,7 @@ def callback(
 
             # Load data
             task2 = progress.add_task("[yellow]Loading data...", total=1)
-            db.load_data()
+            db.load_data(required_tables)
             progress.update(task2, completed=1)
 
             # Add constraints
