@@ -275,3 +275,215 @@ class TestDatabaseBase:
         mock_connection.commit.assert_called_once()
         mock_cursor.close.assert_called_once()
         mock_connection.close.assert_called_once()
+
+    # Tests for _file_exists method
+    def test_file_exists_with_traversable(self, database: TestDatabase) -> None:
+        """Test _file_exists with Traversable object."""
+        mock_traversable = Mock()
+        mock_traversable.is_file.return_value = True
+        
+        result = database._file_exists(mock_traversable)
+        
+        assert result is True
+        mock_traversable.is_file.assert_called_once()
+
+    def test_file_exists_with_path(self, database: TestDatabase) -> None:
+        """Test _file_exists with Path object."""
+        mock_path = Mock()
+        mock_path.exists.return_value = True
+        
+        result = database._file_exists(mock_path)
+        
+        assert result is True
+        mock_path.exists.assert_called_once()
+
+    # Tests for _wait_for_file method
+    @patch("omop_lite.db.base.time.time")
+    @patch("omop_lite.db.base.time.sleep")
+    def test_wait_for_file_synthetic_true_immediate_check(self, mock_sleep: Mock, mock_time: Mock, database: TestDatabase) -> None:
+        """Test _wait_for_file with synthetic=True should just check file existence."""
+        database.settings.synthetic = True
+        mock_file_path = Mock()
+        
+        # Mock _file_exists to return True
+        with patch.object(database, '_file_exists', return_value=True):
+            result = database._wait_for_file(mock_file_path)
+        
+        assert result is True
+        mock_sleep.assert_not_called()  # Should not sleep when synthetic=True
+
+    @patch("omop_lite.db.base.time.time")
+    @patch("omop_lite.db.base.time.sleep")
+    def test_wait_for_file_synthetic_true_file_not_exists(self, mock_sleep: Mock, mock_time: Mock, database: TestDatabase) -> None:
+        """Test _wait_for_file with synthetic=True when file doesn't exist."""
+        database.settings.synthetic = True
+        mock_file_path = Mock()
+        
+        # Mock _file_exists to return False
+        with patch.object(database, '_file_exists', return_value=False):
+            result = database._wait_for_file(mock_file_path)
+        
+        assert result is False
+        mock_sleep.assert_not_called()  # Should not sleep when synthetic=True
+
+    @patch("omop_lite.db.base.time.time")
+    @patch("omop_lite.db.base.time.sleep")
+    def test_wait_for_file_synthetic_false_file_exists_immediately(self, mock_sleep: Mock, mock_time: Mock, database: TestDatabase) -> None:
+        """Test _wait_for_file with synthetic=False when file exists immediately."""
+        database.settings.synthetic = False
+        mock_file_path = Mock()
+        
+        # Mock time to return consistent values
+        mock_time.return_value = 100.0
+        
+        # Mock _file_exists to return True immediately
+        with patch.object(database, '_file_exists', return_value=True):
+            result = database._wait_for_file(mock_file_path)
+        
+        assert result is True
+        mock_sleep.assert_not_called()  # Should not sleep if file exists immediately
+
+    @patch("omop_lite.db.base.time.time")
+    @patch("omop_lite.db.base.time.sleep")
+    def test_wait_for_file_synthetic_false_file_appears_after_wait(self, mock_sleep: Mock, mock_time: Mock, database: TestDatabase) -> None:
+        """Test _wait_for_file with synthetic=False when file appears after waiting."""
+        database.settings.synthetic = False
+        mock_file_path = Mock()
+        
+        # Mock time to simulate progression
+        mock_time.side_effect = [100.0, 105.0, 110.0]  # 3 calls: start, after first sleep, after second sleep
+        
+        # Mock _file_exists to return False initially, then True
+        with patch.object(database, '_file_exists', side_effect=[False, False, True]):
+            result = database._wait_for_file(mock_file_path)
+        
+        assert result is True
+        assert mock_sleep.call_count == 2  # Should sleep twice before file appears
+
+    @patch("omop_lite.db.base.time.time")
+    @patch("omop_lite.db.base.time.sleep")
+    def test_wait_for_file_synthetic_false_timeout(self, mock_sleep: Mock, mock_time: Mock, database: TestDatabase) -> None:
+        """Test _wait_for_file with synthetic=False when timeout is reached."""
+        database.settings.synthetic = False
+        mock_file_path = Mock()
+        
+        # Mock time to simulate timeout (300 seconds default)
+        mock_time.side_effect = [100.0, 105.0, 110.0, 115.0, 120.0, 125.0, 130.0, 135.0, 140.0, 145.0, 150.0, 151.0]  # 12 calls to simulate timeout
+        
+        # Mock _file_exists to always return False
+        with patch.object(database, '_file_exists', return_value=False):
+            result = database._wait_for_file(mock_file_path, max_wait_time=50)  # Short timeout for testing
+        
+        assert result is False
+        # Should sleep multiple times before timeout
+        assert mock_sleep.call_count >= 10
+
+    @patch("omop_lite.db.base.time.time")
+    @patch("omop_lite.db.base.time.sleep")
+    def test_wait_for_file_custom_timeout(self, mock_sleep: Mock, mock_time: Mock, database: TestDatabase) -> None:
+        """Test _wait_for_file with custom timeout."""
+        database.settings.synthetic = False
+        mock_file_path = Mock()
+        
+        # Mock time to simulate short timeout
+        mock_time.side_effect = [100.0, 105.0, 110.0]
+        
+        # Mock _file_exists to always return False
+        with patch.object(database, '_file_exists', return_value=False):
+            result = database._wait_for_file(mock_file_path, max_wait_time=5)  # Very short timeout
+        
+        assert result is False
+        assert mock_sleep.call_count == 1  # Should sleep once before timeout
+
+    # Tests for load_data method with waiting functionality
+    @patch("omop_lite.db.base.Database._get_data_dir")
+    @patch("omop_lite.db.base.Database._bulk_load")
+    def test_load_data_with_waiting_synthetic_false(self, mock_bulk_load: Mock, mock_get_data_dir: Mock, database: TestDatabase) -> None:
+        """Test load_data with synthetic=False uses waiting functionality."""
+        database.settings.synthetic = False
+        mock_data_dir = Mock()
+        mock_get_data_dir.return_value = mock_data_dir
+        mock_data_dir.__truediv__ = lambda self, other: f"{mock_data_dir}/{other}"
+        
+        # Mock _wait_for_file to return True for one table
+        with patch.object(database, '_wait_for_file', return_value=True):
+            database.load_data(["PERSON"])
+        
+        # Should call _wait_for_file for PERSON.csv
+        mock_bulk_load.assert_called_once()
+
+    @patch("omop_lite.db.base.Database._get_data_dir")
+    @patch("omop_lite.db.base.Database._bulk_load")
+    def test_load_data_with_waiting_synthetic_true(self, mock_bulk_load: Mock, mock_get_data_dir: Mock, database: TestDatabase) -> None:
+        """Test load_data with synthetic=True uses immediate file checking."""
+        database.settings.synthetic = True
+        mock_data_dir = Mock()
+        mock_get_data_dir.return_value = mock_data_dir
+        mock_data_dir.__truediv__ = lambda self, other: f"{mock_data_dir}/{other}"
+        
+        # Mock _wait_for_file to return True for one table
+        with patch.object(database, '_wait_for_file', return_value=True):
+            database.load_data(["PERSON"])
+        
+        # Should call _wait_for_file for PERSON.csv
+        mock_bulk_load.assert_called_once()
+
+    @patch("omop_lite.db.base.Database._get_data_dir")
+    @patch("omop_lite.db.base.Database._bulk_load")
+    def test_load_data_file_not_found_after_waiting(self, mock_bulk_load: Mock, mock_get_data_dir: Mock, database: TestDatabase) -> None:
+        """Test load_data when file is not found after waiting."""
+        database.settings.synthetic = False
+        mock_data_dir = Mock()
+        mock_get_data_dir.return_value = mock_data_dir
+        mock_data_dir.__truediv__ = lambda self, other: f"{mock_data_dir}/{other}"
+        
+        # Mock _wait_for_file to return False (file not found)
+        with patch.object(database, '_wait_for_file', return_value=False):
+            database.load_data(["PERSON"])
+        
+        # Should not call _bulk_load when file is not found
+        mock_bulk_load.assert_not_called()
+
+    @patch("omop_lite.db.base.Database._get_data_dir")
+    @patch("omop_lite.db.base.Database._bulk_load")
+    def test_load_data_multiple_tables_some_missing(self, mock_bulk_load: Mock, mock_get_data_dir: Mock, database: TestDatabase) -> None:
+        """Test load_data with multiple tables, some files missing."""
+        database.settings.synthetic = False
+        mock_data_dir = Mock()
+        mock_get_data_dir.return_value = mock_data_dir
+        mock_data_dir.__truediv__ = lambda self, other: f"{mock_data_dir}/{other}"
+        
+        # Mock _wait_for_file to return True for PERSON, False for CONCEPT
+        def mock_wait_for_file(file_path):
+            if "PERSON.csv" in str(file_path):
+                return True
+            return False
+        
+        with patch.object(database, '_wait_for_file', side_effect=mock_wait_for_file):
+            database.load_data(["PERSON", "CONCEPT"])
+        
+        # Should only call _bulk_load for PERSON (which was found)
+        assert mock_bulk_load.call_count == 1
+        # Check that the call was for PERSON table
+        call_args = mock_bulk_load.call_args
+        assert "person" in call_args[0][0]  # table_name should be "person"
+
+    @patch("omop_lite.db.base.Database._get_data_dir")
+    @patch("omop_lite.db.base.Database._bulk_load")
+    def test_load_data_bulk_load_exception(self, mock_bulk_load: Mock, mock_get_data_dir: Mock, database: TestDatabase) -> None:
+        """Test load_data handles exceptions from _bulk_load."""
+        database.settings.synthetic = False
+        mock_data_dir = Mock()
+        mock_get_data_dir.return_value = mock_data_dir
+        mock_data_dir.__truediv__ = lambda self, other: f"{mock_data_dir}/{other}"
+        
+        # Mock _wait_for_file to return True
+        with patch.object(database, '_wait_for_file', return_value=True):
+            # Mock _bulk_load to raise an exception
+            mock_bulk_load.side_effect = Exception("Bulk load failed")
+            
+            # Should not raise exception, should continue processing
+            database.load_data(["PERSON"])
+        
+        # Should still call _bulk_load even though it fails
+        mock_bulk_load.assert_called_once()
