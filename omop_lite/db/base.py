@@ -7,6 +7,7 @@ import time
 from importlib.resources import files
 from importlib.abc import Traversable
 from omop_lite.settings import Settings
+from omop_lite.config import get_available_tables
 from sqlalchemy.sql import text
 
 logger = logging.getLogger(__name__)
@@ -20,30 +21,7 @@ class Database(ABC):
         self.engine: Optional[Engine] = None
         self.metadata: Optional[MetaData] = None
         self.file_path: Optional[Union[Path, Traversable]] = None
-        self.omop_tables = [
-            "CDM_SOURCE",
-            "CONCEPT",
-            "CONCEPT_ANCESTOR",
-            "CONCEPT_CLASS",
-            "CONCEPT_RELATIONSHIP",
-            "CONCEPT_SYNONYM",
-            "CONDITION_ERA",
-            "CONDITION_OCCURRENCE",
-            "DEATH",
-            "DOMAIN",
-            "DRUG_ERA",
-            "DRUG_EXPOSURE",
-            "DRUG_STRENGTH",
-            "LOCATION",
-            "MEASUREMENT",
-            "OBSERVATION",
-            "OBSERVATION_PERIOD",
-            "PERSON",
-            "PROCEDURE_OCCURRENCE",
-            "RELATIONSHIP",
-            "VISIT_OCCURRENCE",
-            "VOCABULARY",
-        ]
+        self.omop_tables = get_available_tables()
 
     @property
     def dialect(self) -> str:
