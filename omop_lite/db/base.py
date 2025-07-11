@@ -3,9 +3,11 @@ from sqlalchemy import MetaData, inspect, Engine
 from pathlib import Path
 from typing import Union, Optional
 import logging
+import time
 from importlib.resources import files
 from importlib.abc import Traversable
 from omop_lite.settings import Settings
+from omop_lite.config import get_available_tables
 from sqlalchemy.sql import text
 
 logger = logging.getLogger(__name__)
@@ -19,30 +21,7 @@ class Database(ABC):
         self.engine: Optional[Engine] = None
         self.metadata: Optional[MetaData] = None
         self.file_path: Optional[Union[Path, Traversable]] = None
-        self.omop_tables = [
-            "CDM_SOURCE",
-            "CONCEPT",
-            "CONCEPT_ANCESTOR",
-            "CONCEPT_CLASS",
-            "CONCEPT_RELATIONSHIP",
-            "CONCEPT_SYNONYM",
-            "CONDITION_ERA",
-            "CONDITION_OCCURRENCE",
-            "DEATH",
-            "DOMAIN",
-            "DRUG_ERA",
-            "DRUG_EXPOSURE",
-            "DRUG_STRENGTH",
-            "LOCATION",
-            "MEASUREMENT",
-            "OBSERVATION",
-            "OBSERVATION_PERIOD",
-            "PERSON",
-            "PROCEDURE_OCCURRENCE",
-            "RELATIONSHIP",
-            "VISIT_OCCURRENCE",
-            "VOCABULARY",
-        ]
+        self.omop_tables = get_available_tables()
 
     @property
     def dialect(self) -> str:
@@ -63,6 +42,30 @@ class Database(ABC):
         """Check if a file exists, handling both Path and Traversable types."""
         if isinstance(file_path, Traversable):
             return file_path.is_file()
+
+    def _wait_for_file(self, file_path: Union[Path, Traversable], max_wait_time: int = 300) -> bool:
+        """Wait for a file to exist, but only if synthetic is False.
+        
+        Args:
+            file_path: The file path to wait for
+            max_wait_time: Maximum time to wait in seconds (default: 5 minutes)
+            
+        Returns:
+            True if file exists after waiting, False if timeout reached
+        """
+        # Only wait if synthetic is False
+        if self.settings.synthetic:
+            return self._file_exists(file_path)
+        
+        start_time = time.time()
+        while time.time() - start_time < max_wait_time:
+            if self._file_exists(file_path):
+                return True
+            logger.info(f"Waiting for {file_path} to exist...")
+            time.sleep(5)  # Wait 5 seconds between checks
+        
+        logger.warning(f"Timeout waiting for {file_path} after {max_wait_time} seconds")
+        return False
 
     def refresh_metadata(self) -> None:
         """Refresh the metadata for the database."""
@@ -137,16 +140,32 @@ class Database(ABC):
             self.drop_schema(schema_name)
         logger.info("✅ Database completely dropped")
 
-    def load_data(self) -> None:
-        """Load data into tables."""
+    def load_data(self, required_tables: list[str]) -> None:
+        """Load data into tables.
+
+        Args:
+            required_tables: A list of table names to load. If not provided, all tables will be loaded.
+        """
         data_dir = self._get_data_dir()
         logger.info(f"Loading data from {data_dir}")
 
-        for table_name in self.omop_tables:
+        # If no required tables are provided, load all tables
+        if not required_tables:
+            required_tables = self.omop_tables
+
+        # Filter the tables to only include the required tables 
+        tables_to_load = [
+            table_name
+            for table_name in self.omop_tables
+            if table_name.lower() in [table.lower() for table in required_tables]
+        ]
+
+        for table_name in tables_to_load:
             table_lower = table_name.lower()
             csv_file = data_dir / f"{table_name}.csv"
 
-            if not self._file_exists(csv_file):
+            # Wait for file to exist if synthetic is False, otherwise just check if it exists
+            if not self._wait_for_file(csv_file):
                 logger.warning(f"Warning: {csv_file} not found, skipping...")
                 continue
 
