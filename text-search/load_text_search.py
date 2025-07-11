@@ -6,8 +6,10 @@ import psycopg
 
 uri = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{getenv('DB_HOST')}:{getenv('DB_PORT')}/{getenv('DB_NAME')}"
 
+SCHEMA_NAME = getenv("SCHEMA_NAME")
+
 vector_length = (
-    pl.scan_parquet("embeddings/embeddings.parquet")
+    pl.scan_parquet("text-search/embeddings.parquet")
     .first()
     .collect()
     .get_column("embeddings")[0]
@@ -18,12 +20,12 @@ with psycopg.connect(uri) as conn:
     print("Connected to database\n")
     print("Materialising text-search column")
     conn.execute(
-            """ALTER TABLE @cdmDatabaseSchema.concept
+            f"""ALTER TABLE {SCHEMA_NAME}.concept
                 ADD COLUMN concept_name_tsv tsvector
                 GENERATED ALWAYS AS (to_tsvector('english', concept_name)) STORED;"""
             )
     print("Creating text-search index")
-    conn.execute("CREATE INDEX idx_concept_fts ON @cdmDatabaseSchema.concept USING GIN (concept_name_tsv);")
+    conn.execute(f"CREATE INDEX idx_concept_fts ON {SCHEMA_NAME}.concept USING GIN (concept_name_tsv);")
 
 with psycopg.connect(uri) as conn:
     print("Connected to database\n")
@@ -40,14 +42,14 @@ with psycopg.connect(uri) as conn:
         # if we want to load multiple embeddings datasets, we can make the table name configurable from the environment
 
         cursor.execute(
-            """
-                DROP TABLE IF EXISTS cdm.embeddings;
+            f"""
+                DROP TABLE IF EXISTS {SCHEMA_NAME}.embeddings;
                 """
         )
         print(f"Creating a table for {vector_length} dimensional vectors")
         cursor.execute(
             f"""
-                CREATE TABLE cdm.embeddings (
+                CREATE TABLE {SCHEMA_NAME}.embeddings (
                     concept_id  int,
                     embedding  vector({vector_length})
                 );
@@ -55,14 +57,14 @@ with psycopg.connect(uri) as conn:
         )
 
         # Open the Parquet file in streaming mode
-        parquet_file = pq.ParquetFile("embeddings/embeddings.parquet")
+        parquet_file = pq.ParquetFile("text-search/embeddings.parquet")
 
         # Each row will occupy 8514-ish bytes at the end
         # To keep the memory usage below 4 Gb, setting the batch size to 200_000
         print("Copying in vectors")
         for batch in parquet_file.iter_batches(batch_size=200000):
             with cursor.copy(
-                "COPY cdm.embeddings (concept_id, embedding) FROM STDIN WITH (FORMAT BINARY)"
+                f"COPY {SCHEMA_NAME}.embeddings (concept_id, embedding) FROM STDIN WITH (FORMAT BINARY)"
             ) as copy:
                 # use set_types for binary copy
                 # https://www.psycopg.org/psycopg3/docs/basic/copy.html#binary-copy

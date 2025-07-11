@@ -1,5 +1,4 @@
 vocabs
-embeddings/embeddings.parquet
 data
 .DS_Store
 *.pyc
