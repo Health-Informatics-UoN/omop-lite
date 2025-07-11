@@ -13,13 +13,14 @@ x-omop-lite-common: &omop-lite-common
 
 x-postgres-common: &postgres-common
   container_name: db
+  user: postgres
   environment:
     - POSTGRES_DB=omop
     - POSTGRES_PASSWORD=password
   ports:
     - "5432:5432"
   healthcheck:
-    test: ["CMD-SHELL", "pg_isready"]
+    test: ["CMD-SHELL", "pg_isready", "-U", "postgres"]
     interval: 1s
     timeout: 5s
     retries: 10
