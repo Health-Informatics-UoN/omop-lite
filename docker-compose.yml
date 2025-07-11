@@ -1,25 +1,48 @@
 name: omop-lite
 
-services:
-  omop-lite:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - SCHEMA_NAME=public
-      - SYNTHETIC=true
-    volumes:
-      - ./data:/data
-    depends_on:
-      - db
+# Common configurations
+x-omop-lite-common: &omop-lite-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    - SCHEMA_NAME=public
+    - SYNTHETIC=true
+  volumes:
+    - ./data:/data
 
-  db:
+x-postgres-common: &postgres-common
+  container_name: db
+  environment:
+    - POSTGRES_DB=omop
+    - POSTGRES_PASSWORD=password
+  ports:
+    - "5432:5432"
+
+services:
+  postgres:
+    <<: *postgres-common
     image: postgres:16
-    environment:
-      - POSTGRES_DB=omop
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5432:5432"
+    profiles: [postgres]
+
+  pgvector:
+    <<: *postgres-common
+    image: pgvector/pgvector:pg17
+    profiles: [text-search]
+
+  # Default omop-lite service
+  omop-lite:
+    <<: *omop-lite-common
+    depends_on:
+      - postgres
+    profiles: [postgres]
+
+  # omop-lite service for text-search profile
+  omop-lite-search:
+    <<: *omop-lite-common
+    depends_on:
+      - pgvector
+    profiles: [text-search]
 
   omop-lite-sqlserver:
     platform: "linux/amd64"
@@ -58,20 +81,20 @@ services:
       start_period: 10s
     profiles: [sqlserver]
 
-   text-search:
-     build:
-       context: ./text-search
-       dockerfile: Dockerfile
-     environment:
+  text-search:
+    build:
+      context: ./text-search
+      dockerfile: Dockerfile
+    environment:
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=password
       - DB_NAME=omop
       - SCHEMA_NAME=public
-     volumes:
-       - ./text-search:/text-search:ro
-     depends_on:
-       omop-lite:
-         condition: service_completed_successfully
-     profiles: [text-search]
+    volumes:
+      - ./text-search:/text-search:ro
+    depends_on:
+      omop-lite-search:
+        condition: service_completed_successfully
+    profiles: [text-search]
