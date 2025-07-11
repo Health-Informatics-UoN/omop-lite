@@ -1,31 +1,55 @@
 name: omop-lite
 
-services:
-  omop-lite:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    environment:
-      - SCHEMA_NAME=public
-      - SYNTHETIC=true
-    volumes:
-      - ./data:/data
-    depends_on:
-      db:
-        condition: service_healthy
+# Common configurations
+x-omop-lite-common: &omop-lite-common
+  build:
+    context: .
+    dockerfile: Dockerfile
+  environment:
+    - SCHEMA_NAME=public
+    - SYNTHETIC=true
+  volumes:
+    - ./data:/data
 
-  db:
+x-postgres-common: &postgres-common
+  container_name: db
+  environment:
+    - POSTGRES_DB=omop
+    - POSTGRES_PASSWORD=password
+  ports:
+    - "5432:5432"
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready"]
+    interval: 1s
+    timeout: 5s
+    retries: 10
+
+services:
+  postgres:
+    <<: *postgres-common
     image: postgres:16
-    environment:
-      - POSTGRES_DB=omop
-      - POSTGRES_PASSWORD=password
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready"]
-      interval: 1s
-      timeout: 5s
-      retries: 10
+    profiles: [postgres]
+
+  pgvector:
+    <<: *postgres-common
+    image: pgvector/pgvector:pg17
+    profiles: [text-search]
+
+  # Default omop-lite service
+  omop-lite:
+    <<: *omop-lite-common
+    depends_on:
+      postgres:
+        condition: service_healthy
+    profiles: [postgres]
+
+  # omop-lite service for text-search profile
+  omop-lite-search:
+    <<: *omop-lite-common
+    depends_on:
+      pgvector:
+        condition: service_healthy
+    profiles: [text-search]
 
   omop-lite-sqlserver:
     platform: "linux/amd64"
@@ -45,6 +69,7 @@ services:
       - ./data:/data
     depends_on:
       - sqlserver
+    profiles: [sqlserver]
 
   sqlserver:
     platform: "linux/amd64"
@@ -61,3 +86,22 @@ services:
       timeout: 3s
       retries: 10
       start_period: 10s
+    profiles: [sqlserver]
+
+  text-search:
+    build:
+      context: ./text-search
+      dockerfile: Dockerfile
+    environment:
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=omop
+      - SCHEMA_NAME=public
+    volumes:
+      - ./text-search:/text-search:ro
+    depends_on:
+      omop-lite-search:
+        condition: service_completed_successfully
+    profiles: [text-search]
