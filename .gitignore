@@ -4,3 +4,4 @@ data
 .DS_Store
 *.pyc
 .env
+text-search/embeddings.parquet

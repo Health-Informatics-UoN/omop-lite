@@ -16,6 +16,17 @@ vector_length = (
 
 with psycopg.connect(uri) as conn:
     print("Connected to database\n")
+    print("Materialising text-search column")
+    conn.execute(
+            """ALTER TABLE @cdmDatabaseSchema.concept
+                ADD COLUMN concept_name_tsv tsvector
+                GENERATED ALWAYS AS (to_tsvector('english', concept_name)) STORED;"""
+            )
+    print("Creating text-search index")
+    conn.execute("CREATE INDEX idx_concept_fts ON @cdmDatabaseSchema.concept USING GIN (concept_name_tsv);")
+
+with psycopg.connect(uri) as conn:
+    print("Connected to database\n")
     print("Loading pgvector extension")
     conn.execute("""
                  CREATE EXTENSION vector;
