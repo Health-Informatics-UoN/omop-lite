@@ -9,7 +9,7 @@
 
 A small container to get an OMOP CDM database running quickly, with support for both PostgreSQL and SQL Server.
 
-Drop your data into `data/`, and run the container.
+Drop your data into `data/`, and run the container. 
 
 ## Configuration
 

@@ -1,4 +1,5 @@
 from omop_lite.db import create_database
+from omop_lite.config import get_available_tables, validate_table_names
 from importlib.metadata import version
 import typer
 from rich.console import Console
@@ -97,6 +98,13 @@ def callback(
     delimiter: str = typer.Option(
         "\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"
     ),
+    required_tables: list[str] = typer.Option(
+        [],
+        "--required-tables",
+        envvar="REQUIRED_TABLES",
+        help="Required tables to load (available: " + ", ".join(get_available_tables()) + ")",
+        case_sensitive=False,
+    ),
 ) -> None:
     """
     Create the OMOP Lite database (default command).
@@ -109,6 +117,11 @@ def callback(
     """
     if ctx.invoked_subcommand is None:
         # This is the default command (no subcommand specified)
+        
+        # Validate required tables if provided
+        if required_tables:
+            required_tables = validate_required_tables(required_tables)
+        
         settings = _create_settings(
             db_host=db_host,
             db_port=db_port,
@@ -162,7 +175,7 @@ def callback(
 
             # Load data
             task2 = progress.add_task("[yellow]Loading data...", total=1)
-            db.load_data()
+            db.load_data(required_tables)
             progress.update(task2, completed=1)
 
             # Add constraints
@@ -182,6 +195,14 @@ def callback(
         )
 
 
-def main_cli():
+def validate_required_tables(required_tables: list[str]) -> list[str]:
+    """Validate that all required tables are valid OMOP table names."""
+    try:
+        return validate_table_names(required_tables)
+    except ValueError as e:
+        raise typer.BadParameter(str(e))
+
+
+def main_cli() -> None:
     """Entry point for the CLI."""
     app()
