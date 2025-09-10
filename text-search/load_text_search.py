@@ -9,7 +9,7 @@ uri = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{getenv('DB_HOS
 SCHEMA_NAME = getenv("SCHEMA_NAME")
 
 vector_length = (
-    pl.scan_parquet("text-search/embeddings.parquet")
+    pl.scan_parquet("/text-search/embeddings.parquet")
     .first()
     .collect()
     .get_column("embeddings")[0]
