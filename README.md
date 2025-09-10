@@ -107,15 +107,16 @@ You can override the delimiter with `DELIMITER` configuration.
 ### Full-text search
 
 Adding a tsvector column to the concept table and an index on that column makes full-text search queries on the concept table run much faster.
-This can be configured by setting `FTS_CREATE` to be non-empty in the environment.
 
 ### Vector search
 
 Postgres does vector search too!
-To enable this on omop-lite, you can compose the `compose-omop-ts.yml` with
+
+### Enabling text search
+To enable these features in omop-lite, you can use the `text-search` profile
 
 ```bash
-docker compose -f compose-omop-ts.yml
+docker compose --profile text-search up
 ```
 
 To do this, you need to have `embeddings/embeddings.parquet`, containing concept_ids and embeddings.
