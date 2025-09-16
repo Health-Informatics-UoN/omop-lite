@@ -8,13 +8,16 @@ uri = f"postgresql://{getenv('DB_USER')}:{getenv('DB_PASSWORD')}@{getenv('DB_HOS
 
 SCHEMA_NAME = getenv("SCHEMA_NAME")
 
-vector_length = (
-    pl.scan_parquet("text-search/embeddings.parquet")
-    .first()
-    .collect()
-    .get_column("embeddings")[0]
-    .shape[0]
-)
+try:
+    vector_length = (
+        pl.scan_parquet("/text-search/embeddings.parquet")
+        .first()
+        .collect()
+        .get_column("embeddings")[0]
+        .shape[0]
+    )
+except FileNotFoundError as e:
+    print(f"Embeddings file missing: {e}")
 
 with psycopg.connect(uri) as conn:
     print("Connected to database\n")

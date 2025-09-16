@@ -119,7 +119,7 @@ To enable these features in omop-lite, you can use the `text-search` profile
 docker compose --profile text-search up
 ```
 
-To do this, you need to have `embeddings/embeddings.parquet`, containing concept_ids and embeddings.
+To do this, you need to have `text-search/embeddings.parquet`, containing concept_ids and embeddings (an example file is provided).
 This uses [pgvector](https://github.com/pgvector/pgvector) to create an `embeddings` table.
 
 ## Testing
