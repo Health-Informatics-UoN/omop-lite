@@ -1,0 +1,29 @@
+name: Release
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.1.0
+    with:
+      node-version: '24'
+    secrets: inherit
+
+  publish-container:
+    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.1.0
+    with:
+      image-name: omop-lite
+      image-description: 'OMOP Lite container image'
+      registry: ghcr.io
+      context: .
+      dockerfile: Dockerfile
+      platforms: linux/amd64,linux/arm64
+    secrets: inherit
