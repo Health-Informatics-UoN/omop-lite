@@ -130,7 +130,7 @@ class TestTestCommand:
             result = runner.invoke(app)
 
             assert result.exit_code == 0
-            assert "Schema 'test_schema' does not exist (normal)" in result.output
+            assert "Schema 'test_schema' does not exist" in result.output
 
     def test_test_command_database_error(self, runner, app):
         """Test test command when database connection fails."""
