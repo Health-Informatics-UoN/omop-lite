@@ -1,6 +1,6 @@
 [project]
 name = "omop-lite"
-version = "0.2.0"
+dynamic = ["version"]
 description = "Get an OMOP CDM database running quickly."
 readme = "README.md"
 requires-python = ">=3.13"
@@ -14,7 +14,7 @@ dependencies = [
 ]
 
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build]
@@ -24,6 +24,9 @@ include = [
     "omop_lite/synthetic/100/*.csv",
     "omop_lite/synthetic/1000/*.csv",
 ]
+
+[tool.hatch.version]
+source = "vcs"
 
 [project.scripts]
 omop-lite = "omop_lite.cli:main_cli"
