@@ -13,13 +13,13 @@ on:
 
 jobs:
   release:
-    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.1.0
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.2.0
     with:
       node-version: '24'
     secrets: inherit
 
   publish-container:
-    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.1.0
+    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.2.0
     with:
       image-name: omop-lite
       image-description: 'OMOP Lite container image'
@@ -27,4 +27,13 @@ jobs:
       context: .
       dockerfile: Dockerfile
       platforms: linux/amd64,linux/arm64
+    secrets: inherit
+
+  semver-container:
+    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.2.0
+    needs: release
+    if: needs.release.outputs.release-created == 'true'
+    with:
+      image-name: omop-lite
+      registry: ghcr.io
     secrets: inherit
