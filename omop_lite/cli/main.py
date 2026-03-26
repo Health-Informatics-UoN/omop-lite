@@ -65,7 +65,10 @@ def callback(
         "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
     ),
     synthetic: bool = typer.Option(
-        False, "--synthetic", envvar="SYNTHETIC", help="Use synthetic data"
+        False,
+        "--synthetic/--no-synthetic",
+        envvar="SYNTHETIC",
+        help="Use synthetic data",
     ),
     synthetic_number: int = typer.Option(
         100,
@@ -90,7 +93,7 @@ def callback(
     ),
     fts_create: bool = typer.Option(
         False,
-        "--fts-create",
+        "--fts-create/--no-fts-create",
         envvar="FTS_CREATE",
         help="Create full-text search indexes",
     ),

@@ -39,7 +39,10 @@ def load_data_command() -> typer.Typer:
             "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
         ),
         synthetic: bool = typer.Option(
-            False, "--synthetic", envvar="SYNTHETIC", help="Use synthetic data"
+            False,
+            "--synthetic/--no-synthetic",
+            envvar="SYNTHETIC",
+            help="Use synthetic data",
         ),
         synthetic_number: int = typer.Option(
             100,
