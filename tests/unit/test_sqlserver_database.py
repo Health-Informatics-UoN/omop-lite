@@ -231,7 +231,7 @@ def test_omop_tables_list(mock_sqlserver_db):
         assert table in mock_sqlserver_db.omop_tables
 
     # Test total count
-    assert len(mock_sqlserver_db.omop_tables) == 22
+    assert len(mock_sqlserver_db.omop_tables) == 39
 
 
 def test_csv_reader_logic():
