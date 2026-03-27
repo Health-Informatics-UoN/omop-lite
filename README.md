@@ -23,7 +23,7 @@ You can configure the container or CLI using the following environment variables
 - `DIALECT`: The type of database to use. Default is `postgresql`, but can also be `mssql`.
 - `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `public`.
 - `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
-- `SYNTHETIC`: Load synthetic data (boolean). Default is `false` (note, if you put `false` as a value, this will be intepreted as `true`. It is a known bug #57)
+- `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
 - `SYNTHETIC_NUMBER`: Size of synthetic data, `100` or `1000`. Default is `100`.
 - `DELIMITER`: The delimiter used to separate data. Default is `tab`, can also be `,`
 

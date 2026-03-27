@@ -285,3 +285,37 @@ class TestMainCLI:
         """Test behavior with invalid subcommand."""
         result = runner.invoke(app, ["invalid-command"])
         assert result.exit_code != 0
+
+    def test_main_cli_synthetic_false_envvar(self, runner):
+        """Test that SYNTHETIC=False env var correctly disables synthetic data (issue #57)."""
+        with (
+            patch("omop_lite.cli.main._create_settings") as mock_create_settings,
+            patch("omop_lite.cli.main.create_database") as mock_create_db,
+        ):
+            mock_create_settings.return_value = Mock()
+            mock_create_db.return_value = Mock()
+
+            for false_value in ("False", "false", "FALSE", "0", "no", "off"):
+                result = runner.invoke(app, env={"SYNTHETIC": false_value})
+                assert result.exit_code == 0, f"Failed for SYNTHETIC={false_value!r}"
+                call_args = mock_create_settings.call_args[1]
+                assert (
+                    call_args["synthetic"] is False
+                ), f"Expected synthetic=False for SYNTHETIC={false_value!r}, got {call_args['synthetic']}"
+
+    def test_main_cli_synthetic_true_envvar(self, runner):
+        """Test that SYNTHETIC=True env var correctly enables synthetic data."""
+        with (
+            patch("omop_lite.cli.main._create_settings") as mock_create_settings,
+            patch("omop_lite.cli.main.create_database") as mock_create_db,
+        ):
+            mock_create_settings.return_value = Mock()
+            mock_create_db.return_value = Mock()
+
+            for true_value in ("True", "true", "TRUE", "1", "yes", "on"):
+                result = runner.invoke(app, env={"SYNTHETIC": true_value})
+                assert result.exit_code == 0, f"Failed for SYNTHETIC={true_value!r}"
+                call_args = mock_create_settings.call_args[1]
+                assert (
+                    call_args["synthetic"] is True
+                ), f"Expected synthetic=True for SYNTHETIC={true_value!r}, got {call_args['synthetic']}"
