@@ -241,4 +241,4 @@ def test_omop_tables_list(mock_postgres_db):
         assert table in mock_postgres_db.omop_tables
 
     # Test total count
-    assert len(mock_postgres_db.omop_tables) == 22
+    assert len(mock_postgres_db.omop_tables) == 39

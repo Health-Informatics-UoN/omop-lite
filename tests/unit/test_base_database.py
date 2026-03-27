@@ -44,7 +44,7 @@ class TestDatabaseBase:
         assert database.engine is None
         assert database.metadata is None
         assert database.file_path is None
-        assert len(database.omop_tables) == 22
+        assert len(database.omop_tables) == 39
         assert "PERSON" in database.omop_tables
         assert "CONCEPT" in database.omop_tables
 
