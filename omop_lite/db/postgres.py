@@ -1,7 +1,10 @@
+import io
 from sqlalchemy import create_engine, MetaData, text
 from importlib.resources import files
 import logging
-from .base import Database
+import pyarrow.csv as pa_csv
+import pyarrow.parquet as pq
+from .base import Database, DataFormat
 from omop_lite.settings import Settings
 from typing import Union
 from pathlib import Path
@@ -57,25 +60,34 @@ class PostgresDatabase(Database):
         self._execute_sql_file(fts_index_sql)
         logger.info("Created full-text search index")
 
-    def _bulk_load(self, table_name: str, file_path: Union[Path, Traversable]) -> None:
+    def _bulk_load(
+        self, table_name: str, file_path: Union[Path, Traversable], fmt: DataFormat
+    ) -> None:
         if not self.engine:
             raise RuntimeError("Database engine not initialized")
 
-        delimiter = self._get_delimiter()
-        quote = self._get_quote()
-
-        with open(str(file_path), "r") as f:
-            connection = self.engine.raw_connection()
+        connection = self.engine.raw_connection()
+        try:
+            cursor = connection.cursor()
             try:
-                cursor = connection.cursor()
-                try:
+                if fmt == DataFormat.PARQUET:
+                    buf = io.BytesIO()
+                    pa_csv.write_csv(pq.read_table(str(file_path)), buf)
+                    buf.seek(0)
+                    cursor.copy_expert(
+                        f"COPY {self.settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, HEADER, ENCODING 'UTF8')",
+                        buf,
+                    )
+                else:
+                    delimiter = self._get_delimiter()
+                    quote = self._get_quote()
                     with open(str(file_path), "r") as f:
                         cursor.copy_expert(
                             f"COPY {self.settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')",
                             f,
                         )
-                    connection.commit()
-                finally:
-                    cursor.close()
+                connection.commit()
             finally:
-                connection.close()
+                cursor.close()
+        finally:
+            connection.close()

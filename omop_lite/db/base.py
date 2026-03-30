@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from enum import StrEnum
 from sqlalchemy import MetaData, inspect, Engine
 from pathlib import Path
 from typing import Union, Optional
@@ -7,6 +8,11 @@ from importlib.resources import files
 from importlib.abc import Traversable
 from omop_lite.settings import Settings
 from sqlalchemy.sql import text
+
+
+class DataFormat(StrEnum):
+    CSV = "csv"
+    PARQUET = "parquet"
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +78,9 @@ class Database(ABC):
         pass
 
     @abstractmethod
-    def _bulk_load(self, table_name: str, file_path: Union[Path, Traversable]) -> None:
+    def _bulk_load(
+        self, table_name: str, file_path: Union[Path, Traversable], fmt: DataFormat
+    ) -> None:
         """Bulk load data into a table."""
         pass
 
@@ -154,6 +162,16 @@ class Database(ABC):
             self.drop_schema(schema_name)
         logger.info("✅ Database completely dropped")
 
+    def _find_data_file(
+        self, data_dir: Union[Path, Traversable], table: str
+    ) -> Optional[tuple[Union[Path, Traversable], DataFormat]]:
+        """Find a data file for a table, preferring parquet over CSV."""
+        for fmt in (DataFormat.PARQUET, DataFormat.CSV):
+            candidate = data_dir / f"{table}.{fmt}"
+            if self._file_exists(candidate):
+                return (candidate, fmt)
+        return None
+
     def load_data(self) -> None:
         """Load data into tables."""
         data_dir = self._get_data_dir()
@@ -161,16 +179,19 @@ class Database(ABC):
 
         for table_name in self.omop_tables:
             table_lower = table_name.lower()
-            csv_file = data_dir / f"{table_name}.csv"
+            result = self._find_data_file(data_dir, table_name)
 
-            if not self._file_exists(csv_file):
-                logger.warning(f"Warning: {csv_file} not found, skipping...")
+            if result is None:
+                logger.warning(
+                    f"Warning: No data file found for {table_name}, skipping..."
+                )
                 continue
 
-            logger.info(f"Loading: {table_name}")
+            file_path, fmt = result
+            logger.info(f"Loading: {table_name} ({fmt})")
 
             try:
-                self._bulk_load(table_lower, csv_file)
+                self._bulk_load(table_lower, file_path, fmt)
                 logger.info(f"Successfully loaded {table_name}")
             except Exception as e:
                 logger.error(f"Error loading {table_name}: {str(e)}")

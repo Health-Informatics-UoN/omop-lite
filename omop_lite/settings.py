@@ -25,6 +25,9 @@ class Settings(BaseSettings):
         default=False, description="Create full-text search indexes"
     )
     delimiter: str = Field(default="\t", description="CSV delimiter")
+    parquet_batch_size: int = Field(
+        default=1000, description="Batch size for parquet inserts (SQL Server)"
+    )
 
     class Config:
         env_file = ".env"

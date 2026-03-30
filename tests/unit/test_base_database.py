@@ -2,9 +2,10 @@ import pytest
 from unittest.mock import Mock, patch
 from pathlib import Path
 from typing import Union
+from importlib.abc import Traversable
 
 from omop_lite.settings import Settings
-from omop_lite.db.base import Database
+from omop_lite.db.base import Database, DataFormat
 
 
 class TestDatabase(Database):
@@ -13,7 +14,9 @@ class TestDatabase(Database):
     def create_schema(self, schema_name: str) -> None:
         pass
 
-    def _bulk_load(self, table_name: str, file_path: Union[Path, str]) -> None:
+    def _bulk_load(
+        self, table_name: str, file_path: Union[Path, Traversable], fmt: DataFormat
+    ) -> None:
         pass
 
 
@@ -275,3 +278,27 @@ class TestDatabaseBase:
         mock_connection.commit.assert_called_once()
         mock_cursor.close.assert_called_once()
         mock_connection.close.assert_called_once()
+
+    def test_find_data_file_prefers_parquet(self, database):
+        """Test _find_data_file returns parquet when both parquet and CSV exist."""
+        with patch.object(database, "_file_exists", side_effect=[True, False]):
+            result = database._find_data_file(Path("/data"), "PERSON")
+        assert result is not None
+        file_path, fmt = result
+        assert fmt == DataFormat.PARQUET
+        assert str(file_path).endswith("PERSON.parquet")
+
+    def test_find_data_file_falls_back_to_csv(self, database):
+        """Test _find_data_file returns CSV when no parquet file exists."""
+        with patch.object(database, "_file_exists", side_effect=[False, True]):
+            result = database._find_data_file(Path("/data"), "PERSON")
+        assert result is not None
+        file_path, fmt = result
+        assert fmt == DataFormat.CSV
+        assert str(file_path).endswith("PERSON.csv")
+
+    def test_find_data_file_returns_none_when_missing(self, database):
+        """Test _find_data_file returns None when neither parquet nor CSV exists."""
+        with patch.object(database, "_file_exists", return_value=False):
+            result = database._find_data_file(Path("/data"), "PERSON")
+        assert result is None
