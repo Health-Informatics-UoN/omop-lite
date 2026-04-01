@@ -100,6 +100,12 @@ def callback(
     delimiter: str = typer.Option(
         "\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"
     ),
+    skip_bad_rows: bool = typer.Option(
+        False,
+        "--skip-bad-rows/--no-skip-bad-rows",
+        envvar="SKIP_BAD_ROWS",
+        help="Skip rows that fail to load instead of failing the whole table (slow for large files)",
+    ),
 ) -> None:
     """
     Create the OMOP Lite database (default command).
@@ -126,6 +132,7 @@ def callback(
             log_level=log_level,
             fts_create=fts_create,
             delimiter=delimiter,
+            skip_bad_rows=skip_bad_rows,
         )
 
         # Show startup info

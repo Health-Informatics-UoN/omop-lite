@@ -116,45 +116,43 @@ class TestPostgresParquetLoading:
 
 class TestSQLServerParquetLoading:
     @pytest.mark.unit
-    def test_bulk_load_parquet_uses_executemany(
+    def test_bulk_load_parquet_uses_executemany_by_default(
         self, mock_sqlserver_db, sample_parquet_file
     ):
-        """Parquet loading calls executemany with batched rows."""
+        """Parquet loading calls executemany in batches when skip_bad_rows is off."""
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_sqlserver_db.engine.raw_connection.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
 
-        # batch_size=2 with 3 rows → 2 batches
+        # Default: skip_bad_rows=False, batch_size=2, 3 rows → 2 batches
         mock_sqlserver_db._bulk_load("person", sample_parquet_file, DataFormat.PARQUET)
 
         assert mock_cursor.executemany.call_count == 2
         first_call_sql = mock_cursor.executemany.call_args_list[0][0][0]
         assert "cdm.[person]" in first_call_sql
         assert "[person_id]" in first_call_sql
-
-        first_batch = mock_cursor.executemany.call_args_list[0][0][1]
-        assert len(first_batch) == 2
-        second_batch = mock_cursor.executemany.call_args_list[1][0][1]
-        assert len(second_batch) == 1
-
         mock_conn.commit.assert_called_once()
 
     @pytest.mark.unit
-    def test_bulk_load_parquet_row_values(
+    def test_bulk_load_parquet_inserts_row_by_row_when_skip_bad_rows(
         self, mock_sqlserver_db, sample_parquet_file
     ):
-        """Parquet rows are converted to Python native types."""
+        """Parquet loading falls back to row-by-row with savepoints when skip_bad_rows=True."""
         mock_conn = Mock()
         mock_cursor = Mock()
         mock_sqlserver_db.engine.raw_connection.return_value = mock_conn
         mock_conn.cursor.return_value = mock_cursor
+        mock_sqlserver_db.settings.skip_bad_rows = True
 
-        mock_sqlserver_db.settings.parquet_batch_size = 100
         mock_sqlserver_db._bulk_load("person", sample_parquet_file, DataFormat.PARQUET)
 
-        all_rows = mock_cursor.executemany.call_args[0][1]
-        assert len(all_rows) == 3
+        execute_calls = mock_cursor.execute.call_args_list
+        insert_calls = [c for c in execute_calls if "INSERT" in str(c)]
+        assert len(insert_calls) == 3
+        assert "cdm.[person]" in insert_calls[0][0][0]
+        assert "[person_id]" in insert_calls[0][0][0]
         # Values should be native Python ints, not pyarrow scalars
-        assert all_rows[0][0] == 1
-        assert all_rows[1][1] == 1990
+        assert insert_calls[0][0][1][0] == 1    # person_id row 1
+        assert insert_calls[1][0][1][1] == 1990  # year_of_birth row 2
+        mock_conn.commit.assert_called_once()

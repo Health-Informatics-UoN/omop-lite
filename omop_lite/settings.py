@@ -28,6 +28,10 @@ class Settings(BaseSettings):
     parquet_batch_size: int = Field(
         default=1000, description="Batch size for parquet inserts (SQL Server)"
     )
+    skip_bad_rows: bool = Field(
+        default=False,
+        description="Skip rows that fail to load instead of failing the whole table",
+    )
 
     class Config:
         env_file = ".env"

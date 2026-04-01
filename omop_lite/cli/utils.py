@@ -18,6 +18,7 @@ def _create_settings(
     log_level: str = "INFO",
     fts_create: bool = False,
     delimiter: str = "\t",
+    skip_bad_rows: bool = False,
 ) -> Settings:
     """Create settings with validation."""
     # Validate dialect
@@ -38,6 +39,7 @@ def _create_settings(
         log_level=log_level,
         fts_create=fts_create,
         delimiter=delimiter,
+        skip_bad_rows=skip_bad_rows,
     )
 
 

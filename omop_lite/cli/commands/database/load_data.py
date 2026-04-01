@@ -68,6 +68,12 @@ def load_data_command() -> typer.Typer:
         delimiter: str = typer.Option(
             "\t", "--delimiter", envvar="DELIMITER", help="CSV delimiter"
         ),
+        skip_bad_rows: bool = typer.Option(
+            False,
+            "--skip-bad-rows/--no-skip-bad-rows",
+            envvar="SKIP_BAD_ROWS",
+            help="Skip rows that fail to load instead of failing the whole table (slow for large files)",
+        ),
     ) -> None:
         """
         Load data into existing tables.
@@ -88,6 +94,7 @@ def load_data_command() -> typer.Typer:
             dialect=dialect,
             log_level=log_level,
             delimiter=delimiter,
+            skip_bad_rows=skip_bad_rows,
         )
 
         db = create_database(settings)

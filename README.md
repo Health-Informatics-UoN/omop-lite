@@ -26,6 +26,7 @@ You can configure the container or CLI using the following environment variables
 - `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
 - `SYNTHETIC_NUMBER`: Size of synthetic data, `100` or `1000`. Default is `100`.
 - `DELIMITER`: The delimiter used to separate data. Default is `tab`, can also be `,`
+- `SKIP_BAD_ROWS`: Skip individual rows that fail to load (e.g. constraint violations) instead of failing the whole table. Default is `false`. Note: this uses row-by-row insertion as a fallback, which is significantly slower and not recommended for large tables unless needed.
 
 ## Usage
 
@@ -101,6 +102,8 @@ You can provide your own data for loading into the tables by placing your files 
 
 To match the vocabulary files from Athena, this data should be tab-separated, but as a `.csv` file extension.
 You can override the delimiter with `DELIMITER` configuration.
+
+If your data contains rows that violate constraints (e.g. null values in required columns), you can set `SKIP_BAD_ROWS=true` to skip those rows and continue loading. The skipped rows and their errors will be logged as warnings.
 
 ## Text search OMOP
 
