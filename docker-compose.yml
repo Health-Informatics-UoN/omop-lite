@@ -7,7 +7,6 @@ x-omop-lite-common: &omop-lite-common
     dockerfile: Dockerfile
   environment:
     - SCHEMA_NAME=public
-    - SYNTHETIC=true
   volumes:
     - ./data:/data
 
