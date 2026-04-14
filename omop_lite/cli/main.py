@@ -1,3 +1,4 @@
+from typing import Literal
 from omop_lite.db import create_database
 from importlib.metadata import version
 import typer
@@ -82,12 +83,18 @@ def callback(
     schema_name: str = typer.Option(
         "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
     ),
-    dialect: str = typer.Option(
+    dialect: Literal["postgresql", "mssql"] = typer.Option(
         "postgresql",
         "--dialect",
         envvar="DIALECT",
         help="Database dialect (postgresql or mssql)",
     ),
+    omop_version: Literal["omop5.3", "omop5.4"] = typer.Option(
+        "omop5.4",
+        "--omop_version",
+        envvar="OMOP_VERSION",
+        help="Version of the OMOP CDM (omop5.4 or omop5.3)"
+        ),
     log_level: str = typer.Option(
         "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
     ),
@@ -123,6 +130,7 @@ def callback(
             data_dir=data_dir,
             schema_name=schema_name,
             dialect=dialect,
+            omop_version=omop_version,
             log_level=log_level,
             fts_create=fts_create,
             delimiter=delimiter,
