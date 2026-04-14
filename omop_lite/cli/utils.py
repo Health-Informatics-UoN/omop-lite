@@ -16,7 +16,7 @@ def _create_settings(
     data_dir: str = "data",
     schema_name: str = "public",
     dialect: Literal["postgresql", "mssql"] = "postgresql",
-    omop_version: Literal["omop5.3", "omop5.4"] = "omop5.4",
+    omop_version: Literal["omop5_3", "omop5_4"] = "omop5_4",
     log_level: str = "INFO",
     fts_create: bool = False,
     delimiter: str = "\t",
@@ -28,8 +28,8 @@ def _create_settings(
     if dialect not in ["postgresql", "mssql"]:
         raise typer.BadParameter("dialect must be either 'postgresql' or 'mssql'")
     # Validate omop_version
-    if omop_version not in ["omop5.3", "omop5.4"]:
-        raise typer.BadParameter("omop version must be either 'omop5.3' or 'omop5.4'")
+    if omop_version not in ["omop5_3", "omop5_4"]:
+        raise typer.BadParameter("omop version must be either 'omop5_3' or 'omop5_4'")
 
     return Settings(
         db_host=db_host,

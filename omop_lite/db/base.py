@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 # I thought about having a COMMON_TABLES list, but I think that's trying to be too clever
 OMOP_TABLES = {
-        "omop5.4": [
+        "omop5_4": [
             "CARE_SITE",
             "CDM_SOURCE",
             "COHORT",
@@ -53,7 +53,7 @@ OMOP_TABLES = {
             "VISIT_OCCURRENCE",
             "VOCABULARY",
         ],
-        "omop5.3": [
+        "omop5_3": [
             "PERSON",
             "OBSERVATION_PERIOD",
             "VISIT_OCCURRENCE",
