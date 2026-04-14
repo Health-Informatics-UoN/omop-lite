@@ -33,6 +33,7 @@ class TestCLIIntegration:
             "DB_NAME": "omop_test",
             "SCHEMA_NAME": "test_schema",
             "DIALECT": "postgresql",
+            "OMOP_VERSION": "omop5.4",
             "LOG_LEVEL": "INFO",
         }
 
