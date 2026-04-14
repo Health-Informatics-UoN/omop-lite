@@ -28,7 +28,7 @@ def omop_5_3_settings():
         db_name="omop",
         schema_name="cdm",
         dialect="postgresql",
-        omop_version="omop5_4"
+        omop_version="omop5_3"
     )
 
 def test_5_3_db(omop_5_3_settings):
