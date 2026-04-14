@@ -17,7 +17,7 @@ class PostgresDatabase(Database):
         self.engine = create_engine(self.db_url)
         self.metadata = MetaData(schema=settings.schema_name)
         self.metadata.reflect(bind=self.engine)
-        self.file_path = files("omop_lite.scripts.pg")
+        self.file_path = files(f"omop_lite.scripts.pg.{settings.omop_version}")
 
     def create_schema(self, schema_name: str) -> None:
         if not self.engine:

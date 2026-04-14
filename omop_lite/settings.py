@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     dialect: Literal["postgresql", "mssql"] = Field(
         default="postgresql", description="Database dialect"
     )
+    omop_version: Literal['omop5.3', 'omop5.4'] = Field(default='omop5.4', description="Version of the OMOP-CDM specification to use")
     log_level: str = Field(default="INFO", description="Logging level")
     fts_create: bool = Field(
         default=False, description="Create full-text search indexes"
