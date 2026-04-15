@@ -1,3 +1,4 @@
+from typing import Literal
 from omop_lite.settings import Settings
 import logging
 import typer
@@ -14,15 +15,21 @@ def _create_settings(
     synthetic_number: int = 100,
     data_dir: str = "data",
     schema_name: str = "public",
-    dialect: str = "postgresql",
+    dialect: Literal["postgresql", "mssql"] = "postgresql",
+    omop_version: Literal["omop5_3", "omop5_4"] = "omop5_4",
     log_level: str = "INFO",
     fts_create: bool = False,
     delimiter: str = "\t",
 ) -> Settings:
     """Create settings with validation."""
     # Validate dialect
+    # I think this should just let pydantic handle it - as these are both Literals in the model, it will throw a validation error anyway
+    # Keeping existing logic for now
     if dialect not in ["postgresql", "mssql"]:
         raise typer.BadParameter("dialect must be either 'postgresql' or 'mssql'")
+    # Validate omop_version
+    if omop_version not in ["omop5_3", "omop5_4"]:
+        raise typer.BadParameter("omop version must be either 'omop5_3' or 'omop5_4'")
 
     return Settings(
         db_host=db_host,
@@ -35,6 +42,7 @@ def _create_settings(
         data_dir=data_dir,
         schema_name=schema_name,
         dialect=dialect,
+        omop_version=omop_version,
         log_level=log_level,
         fts_create=fts_create,
         delimiter=delimiter,

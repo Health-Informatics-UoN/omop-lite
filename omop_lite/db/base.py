@@ -10,16 +10,9 @@ from sqlalchemy.sql import text
 
 logger = logging.getLogger(__name__)
 
-
-class Database(ABC):
-    """Abstract base class for database operations"""
-
-    def __init__(self, settings: Settings) -> None:
-        self.settings = settings
-        self.engine: Optional[Engine] = None
-        self.metadata: Optional[MetaData] = None
-        self.file_path: Optional[Union[Path, Traversable]] = None
-        self.omop_tables = [
+# I thought about having a COMMON_TABLES list, but I think that's trying to be too clever
+OMOP_TABLES = {
+        "omop5_4": [
             "CARE_SITE",
             "CDM_SOURCE",
             "COHORT",
@@ -59,7 +52,57 @@ class Database(ABC):
             "VISIT_DETAIL",
             "VISIT_OCCURRENCE",
             "VOCABULARY",
+        ],
+        "omop5_3": [
+            "ATTRIBUTE_DEFINITION",
+            "CARE_SITE",
+            "CDM_SOURCE",
+            "COHORT_DEFINITION",
+            "CONCEPT",
+            "CONCEPT_ANCESTOR",
+            "CONCEPT_CLASS",
+            "CONCEPT_RELATIONSHIP",
+            "CONCEPT_SYNONYM",
+            "CONDITION_ERA",
+            "CONDITION_OCCURRENCE",
+            "COST",
+            "DEATH",
+            "DRUG_EXPOSURE",
+            "DOMAIN",
+            "DEVICE_EXPOSURE",
+            "DOSE_ERA",
+            "DRUG_ERA",
+            "DRUG_STRENGTH",
+            "FACT_RELATIONSHIP",
+            "LOCATION",
+            "MEASUREMENT",
+            "METADATA",
+            "NOTE",
+            "NOTE_NLP",
+            "OBSERVATION",
+            "OBSERVATION_PERIOD",
+            "PAYER_PLAN_PERIOD",
+            "PERSON",
+            "PROCEDURE_OCCURRENCE",
+            "PROVIDER",
+            "RELATIONSHIP",
+            "SOURCE_TO_CONCEPT_MAP",
+            "SPECIMEN",
+            "VISIT_DETAIL",
+            "VISIT_OCCURRENCE",
+            "VOCABULARY",
         ]
+        }
+
+class Database(ABC):
+    """Abstract base class for database operations"""
+
+    def __init__(self, settings: Settings) -> None:
+        self.settings = settings
+        self.engine: Optional[Engine] = None
+        self.metadata: Optional[MetaData] = None
+        self.file_path: Optional[Union[Path, Traversable]] = None
+        self.omop_tables: list[str] = OMOP_TABLES[settings.omop_version]
 
     @property
     def dialect(self) -> str:
@@ -200,7 +243,7 @@ class Database(ABC):
         - Default is `\t`
 
         This is used to determine the delimiter for the COPY command.
-        """
+"""
         if self.settings.synthetic:
             if self.settings.synthetic_number == 1000:
                 return ","
