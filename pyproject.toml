@@ -23,6 +23,8 @@ include = [
     "omop_lite/scripts/**/*.sql",
     "omop_lite/synthetic/100/*.csv",
     "omop_lite/synthetic/1000/*.csv",
+    "omop_lite/synthetic/1001/*.csv",
+
 ]
 
 [tool.hatch.version]

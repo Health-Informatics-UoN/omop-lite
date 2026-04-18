@@ -1525,116 +1525,116 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 21490742	Airway resistance --during inspiration	Measurement	LOINC	Clinical Observation	S	75948-0	2016-06-24	2099-12-31	
 32020	EHR encounter diagnosis	Type Concept	Condition Type	Condition Type		OMOP4822160	1970-01-01	2099-12-31	
 45905770	Patient Self-Reported Condition	Type Concept	Condition Type	Condition Type		OMOP4822157	1970-01-01	2099-12-31	
-747481	tert-butylbenzoic acid (mixed isomers)	Drug	RxNorm	Ingredient	S	2671582	02/01/2024	31/12/2099
-844743	spinach extract 100 UNT/ML	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP5567556	04/08/2025	31/12/2099
-903903	tretinoin 0.5 MG/ML Topical Cream [Renova]	Drug	RxNorm	Branded Drug	S	846953	03/05/2009	31/12/2099
-1116072	zolmitriptan 2.5 MG Oral Tablet [Zomig]	Drug	RxNorm	Branded Drug	S	153353	01/01/1970	31/12/2099
-2022715	1540 ML alanine 4.9 MG/ML / arginine 3.43 MG/ML / aspartic acid 0.99 MG/ML / calcium chloride, dihydration 0.29 MG/ML / glucose 98 MG/ML / glutamate 1.6 MG/ML / glycerol mono(di)sodium phosphate 1.5 MG/ML / ... Injectable Solution [MG TNA]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP4921193	31/07/2020	31/12/2099
-2032106	1 ML epidermal growth factor 0.5 MG/ML Topical Solution [EASYEF] by Daewoong	Drug	RxNorm Extension	Marketed Product	S	OMOP4931028	31/07/2020	31/12/2099
-2044422	acetylcarnitine 500 MG Extended Release Oral Tablet [NORATIL]	Drug	RxNorm Extension	Branded Drug	S	OMOP4944442	31/07/2020	31/12/2099
-2918507	tenofovir disoproxil 300 MG [Hetenofovir]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP5135327	30/06/2021	31/12/2099
-2936497	Bupleurum falcatum root extract 120 MG / ginger extract 25 MG / Glycyrrhiza uralensis extract 90 MG / Korean ginseng preparation 33.3 MG / Piellia ternata whole extract 100 MG / ... Oral Capsule [Allerge] Box of 60	Drug	RxNorm Extension	Branded Drug Box	S	OMOP5153214	30/06/2021	31/12/2099
-19106683	acetaminophen 100 MG / adiphenine 300 MG Oral Tablet	Drug	RxNorm	Clinical Drug	S	429280	01/01/1970	31/12/2099
-19125043	sitagliptin phosphate 100 MG Oral Tablet [Januvia]	Drug	RxNorm	Branded Drug	S	665036	17/12/2006	31/12/2099
-21025947	pioglitazone 30 MG Oral Tablet Box of 28 by TEVA	Drug	RxNorm Extension	Marketed Product	S	OMOP414970	24/08/2017	31/12/2099
-21042512	Ciprofloxacin 3 MG/ML Ophthalmic Solution [Ciloxan] by Lexon	Drug	RxNorm Extension	Marketed Product	S	OMOP359818	24/08/2017	31/12/2099
-21050803	Riboflavin 50 MG Oral Capsule [B-2-50] Box of 100 by Bio-Tech Cal	Drug	RxNorm Extension	Marketed Product	S	OMOP278154	24/08/2017	31/12/2099
-21086674	Actaea racemosa whole extract 6 C Oral Tablet Box of 125 by Weleda	Drug	RxNorm Extension	Marketed Product	S	OMOP283292	24/08/2017	31/12/2099
-21093170	Ibuprofen 200 MG Oral Tablet [Cuprofen] Box of 96	Drug	RxNorm Extension	Branded Drug Box	S	OMOP389343	24/08/2017	31/12/2099
-21101386	Disopyramide 150 MG Oral Capsule [Rythmodan] by Waymade	Drug	RxNorm Extension	Marketed Product	S	OMOP360170	24/08/2017	31/12/2099
-21114218	lacidipine 2 MG Oral Tablet by Lexon	Drug	RxNorm Extension	Marketed Product	S	OMOP413522	24/08/2017	31/12/2099
-21134424	rabeprazole 20 MG Delayed Release Oral Tablet Box of 28 by Milpharm	Drug	RxNorm Extension	Marketed Product	S	OMOP261704	24/08/2017	31/12/2099
-21143516	aceclofenac 100 MG Oral Tablet Box of 60 by Mawdsley-Brooks	Drug	RxNorm Extension	Marketed Product	S	OMOP411522	24/08/2017	31/12/2099
-35129893	Amoxapine 25 MG [Amoxan]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4787209	11/03/2019	31/12/2099
-35137456	terguride Oral Tablet	Drug	RxNorm Extension	Clinical Drug Form	S	OMOP4794629	11/03/2019	31/12/2099
-35754398	Budesonide 0.18 MG/ACTUAT Inhalant Powder [Budelin]	Drug	RxNorm Extension	Branded Drug	S	OMOP2755859	24/08/2017	31/12/2099
-36056202	500 ML calcium chloride 0.32 MG/ML / potassium chloride 0.3 MG/ML / sodium chloride 8.6 MG/ML Injectable Solution [Viaflex] by Baxter	Drug	RxNorm Extension	Marketed Product	S	OMOP4981619	17/08/2020	31/12/2099
-36058008	camphor 31 MG/ML / salicylic acid 126 MG/ML Topical Solution [Scholl Seal and Heal] by Reckitt Benckiser	Drug	RxNorm Extension	Marketed Product	S	OMOP4983585	17/08/2020	31/12/2099
-36267219	Thyme oil 150 MG/ML Oral Solution	Drug	RxNorm Extension	Clinical Drug	S	OMOP3118094	01/10/2017	31/12/2099
-36852739	RIFAMEXIL	Drug	RxNorm Extension	Ingredient	S	OMOP5170356	01/01/1970	31/12/2099
-36863786	HT-61	Drug	RxNorm Extension	Ingredient	S	OMOP5181403	01/01/1970	31/12/2099
-36922065	tucatinib 50 MG Oral Tablet [Tukysa] Box of 88	Drug	RxNorm Extension	Branded Drug Box	S	OMOP5187804	22/05/2023	31/12/2099
-40014748	anthralin Topical Ointment [Alphodith]	Drug	RxNorm	Branded Drug Form	S	385382	01/01/1970	31/12/2099
-40709093	500 ML Fluoride Ion 0.5 MG/ML Mouthwash	Drug	RxNorm Extension	Quant Clinical Drug	S	OMOP4748101	04/06/2018	31/12/2099
-40715368	10 ML Regular Insulin, Human 100 UNT/ML Injectable Solution [Humulin S] by Eli Lilly	Drug	RxNorm Extension	Marketed Product	S	OMOP4742297	04/06/2018	31/12/2099
-40847101	DL-Lactic Acid 167 MG/ML / Salicylic Acid 167 MG/ML Medicated Shampoo [Duofilm]	Drug	RxNorm Extension	Branded Drug	S	OMOP2045063	24/08/2017	31/12/2099
-40853107	olanzapine 5 MG Delayed Release Oral Tablet [Olanzapin Hormosan] Box of 56 by Hormosan	Drug	RxNorm Extension	Marketed Product	S	OMOP2051069	24/08/2017	31/12/2099
-40866276	Mirtazapine 30 MG Oral Tablet Box of 1000	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2064238	24/08/2017	31/12/2099
-40909716	Dexamethasone 5 MG/ML Injectable Solution [Dexahexal]	Drug	RxNorm Extension	Branded Drug	S	OMOP2107678	24/08/2017	31/12/2099
-40914920	Acetaminophen 1000 MG Rectal Suppository Box of 100 by Sanofi	Drug	RxNorm Extension	Marketed Product	S	OMOP2112882	24/08/2017	31/12/2099
-40954088	Diazepam 10 MG [Diazepam Sandoz]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP2152050	24/08/2017	31/12/2099
-40968067	Methotrexate 15 MG Oral Tablet [Methotrexat Hexal] Box of 10	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2166029	24/08/2017	31/12/2099
-40968906	Ketoconazole 20 MG/ML Medicated Shampoo [Terzolin] Box of 1	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2166868	24/08/2017	31/12/2099
-40968957	Isosorbide 100 MG Oral Tablet [Is 5 Mono] Box of 100	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2166919	24/08/2017	31/12/2099
-40971183	Epinephrine 10 MG/ML / Pilocarpine 10 MG/ML Prefilled Applicator [E Pilo]	Drug	RxNorm Extension	Branded Drug	S	OMOP2169145	24/08/2017	31/12/2099
-40995661	Theophylline 250 MG Rectal Suppository [Euphyllin]	Drug	RxNorm Extension	Branded Drug	S	OMOP2193623	24/08/2017	31/12/2099
-41026683	Theophylline 400 MG Extended Release Oral Capsule [Pulmo Timelets] Box of 100	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2224645	24/08/2017	31/12/2099
-41041767	Ginkgo biloba extract 40 MG Oral Tablet Box of 60 by Ratiopharm	Drug	RxNorm Extension	Marketed Product	S	OMOP2239729	24/08/2017	31/12/2099
-41049079	Atropa belladonna fruiting top extract / Diphenhydramine Oral Tablet	Drug	RxNorm Extension	Clinical Drug Form	S	OMOP2247041	24/08/2017	31/12/2099
-41055787	Caffeine 0.05 MG/ML / Copper Gluconate 0.03 MG/ML / ferrous cation 0.3 MG/ML / Ginseng Preparation 100 MG/ML / Magnesium 0.03 MG/ML / Manganese 0.0333 MG/ML / Niacinamide 0.2 MG/ML / ... Oral Solution Box of 1	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2253749	24/08/2017	31/12/2099
-41076488	Hyoscyamus niger extract 350 MG/ML	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP2274450	24/08/2017	31/12/2099
-41090882	Proscillaridin 1 MG/ML Oral Solution [Wirnesin]	Drug	RxNorm Extension	Branded Drug	S	OMOP2288844	24/08/2017	31/12/2099
-41096613	Doxazosin 1 MG Oral Tablet [Doxazosin Al] Box of 20	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2294575	24/08/2017	31/12/2099
-41107666	Orthosiphon 180 MG	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP2305628	24/08/2017	31/12/2099
-41167082	Hydrochlorothiazide 25 MG Oral Tablet [Esidrix] Box of 50 by Novartis	Drug	RxNorm Extension	Marketed Product	S	OMOP2365044	24/08/2017	31/12/2099
-41168948	Budesonide 3 MG Oral Capsule [Budenofalk] Box of 100 by Aca Mueller	Drug	RxNorm Extension	Marketed Product	S	OMOP2366910	24/08/2017	31/12/2099
-41175599	Hydromorphone Extended Release Oral Capsule [Hydromorphon Abz]	Drug	RxNorm Extension	Branded Drug Form	S	OMOP2373561	24/08/2017	31/12/2099
-41178983	Ketoprofen 50 MG Oral Capsule Box of 300	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2376945	24/08/2017	31/12/2099
-41184102	ropinirole 1 MG Delayed Release Oral Tablet [Ropinirol Stada]	Drug	RxNorm Extension	Branded Drug	S	OMOP2382064	24/08/2017	31/12/2099
-41196685	Omeprazole 40 MG Oral Capsule Box of 7 by Ratiopharm	Drug	RxNorm Extension	Marketed Product	S	OMOP2394647	24/08/2017	31/12/2099
-41197704	Loratadine 10 MG Oral Tablet [Loratadura] Box of 7 by Mylan	Drug	RxNorm Extension	Marketed Product	S	OMOP2395666	24/08/2017	31/12/2099
-41202050	Eucalyptus globulus pollen extract 286 MG/ML	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP2400012	24/08/2017	31/12/2099
-41304956	Citric Acid 90 MG/ML / dodecylbenzenesulfonic acid 9 MG/ML / Sorbitol 893 MG/ML Enema Box of 50	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2502918	24/08/2017	31/12/2099
-41306448	Achillea millefolium extract 2 MG/ML / Angelica archangelica leaf extract 1.75 MG/ML / Choline 2.22 MG/ML / Copper Gluconate 0.001 MG/ML / CRATAEGUS LAEVIGATA FRUIT 6 MG/ML / ferric cation 2 MG/ML / Folic Acid 0.003 MG/ML / ... Oral Solution	Drug	RxNorm Extension	Clinical Drug	S	OMOP2504410	24/08/2017	31/12/2099
-41332482	1 ML Tetanus immune globulin 250 UNT/ML Injectable Solution [Tetanobulin] Box of 25	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2530444	24/08/2017	31/12/2099
-41395885	50 ML Doxycycline 10 MG/ML Oral Suspension [Vibramycin] Box of 1	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2593847	24/08/2017	31/12/2099
-41407140	0.4 ML Ketotifen 0.345 MG/ML Ophthalmic Solution [Allergo Vision] Box of 20 by OmniVision	Drug	RxNorm Extension	Marketed Product	S	OMOP2605102	24/08/2017	31/12/2099
-41416211	100 ML Arnica extract 0.013 MG/ML / Copper Gluconate 0.013 MG/ML / Mandragora officinarum preparation 0.00013 MG/ML / Melissa officinalis extract 160 MG/ML / Nicotine 0.00013 MG/ML / ... Oral Solution [Clauparest] Box of 1	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2614173	24/08/2017	31/12/2099
-41442297	500 ML Calcium 0.368 MG/ML / Glucose 56 MG/ML / Magnesium 0.306 MG/ML / Potassium 0.374 MG/ML / Sodium 8.18 MG/ML Injectable Solution Box of 10	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP2640259	24/08/2017	31/12/2099
-41495980	50000 MG Betamethasone 0.0006 MG/MG Topical Ointment [Betnesol] Box of 20	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2693942	24/08/2017	31/12/2099
-42727237	Amoxicillin 0.815 MG/MG Injectable Solution Box of 30	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2723742	24/08/2017	31/12/2099
-42936288	donepezil 10 MG [ARITE]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4662989	21/08/2018	31/12/2099
-42941698	Ceftriaxone 2000 MG Injection [UNITIAXONE]	Drug	RxNorm Extension	Branded Drug	S	OMOP4668341	21/08/2018	31/12/2099
-42953893	glimepiride 2 MG / Metformin 500 MG [MERICLE-M]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4680446	21/08/2018	31/12/2099
-42969636	rosuvastatin 20 MG Oral Tablet [CHOLELESS]	Drug	RxNorm Extension	Branded Drug	S	OMOP4696071	21/08/2018	31/12/2099
-43023173	Ibuprofen 0.05 MG/MG [Advil]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4838294	06/10/2019	31/12/2099
-43139824	Factor VIIa 8 MG Prefilled Syringe Box of 1	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP491834	24/08/2017	31/12/2099
-43175305	10 ML imiglucerase 40 UNT/ML Prefilled Syringe Box of 1	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP516171	24/08/2017	31/12/2099
-43194850	glimepiride 4 MG [GLIMEPIRIDE EVOLUGEN]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP491613	24/08/2017	31/12/2099
-43214333	Amlodipine 10 MG Oral Capsule [AMLOR] Box of 90	Drug	RxNorm Extension	Branded Drug Box	S	OMOP470424	24/08/2017	31/12/2099
-43256943	Acetaminophen 500 MG / Phenylephrine 5 MG Oral Tablet [Robitussin] Box of 24	Drug	RxNorm Extension	Branded Drug Box	S	OMOP542839	24/08/2017	31/12/2099
-43284870	temozolomide 100 MG Oral Capsule [Temaccord] Box of 5	Drug	RxNorm Extension	Branded Drug Box	S	OMOP549693	24/08/2017	31/12/2099
-43286859	100 ML clevidipine 0.5 MG/ML Injectable Suspension Box of 10	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP567506	24/08/2017	31/12/2099
-43518246	3 ML insulin, isophane 100 UNT/ML Injection [Protaphane]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP2805361	29/08/2017	31/12/2099
-43627004	3 ML Piroxicam 20 MG/ML Injectable Solution [PIROXICAM SANDOZ]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP761041	24/08/2017	31/12/2099
-43691009	ammonium carbonate / Barium Iodide / Berberis vulgaris fruit extract / ECHINACEA ANGUSTIFOLIA Extract / Hydrastis canadensis whole preparation / Pulsatilla vulgaris extract Oral Solution	Drug	RxNorm Extension	Clinical Drug Form	S	OMOP907467	24/08/2017	31/12/2099
-43698250	1 ML Borago officinialis whole extract 5 X Injectable Solution Box of 10 by Wala Heilmittel	Drug	RxNorm Extension	Marketed Product	S	OMOP731877	24/08/2017	31/12/2099
-43722693	400 ML Ammonium Chloride 2.85 MG/ML Injectable Solution Box of 6	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP853909	24/08/2017	31/12/2099
-43748109	Budesonide 1.28 MG/ML Nasal Suspension Box of 3	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP659672	24/08/2017	31/12/2099
-43749954	olanzapine 2.5 MG Delayed Release Oral Tablet [Olanzapin Heumann]	Drug	RxNorm Extension	Branded Drug	S	OMOP692274	24/08/2017	31/12/2099
-43762714	ginger root 0.0222 MG/MG	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP907087	24/08/2017	31/12/2099
-43775313	100 ML CHAMOMILE FLOWERS 1000 MG/ML Oral Suspension Box of 5	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP830536	24/08/2017	31/12/2099
-43783646	dorzolamide 22.3 MG/ML / Timolol 7 MG/ML Prefilled Applicator [Dorzolamid + Timolol Trb]	Drug	RxNorm Extension	Branded Drug	S	OMOP956680	24/08/2017	31/12/2099
-43812446	250 ML Phenylalanine 3.1 MG/ML Injectable Solution [Amiped]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP849514	24/08/2017	31/12/2099
-43826994	30 ML Hydrocortisone 1 MG/ML Topical Solution [Alfason] by Astellas	Drug	RxNorm Extension	Marketed Product	S	OMOP803100	24/08/2017	31/12/2099
-43835980	Adenosine Injectable Solution [Adenosin Rotexmedica]	Drug	RxNorm Extension	Branded Drug Form	S	OMOP924609	24/08/2017	31/12/2099
-43852909	Aluminum Hydroxide 500 MG [Algeldrate]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP905998	24/08/2017	31/12/2099
-44100389	Acetaminophen 325 MG / Codeine 8 MG / Methocarbamol 400 MG Oral Tablet [Robaxacet]	Drug	RxNorm Extension	Branded Drug	S	OMOP1095020	24/08/2017	31/12/2099
-44170539	topiramate 25 MG Delayed Release Oral Tablet [Topiramat Glenmark] Box of 50 by Glenmark	Drug	RxNorm Extension	Marketed Product	S	OMOP3047262	06/10/2017	31/12/2099
-44170768	propiverine 15 MG Delayed Release Oral Tablet [Propiver] Box of 49 by Mibe	Drug	RxNorm Extension	Marketed Product	S	OMOP3047491	06/10/2017	31/12/2099
-44174723	Ofloxacin 200 MG Delayed Release Oral Tablet [Tarivid] Box of 20 by Orifarm Leverkus	Drug	RxNorm Extension	Marketed Product	S	OMOP3051446	06/10/2017	31/12/2099
-44176626	Tramadol 100 MG Oral Tablet [TRAMADOL MYLAN] Box of 50	Drug	RxNorm Extension	Branded Drug Box	S	OMOP3053349	06/10/2017	31/12/2099
-44195231	45 ML Phosphoric acid 660 MG/ML Oral Solution [Fleet] Box of 100	Drug	RxNorm Extension	Quant Branded Box	S	OMOP3071954	06/10/2017	31/12/2099
-608822	Specimen from abscess of lung	Specimen	SNOMED	Specimen	S	29011000087100	31/07/2021	31/12/2099
-4043431	Multiple joint synovial fluid	Specimen	SNOMED	Specimen	S	167867009	31/01/2002	31/12/2099
-4048506	Specimen	Specimen	SNOMED	Specimen	S	123038009	31/01/2002	31/12/2099
-4048982	Specimen from kidney obtained by wedge biopsy	Specimen	SNOMED	Specimen	S	122673004	31/01/2002	31/12/2099
-4162500	Specimen from salivary gland obtained by biopsy	Specimen	SNOMED	Specimen	S	433119005	31/07/2008	31/12/2099
-4164007	Tissue specimen from central nervous system	Specimen	SNOMED	Specimen	S	399542003	31/07/2003	31/12/2099
-4188549	Breast cytologic material obtained by incisional biopsy	Specimen	SNOMED	Specimen	S	373103009	31/07/2002	31/12/2099
-4206413	Ascitic fluid specimen	Specimen	SNOMED	Specimen	S	309201001	31/01/2002	31/12/2099
-4206436	Cervical biopsy specimen	Specimen	SNOMED	Specimen	S	309283000	31/01/2002	31/12/2099
-40481562	Dialysis fluid specimen obtained before dialysis	Specimen	SNOMED	Specimen	S	444946008	31/07/2010	31/12/2099
-40491350	Body substance specimen from ear	Specimen	SNOMED	Specimen	S	447148003	31/01/2011	31/12/2099
-43021140	Pulmonary artery flotation catheter tip submitted as specimen	Specimen	SNOMED	Specimen	S	472924005	31/01/2013	31/12/2099
-44792555	Hemicolectomy tissue sample	Specimen	SNOMED	Specimen	S	362401000000106	01/10/2008	31/12/2099
+747481	tert-butylbenzoic acid (mixed isomers)	Drug	RxNorm	Ingredient	S	2671582	2024-01-02	2099-12-31	
+844743	spinach extract 100 UNT/ML	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP5567556	2025-08-04	2099-12-31	
+903903	tretinoin 0.5 MG/ML Topical Cream [Renova]	Drug	RxNorm	Branded Drug	S	846953	2009-05-03	2099-12-31	
+1116072	zolmitriptan 2.5 MG Oral Tablet [Zomig]	Drug	RxNorm	Branded Drug	S	153353	1970-01-01	2099-12-31	
+2022715	1540 ML alanine 4.9 MG/ML / arginine 3.43 MG/ML / aspartic acid 0.99 MG/ML / calcium chloride dihydration 0.29 MG/ML / glucose 98 MG/ML / glutamate 1.6 MG/ML / glycerol mono(di)sodium phosphate 1.5 MG/ML / ... Injectable Solution [MG TNA]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP4921193	2020-07-31	2099-12-31	
+2032106	1 ML epidermal growth factor 0.5 MG/ML Topical Solution [EASYEF] by Daewoong	Drug	RxNorm Extension	Marketed Product	S	OMOP4931028	2020-07-31	2099-12-31	
+2044422	acetylcarnitine 500 MG Extended Release Oral Tablet [NORATIL]	Drug	RxNorm Extension	Branded Drug	S	OMOP4944442	2020-07-31	2099-12-31	
+2918507	tenofovir disoproxil 300 MG [Hetenofovir]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP5135327	2021-06-30	2099-12-31	
+2936497	Bupleurum falcatum root extract 120 MG / ginger extract 25 MG / Glycyrrhiza uralensis extract 90 MG / Korean ginseng preparation 33.3 MG / Piellia ternata whole extract 100 MG / ... Oral Capsule [Allerge] Box of 60	Drug	RxNorm Extension	Branded Drug Box	S	OMOP5153214	2021-06-30	2099-12-31	
+19106683	acetaminophen 100 MG / adiphenine 300 MG Oral Tablet	Drug	RxNorm	Clinical Drug	S	429280	1970-01-01	2099-12-31	
+19125043	sitagliptin phosphate 100 MG Oral Tablet [Januvia]	Drug	RxNorm	Branded Drug	S	665036	2006-12-17	2099-12-31	
+21025947	pioglitazone 30 MG Oral Tablet Box of 28 by TEVA	Drug	RxNorm Extension	Marketed Product	S	OMOP414970	2017-08-24	2099-12-31	
+21042512	Ciprofloxacin 3 MG/ML Ophthalmic Solution [Ciloxan] by Lexon	Drug	RxNorm Extension	Marketed Product	S	OMOP359818	2017-08-24	2099-12-31	
+21050803	Riboflavin 50 MG Oral Capsule [B-2-50] Box of 100 by Bio-Tech Cal	Drug	RxNorm Extension	Marketed Product	S	OMOP278154	2017-08-24	2099-12-31	
+21086674	Actaea racemosa whole extract 6 C Oral Tablet Box of 125 by Weleda	Drug	RxNorm Extension	Marketed Product	S	OMOP283292	2017-08-24	2099-12-31	
+21093170	Ibuprofen 200 MG Oral Tablet [Cuprofen] Box of 96	Drug	RxNorm Extension	Branded Drug Box	S	OMOP389343	2017-08-24	2099-12-31	
+21101386	Disopyramide 150 MG Oral Capsule [Rythmodan] by Waymade	Drug	RxNorm Extension	Marketed Product	S	OMOP360170	2017-08-24	2099-12-31	
+21114218	lacidipine 2 MG Oral Tablet by Lexon	Drug	RxNorm Extension	Marketed Product	S	OMOP413522	2017-08-24	2099-12-31	
+21134424	rabeprazole 20 MG Delayed Release Oral Tablet Box of 28 by Milpharm	Drug	RxNorm Extension	Marketed Product	S	OMOP261704	2017-08-24	2099-12-31	
+21143516	aceclofenac 100 MG Oral Tablet Box of 60 by Mawdsley-Brooks	Drug	RxNorm Extension	Marketed Product	S	OMOP411522	2017-08-24	2099-12-31	
+35129893	Amoxapine 25 MG [Amoxan]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4787209	2019-03-11	2099-12-31	
+35137456	terguride Oral Tablet	Drug	RxNorm Extension	Clinical Drug Form	S	OMOP4794629	2019-03-11	2099-12-31	
+35754398	Budesonide 0.18 MG/ACTUAT Inhalant Powder [Budelin]	Drug	RxNorm Extension	Branded Drug	S	OMOP2755859	2017-08-24	2099-12-31	
+36056202	500 ML calcium chloride 0.32 MG/ML / potassium chloride 0.3 MG/ML / sodium chloride 8.6 MG/ML Injectable Solution [Viaflex] by Baxter	Drug	RxNorm Extension	Marketed Product	S	OMOP4981619	2020-08-17	2099-12-31	
+36058008	camphor 31 MG/ML / salicylic acid 126 MG/ML Topical Solution [Scholl Seal and Heal] by Reckitt Benckiser	Drug	RxNorm Extension	Marketed Product	S	OMOP4983585	2020-08-17	2099-12-31	
+36267219	Thyme oil 150 MG/ML Oral Solution	Drug	RxNorm Extension	Clinical Drug	S	OMOP3118094	2017-10-01	2099-12-31	
+36852739	RIFAMEXIL	Drug	RxNorm Extension	Ingredient	S	OMOP5170356	1970-01-01	2099-12-31	
+36863786	HT-61	Drug	RxNorm Extension	Ingredient	S	OMOP5181403	1970-01-01	2099-12-31	
+36922065	tucatinib 50 MG Oral Tablet [Tukysa] Box of 88	Drug	RxNorm Extension	Branded Drug Box	S	OMOP5187804	2023-05-22	2099-12-31	
+40014748	anthralin Topical Ointment [Alphodith]	Drug	RxNorm	Branded Drug Form	S	385382	1970-01-01	2099-12-31	
+40709093	500 ML Fluoride Ion 0.5 MG/ML Mouthwash	Drug	RxNorm Extension	Quant Clinical Drug	S	OMOP4748101	2018-06-04	2099-12-31	
+40715368	10 ML Regular Insulin Human 100 UNT/ML Injectable Solution [Humulin S] by Eli Lilly	Drug	RxNorm Extension	Marketed Product	S	OMOP4742297	2018-06-04	2099-12-31	
+40847101	DL-Lactic Acid 167 MG/ML / Salicylic Acid 167 MG/ML Medicated Shampoo [Duofilm]	Drug	RxNorm Extension	Branded Drug	S	OMOP2045063	2017-08-24	2099-12-31	
+40853107	olanzapine 5 MG Delayed Release Oral Tablet [Olanzapin Hormosan] Box of 56 by Hormosan	Drug	RxNorm Extension	Marketed Product	S	OMOP2051069	2017-08-24	2099-12-31	
+40866276	Mirtazapine 30 MG Oral Tablet Box of 1000	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2064238	2017-08-24	2099-12-31	
+40909716	Dexamethasone 5 MG/ML Injectable Solution [Dexahexal]	Drug	RxNorm Extension	Branded Drug	S	OMOP2107678	2017-08-24	2099-12-31	
+40914920	Acetaminophen 1000 MG Rectal Suppository Box of 100 by Sanofi	Drug	RxNorm Extension	Marketed Product	S	OMOP2112882	2017-08-24	2099-12-31	
+40954088	Diazepam 10 MG [Diazepam Sandoz]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP2152050	2017-08-24	2099-12-31	
+40968067	Methotrexate 15 MG Oral Tablet [Methotrexat Hexal] Box of 10	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2166029	2017-08-24	2099-12-31	
+40968906	Ketoconazole 20 MG/ML Medicated Shampoo [Terzolin] Box of 1	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2166868	2017-08-24	2099-12-31	
+40968957	Isosorbide 100 MG Oral Tablet [Is 5 Mono] Box of 100	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2166919	2017-08-24	2099-12-31	
+40971183	Epinephrine 10 MG/ML / Pilocarpine 10 MG/ML Prefilled Applicator [E Pilo]	Drug	RxNorm Extension	Branded Drug	S	OMOP2169145	2017-08-24	2099-12-31	
+40995661	Theophylline 250 MG Rectal Suppository [Euphyllin]	Drug	RxNorm Extension	Branded Drug	S	OMOP2193623	2017-08-24	2099-12-31	
+41026683	Theophylline 400 MG Extended Release Oral Capsule [Pulmo Timelets] Box of 100	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2224645	2017-08-24	2099-12-31	
+41041767	Ginkgo biloba extract 40 MG Oral Tablet Box of 60 by Ratiopharm	Drug	RxNorm Extension	Marketed Product	S	OMOP2239729	2017-08-24	2099-12-31	
+41049079	Atropa belladonna fruiting top extract / Diphenhydramine Oral Tablet	Drug	RxNorm Extension	Clinical Drug Form	S	OMOP2247041	2017-08-24	2099-12-31	
+41055787	Caffeine 0.05 MG/ML / Copper Gluconate 0.03 MG/ML / ferrous cation 0.3 MG/ML / Ginseng Preparation 100 MG/ML / Magnesium 0.03 MG/ML / Manganese 0.0333 MG/ML / Niacinamide 0.2 MG/ML / ... Oral Solution Box of 1	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2253749	2017-08-24	2099-12-31	
+41076488	Hyoscyamus niger extract 350 MG/ML	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP2274450	2017-08-24	2099-12-31	
+41090882	Proscillaridin 1 MG/ML Oral Solution [Wirnesin]	Drug	RxNorm Extension	Branded Drug	S	OMOP2288844	2017-08-24	2099-12-31	
+41096613	Doxazosin 1 MG Oral Tablet [Doxazosin Al] Box of 20	Drug	RxNorm Extension	Branded Drug Box	S	OMOP2294575	2017-08-24	2099-12-31	
+41107666	Orthosiphon 180 MG	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP2305628	2017-08-24	2099-12-31	
+41167082	Hydrochlorothiazide 25 MG Oral Tablet [Esidrix] Box of 50 by Novartis	Drug	RxNorm Extension	Marketed Product	S	OMOP2365044	2017-08-24	2099-12-31	
+41168948	Budesonide 3 MG Oral Capsule [Budenofalk] Box of 100 by Aca Mueller	Drug	RxNorm Extension	Marketed Product	S	OMOP2366910	2017-08-24	2099-12-31	
+41175599	Hydromorphone Extended Release Oral Capsule [Hydromorphon Abz]	Drug	RxNorm Extension	Branded Drug Form	S	OMOP2373561	2017-08-24	2099-12-31	
+41178983	Ketoprofen 50 MG Oral Capsule Box of 300	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2376945	2017-08-24	2099-12-31	
+41184102	ropinirole 1 MG Delayed Release Oral Tablet [Ropinirol Stada]	Drug	RxNorm Extension	Branded Drug	S	OMOP2382064	2017-08-24	2099-12-31	
+41196685	Omeprazole 40 MG Oral Capsule Box of 7 by Ratiopharm	Drug	RxNorm Extension	Marketed Product	S	OMOP2394647	2017-08-24	2099-12-31	
+41197704	Loratadine 10 MG Oral Tablet [Loratadura] Box of 7 by Mylan	Drug	RxNorm Extension	Marketed Product	S	OMOP2395666	2017-08-24	2099-12-31	
+41202050	Eucalyptus globulus pollen extract 286 MG/ML	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP2400012	2017-08-24	2099-12-31	
+41304956	Citric Acid 90 MG/ML / dodecylbenzenesulfonic acid 9 MG/ML / Sorbitol 893 MG/ML Enema Box of 50	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2502918	2017-08-24	2099-12-31	
+41306448	Achillea millefolium extract 2 MG/ML / Angelica archangelica leaf extract 1.75 MG/ML / Choline 2.22 MG/ML / Copper Gluconate 0.001 MG/ML / CRATAEGUS LAEVIGATA FRUIT 6 MG/ML / ferric cation 2 MG/ML / Folic Acid 0.003 MG/ML / ... Oral Solution	Drug	RxNorm Extension	Clinical Drug	S	OMOP2504410	2017-08-24	2099-12-31	
+41332482	1 ML Tetanus immune globulin 250 UNT/ML Injectable Solution [Tetanobulin] Box of 25	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2530444	2017-08-24	2099-12-31	
+41395885	50 ML Doxycycline 10 MG/ML Oral Suspension [Vibramycin] Box of 1	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2593847	2017-08-24	2099-12-31	
+41407140	0.4 ML Ketotifen 0.345 MG/ML Ophthalmic Solution [Allergo Vision] Box of 20 by OmniVision	Drug	RxNorm Extension	Marketed Product	S	OMOP2605102	2017-08-24	2099-12-31	
+41416211	100 ML Arnica extract 0.013 MG/ML / Copper Gluconate 0.013 MG/ML / Mandragora officinarum preparation 0.00013 MG/ML / Melissa officinalis extract 160 MG/ML / Nicotine 0.00013 MG/ML / ... Oral Solution [Clauparest] Box of 1	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2614173	2017-08-24	2099-12-31	
+41442297	500 ML Calcium 0.368 MG/ML / Glucose 56 MG/ML / Magnesium 0.306 MG/ML / Potassium 0.374 MG/ML / Sodium 8.18 MG/ML Injectable Solution Box of 10	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP2640259	2017-08-24	2099-12-31	
+41495980	50000 MG Betamethasone 0.0006 MG/MG Topical Ointment [Betnesol] Box of 20	Drug	RxNorm Extension	Quant Branded Box	S	OMOP2693942	2017-08-24	2099-12-31	
+42727237	Amoxicillin 0.815 MG/MG Injectable Solution Box of 30	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP2723742	2017-08-24	2099-12-31	
+42936288	donepezil 10 MG [ARITE]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4662989	2018-08-21	2099-12-31	
+42941698	Ceftriaxone 2000 MG Injection [UNITIAXONE]	Drug	RxNorm Extension	Branded Drug	S	OMOP4668341	2018-08-21	2099-12-31	
+42953893	glimepiride 2 MG / Metformin 500 MG [MERICLE-M]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4680446	2018-08-21	2099-12-31	
+42969636	rosuvastatin 20 MG Oral Tablet [CHOLELESS]	Drug	RxNorm Extension	Branded Drug	S	OMOP4696071	2018-08-21	2099-12-31	
+43023173	Ibuprofen 0.05 MG/MG [Advil]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP4838294	2019-10-06	2099-12-31	
+43139824	Factor VIIa 8 MG Prefilled Syringe Box of 1	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP491834	2017-08-24	2099-12-31	
+43175305	10 ML imiglucerase 40 UNT/ML Prefilled Syringe Box of 1	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP516171	2017-08-24	2099-12-31	
+43194850	glimepiride 4 MG [GLIMEPIRIDE EVOLUGEN]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP491613	2017-08-24	2099-12-31	
+43214333	Amlodipine 10 MG Oral Capsule [AMLOR] Box of 90	Drug	RxNorm Extension	Branded Drug Box	S	OMOP470424	2017-08-24	2099-12-31	
+43256943	Acetaminophen 500 MG / Phenylephrine 5 MG Oral Tablet [Robitussin] Box of 24	Drug	RxNorm Extension	Branded Drug Box	S	OMOP542839	2017-08-24	2099-12-31	
+43284870	temozolomide 100 MG Oral Capsule [Temaccord] Box of 5	Drug	RxNorm Extension	Branded Drug Box	S	OMOP549693	2017-08-24	2099-12-31	
+43286859	100 ML clevidipine 0.5 MG/ML Injectable Suspension Box of 10	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP567506	2017-08-24	2099-12-31	
+43518246	3 ML insulin isophane 100 UNT/ML Injection [Protaphane]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP2805361	2017-08-29	2099-12-31	
+43627004	3 ML Piroxicam 20 MG/ML Injectable Solution [PIROXICAM SANDOZ]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP761041	2017-08-24	2099-12-31	
+43691009	ammonium carbonate / Barium Iodide / Berberis vulgaris fruit extract / ECHINACEA ANGUSTIFOLIA Extract / Hydrastis canadensis whole preparation / Pulsatilla vulgaris extract Oral Solution	Drug	RxNorm Extension	Clinical Drug Form	S	OMOP907467	2017-08-24	2099-12-31	
+43698250	1 ML Borago officinialis whole extract 5 X Injectable Solution Box of 10 by Wala Heilmittel	Drug	RxNorm Extension	Marketed Product	S	OMOP731877	2017-08-24	2099-12-31	
+43722693	400 ML Ammonium Chloride 2.85 MG/ML Injectable Solution Box of 6	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP853909	2017-08-24	2099-12-31	
+43748109	Budesonide 1.28 MG/ML Nasal Suspension Box of 3	Drug	RxNorm Extension	Clinical Drug Box	S	OMOP659672	2017-08-24	2099-12-31	
+43749954	olanzapine 2.5 MG Delayed Release Oral Tablet [Olanzapin Heumann]	Drug	RxNorm Extension	Branded Drug	S	OMOP692274	2017-08-24	2099-12-31	
+43762714	ginger root 0.0222 MG/MG	Drug	RxNorm Extension	Clinical Drug Comp	S	OMOP907087	2017-08-24	2099-12-31	
+43775313	100 ML CHAMOMILE FLOWERS 1000 MG/ML Oral Suspension Box of 5	Drug	RxNorm Extension	Quant Clinical Box	S	OMOP830536	2017-08-24	2099-12-31	
+43783646	dorzolamide 22.3 MG/ML / Timolol 7 MG/ML Prefilled Applicator [Dorzolamid + Timolol Trb]	Drug	RxNorm Extension	Branded Drug	S	OMOP956680	2017-08-24	2099-12-31	
+43812446	250 ML Phenylalanine 3.1 MG/ML Injectable Solution [Amiped]	Drug	RxNorm Extension	Quant Branded Drug	S	OMOP849514	2017-08-24	2099-12-31	
+43826994	30 ML Hydrocortisone 1 MG/ML Topical Solution [Alfason] by Astellas	Drug	RxNorm Extension	Marketed Product	S	OMOP803100	2017-08-24	2099-12-31	
+43835980	Adenosine Injectable Solution [Adenosin Rotexmedica]	Drug	RxNorm Extension	Branded Drug Form	S	OMOP924609	2017-08-24	2099-12-31	
+43852909	Aluminum Hydroxide 500 MG [Algeldrate]	Drug	RxNorm Extension	Branded Drug Comp	S	OMOP905998	2017-08-24	2099-12-31	
+44100389	Acetaminophen 325 MG / Codeine 8 MG / Methocarbamol 400 MG Oral Tablet [Robaxacet]	Drug	RxNorm Extension	Branded Drug	S	OMOP1095020	2017-08-24	2099-12-31	
+44170539	topiramate 25 MG Delayed Release Oral Tablet [Topiramat Glenmark] Box of 50 by Glenmark	Drug	RxNorm Extension	Marketed Product	S	OMOP3047262	2017-10-06	2099-12-31	
+44170768	propiverine 15 MG Delayed Release Oral Tablet [Propiver] Box of 49 by Mibe	Drug	RxNorm Extension	Marketed Product	S	OMOP3047491	2017-10-06	2099-12-31	
+44174723	Ofloxacin 200 MG Delayed Release Oral Tablet [Tarivid] Box of 20 by Orifarm Leverkus	Drug	RxNorm Extension	Marketed Product	S	OMOP3051446	2017-10-06	2099-12-31	
+44176626	Tramadol 100 MG Oral Tablet [TRAMADOL MYLAN] Box of 50	Drug	RxNorm Extension	Branded Drug Box	S	OMOP3053349	2017-10-06	2099-12-31	
+44195231	45 ML Phosphoric acid 660 MG/ML Oral Solution [Fleet] Box of 100	Drug	RxNorm Extension	Quant Branded Box	S	OMOP3071954	2017-10-06	2099-12-31	
+608822	Specimen from abscess of lung	Specimen	SNOMED	Specimen	S	29011000087100	2021-07-31	2099-12-31	
+4043431	Multiple joint synovial fluid	Specimen	SNOMED	Specimen	S	167867009	2002-01-31	2099-12-31	
+4048506	Specimen	Specimen	SNOMED	Specimen	S	123038009	2002-01-31	2099-12-31	
+4048982	Specimen from kidney obtained by wedge biopsy	Specimen	SNOMED	Specimen	S	122673004	2002-01-31	2099-12-31	
+4162500	Specimen from salivary gland obtained by biopsy	Specimen	SNOMED	Specimen	S	433119005	2008-07-31	2099-12-31	
+4164007	Tissue specimen from central nervous system	Specimen	SNOMED	Specimen	S	399542003	2003-07-31	2099-12-31	
+4188549	Breast cytologic material obtained by incisional biopsy	Specimen	SNOMED	Specimen	S	373103009	2002-07-31	2099-12-31	
+4206413	Ascitic fluid specimen	Specimen	SNOMED	Specimen	S	309201001	2002-01-31	2099-12-31	
+4206436	Cervical biopsy specimen	Specimen	SNOMED	Specimen	S	309283000	2002-01-31	2099-12-31	
+40481562	Dialysis fluid specimen obtained before dialysis	Specimen	SNOMED	Specimen	S	444946008	2010-07-31	2099-12-31	
+40491350	Body substance specimen from ear	Specimen	SNOMED	Specimen	S	447148003	2011-01-31	2099-12-31	
+43021140	Pulmonary artery flotation catheter tip submitted as specimen	Specimen	SNOMED	Specimen	S	472924005	2013-01-31	2099-12-31	
+44792555	Hemicolectomy tissue sample	Specimen	SNOMED	Specimen	S	362401000000106	2008-10-01	2099-12-31	
