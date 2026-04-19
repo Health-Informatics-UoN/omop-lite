@@ -227,6 +227,8 @@ class Database(ABC):
         if self.settings.synthetic:
             if self.settings.synthetic_number == 1000:
                 return files("omop_lite.synthetic.1000")
+            elif self.settings.synthetic_number == 1001:
+                return files("omop_lite.synthetic.1001")
             return files("omop_lite.synthetic.100")
         data_dir = Path(self.settings.data_dir)
         if not data_dir.exists():
@@ -245,7 +247,7 @@ class Database(ABC):
         This is used to determine the delimiter for the COPY command.
 """
         if self.settings.synthetic:
-            if self.settings.synthetic_number == 1000:
+            if self.settings.synthetic_number == 1000 or self.settings.synthetic_number == 1001:
                 return ","
             return self.settings.delimiter
         else:
@@ -257,7 +259,7 @@ class Database(ABC):
         Common implementation for all databases.
         """
         if self.settings.synthetic:
-            if self.settings.synthetic_number == 1000:
+            if self.settings.synthetic_number == 1000 or self.settings.synthetic_number == 1001:
                 return '"'
         return "\b"
 
