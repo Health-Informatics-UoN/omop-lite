@@ -1726,7 +1726,7 @@ concept_id	concept_name	domain_id	vocabulary_id	concept_class_id	standard_concep
 36929524	Sigvaris Essential Semitransparent (15-20mmHg) panty closed toe lymphoedema garment female long small	Device	dm+d	AMP	S	40179611000001106	1970-01-01	2099-12-31	
 36956403	Sigvaris Essential Semitransparent (15-20mmHg) panty closed toe lymphoedema garment female normal medium	Device	dm+d	AMP	S	40178811000001103	1970-01-01	2099-12-31	
 36962618	Moderex Post-Op dressing 9cm x 10cm	Device	dm+d	AMP	S	40064211000001108	1970-01-01	2099-12-31	
-40218706	Peritoneal dialysis clamps	 each (Deprecated)	Device	HCPCS	HCPCS	S	K0610	2003-07-01	2003-12-31	
+40218706	Peritoneal dialysis clamps each (Deprecated)	Device	HCPCS	HCPCS	S	K0610	2003-07-01	2003-12-31	
 40666390	Juzo Hostess class 1 (18-21mmHg) below knee closed toe with silicone top band lymphoedema garment extra short size III	Device	dm+d	AMP	S	32064911000001107	1970-01-01	2099-12-31	
 40667138	Juzo Dynamic class 2 (23-32mmHg) tights closed toe lymphoedema garment standard size III	Device	dm+d	AMP	S	33489511000001103	1970-01-01	2099-12-31	
 40675694	Juzo Dynamic custom fit class 3 (34-46mmHg) below knee open toe with silicone top band lymphoedema garment Blueberry (Juzo UK Ltd) 1 device	Device	dm+d	AMPP	S	33080011000001107	1970-01-01	2099-12-31	
