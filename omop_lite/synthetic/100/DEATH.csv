@@ -1,3 +1,4 @@
+person_id   death_date  death_datetime  death_type_concept_id   cause_concept_id    cause_source_value  cause_source_concept_id
 7	2025-11-16		32822	37169474		
 14	2024-07-27		32843	37169474		
 21	2025-11-24		32834	37169474		
