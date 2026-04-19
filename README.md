@@ -92,8 +92,9 @@ helm install omop-lite omop-lite/omop-lite -f values.yaml
 If you need synthetic data, some is provided in the `synthetic` directory. It provides a small amount of data to load quickly.
 To load the synthetic data, run the container with the `SYNTHETIC` environment variable set to `true`.
 
-- 100 is fake data.
+- 100 is fake data
 - 1000 is [Synthea 1k](https://registry.opendata.aws/synthea-omop/) data.
+- 1001 is [Synthea 1k](https://registry.opendata.aws/synthea-omop/) data but with Specimen, Death, Device Exposure added in
 
 ## Bring Your Own Data
 
