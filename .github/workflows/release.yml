@@ -2,7 +2,7 @@
 # It is triggered by a push to the main branch.
 # It will publish an edge container image
 # And run semantic release
-# If the release is triggered it will tag the container image, and publish the PyPI package.
+# If the release is triggered it will tag the container image
 
 name: Release
 permissions:
@@ -12,7 +12,6 @@ permissions:
   packages: write
   id-token: write
 
-
 on:
   push:
     branches:
@@ -20,16 +19,16 @@ on:
 
 jobs:
   release:
-    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.3.0
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.4.0
     with:
-      node-version: '24'
+      node-version: "24"
     secrets: inherit
 
   publish-container:
-    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.3.0
+    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.4.0
     with:
       image-name: omop-lite
-      image-description: 'OMOP Lite container image'
+      image-description: "OMOP Lite container image"
       registry: ghcr.io
       context: .
       dockerfile: Dockerfile
@@ -37,11 +36,12 @@ jobs:
     secrets: inherit
 
   semver-container:
-    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.3.0
+    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.4.0
     needs: [release, publish-container]
     if: needs.release.outputs.release-created == 'true'
     with:
       image-name: omop-lite
       registry: ghcr.io
       tag: ${{ needs.release.outputs.release-tag }}
+      tag-latest: true
     secrets: inherit
