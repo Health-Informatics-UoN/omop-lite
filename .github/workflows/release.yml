@@ -2,7 +2,7 @@
 # It is triggered by a push to the main branch.
 # It will publish an edge container image
 # And run semantic release
-# If the release is triggered it will tag the container image
+# If the release is triggered it will tag the container image and release to Pypi
 
 name: Release
 permissions:
@@ -45,3 +45,28 @@ jobs:
       tag: ${{ needs.release.outputs.release-tag }}
       tag-latest: true
     secrets: inherit
+
+  publish-pypi:
+    needs: release
+    if: needs.release.outputs.release-created == 'true'
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      # Set your PyPI package name
+      url: https://pypi.org/p/omop-lite
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+        with:
+          python-version: "3.x"
+
+      - name: Build package
+        run: |
+          pip install build
+          python -m build
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@cef221092ed1bacb1cc03d23a2d87d1d172e277b # v1.14.0
