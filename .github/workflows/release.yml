@@ -25,7 +25,7 @@ jobs:
     secrets: inherit
 
   publish-container:
-    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.4.3
+    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.4.4
     with:
       image-name: omop-lite
       image-description: "OMOP Lite container image"
