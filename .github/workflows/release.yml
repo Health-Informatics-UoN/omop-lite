@@ -36,7 +36,7 @@ jobs:
     secrets: inherit
 
   semver-container:
-    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.4.3
+    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.4.4
     needs: [release, publish-container]
     if: needs.release.outputs.release-created == 'true'
     with:
