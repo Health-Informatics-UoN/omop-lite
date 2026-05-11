@@ -5,10 +5,10 @@ updates:
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "fix(dependencies): "
+      prefix: "chore(dependencies): "
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "fix(dependencies): "
+      prefix: "chore(dependencies): "
