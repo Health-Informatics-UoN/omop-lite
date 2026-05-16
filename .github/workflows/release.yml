@@ -19,7 +19,7 @@ on:
 
 jobs:
   release:
-    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.4.3
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.4.5
     with:
       node-version: "24"
     secrets: inherit
