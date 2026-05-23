@@ -84,7 +84,7 @@ jobs:
 
       - name: Pytest coverage comment
         if: github.event.pull_request.head.repo.fork == false
-        uses: MishaKav/pytest-coverage-comment@81882822c5b22af01f91bd3eacb1cefb6ad73dc2
+        uses: MishaKav/pytest-coverage-comment@dd5b80bde6d16941f336518e92929e89069d8451
         with:
           pytest-coverage-path: pytest-coverage.txt
           junitxml-path: pytest.xml
