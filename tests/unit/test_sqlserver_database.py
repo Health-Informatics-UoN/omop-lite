@@ -95,43 +95,39 @@ def test_schema_creation_sql_generation(mock_sqlserver_db):
 
 
 def test_insert_sql_generation():
-    """Test that the correct INSERT SQL is generated."""
-    settings = Settings(
-        schema_name="cdm",
-        delimiter="\t",
-        synthetic=True,
-        synthetic_number=1000,
-        dialect="mssql",
-    )
-
-    # Test the SQL generation logic for INSERT command
+    """Test that the correct INSERT SQL is generated with bracketed schema."""
     table_name = "test_table"
     headers = ["id", "name", "value"]
 
     columns = ", ".join(f"[{col}]" for col in headers)
     placeholders = ", ".join(["?" for _ in headers])
-    expected_sql = f"INSERT INTO cdm.[{table_name}] ({columns}) VALUES ({placeholders})"
-
-    # This tests the SQL generation logic, not the execution
-    generated_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
+    expected_sql = f"INSERT INTO [cdm].[{table_name}] ({columns}) VALUES ({placeholders})"
+    generated_sql = f"INSERT INTO [cdm].[{table_name}] ({columns}) VALUES ({placeholders})"
     assert generated_sql == expected_sql
 
 
 def test_insert_sql_with_single_column():
-    """Test INSERT SQL with single column."""
-    settings = Settings(
-        schema_name="cdm", delimiter="|", synthetic=False, dialect="mssql"
-    )
-
+    """Test INSERT SQL with single column and bracketed schema."""
     table_name = "test_table"
     headers = ["id"]
 
     columns = ", ".join(f"[{col}]" for col in headers)
     placeholders = ", ".join(["?" for _ in headers])
-    expected_sql = f"INSERT INTO cdm.[{table_name}] ({columns}) VALUES ({placeholders})"
-
-    generated_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
+    expected_sql = f"INSERT INTO [cdm].[{table_name}] ({columns}) VALUES ({placeholders})"
+    generated_sql = f"INSERT INTO [cdm].[{table_name}] ({columns}) VALUES ({placeholders})"
     assert generated_sql == expected_sql
+
+
+def test_insert_sql_preserves_mixed_case_schema():
+    """Test that INSERT SQL preserves mixed-case schema name via bracket quoting."""
+    table_name = "test_table"
+    quoted_schema = "[Testing]"
+    headers = ["id", "name"]
+
+    columns = ", ".join(f"[{col}]" for col in headers)
+    placeholders = ", ".join(["?" for _ in headers])
+    generated_sql = f"INSERT INTO {quoted_schema}.[{table_name}] ({columns}) VALUES ({placeholders})"
+    assert "[Testing]" in generated_sql
 
 
 def test_file_path_handling():

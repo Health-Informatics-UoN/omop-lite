@@ -109,6 +109,13 @@ class Database(ABC):
         """Get the database dialect."""
         return self.settings.dialect
 
+    @property
+    def quoted_schema_name(self) -> str:
+        """Return the schema name quoted for the current dialect to preserve case."""
+        if self.dialect == "postgresql":
+            return f'"{self.settings.schema_name}"'
+        return f"[{self.settings.schema_name}]"
+
     @abstractmethod
     def create_schema(self, schema_name: str) -> None:
         """Create a new schema."""
@@ -272,7 +279,7 @@ class Database(ABC):
             file_path = str(file_path)
 
         with open(file_path, "r") as f:
-            sql = f.read().replace("@cdmDatabaseSchema", self.settings.schema_name)
+            sql = f.read().replace("@cdmDatabaseSchema", self.quoted_schema_name)
 
         if not self.engine:
             raise RuntimeError("Database engine not initialized")

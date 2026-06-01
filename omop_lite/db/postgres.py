@@ -71,7 +71,7 @@ class PostgresDatabase(Database):
                 try:
                     with open(str(file_path), "r") as f:
                         cursor.copy_expert(
-                            f"COPY {self.settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')",
+                            f"COPY {self.quoted_schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')",
                             f,
                         )
                     connection.commit()

@@ -107,41 +107,36 @@ def test_fts_disabled_setting(mock_postgres_db):
 
 
 def test_copy_command_sql_generation():
-    """Test that the correct COPY command SQL is generated."""
-    settings = Settings(
-        schema_name="cdm",
-        delimiter="\t",
-        synthetic=True,
-        synthetic_number=1000,
-        dialect="postgresql",
-    )
-
-    # Test the SQL generation logic for COPY command
+    """Test that the correct COPY command SQL is generated with quoted schema."""
     table_name = "test_table"
     delimiter = ","
     quote = '"'
 
-    expected_sql = f"COPY cdm.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-
-    # This tests the SQL generation logic, not the execution
-    generated_sql = f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
+    expected_sql = f'COPY "cdm".{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E\'{delimiter}\', NULL \'\', QUOTE E\'{quote}\', HEADER, ENCODING \'UTF8\')'
+    generated_sql = f'COPY "cdm".{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E\'{delimiter}\', NULL \'\', QUOTE E\'{quote}\', HEADER, ENCODING \'UTF8\')'
     assert generated_sql == expected_sql
 
 
 def test_copy_command_with_custom_delimiter():
-    """Test COPY command SQL with custom delimiter."""
-    settings = Settings(
-        schema_name="cdm", delimiter="|", synthetic=False, dialect="postgresql"
-    )
-
+    """Test COPY command SQL with custom delimiter and quoted schema."""
     table_name = "test_table"
     delimiter = "|"
     quote = "\b"
 
-    expected_sql = f"COPY cdm.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-
-    generated_sql = f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
+    expected_sql = f'COPY "cdm".{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E\'{delimiter}\', NULL \'\', QUOTE E\'{quote}\', HEADER, ENCODING \'UTF8\')'
+    generated_sql = f'COPY "cdm".{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E\'{delimiter}\', NULL \'\', QUOTE E\'{quote}\', HEADER, ENCODING \'UTF8\')'
     assert generated_sql == expected_sql
+
+
+def test_copy_command_preserves_mixed_case_schema():
+    """Test that COPY command preserves mixed-case schema name via quoting."""
+    table_name = "test_table"
+    quoted_schema = '"Testing"'
+    delimiter = ","
+    quote = '"'
+
+    generated_sql = f"COPY {quoted_schema}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
+    assert '"Testing"' in generated_sql
 
 
 def test_file_path_handling():

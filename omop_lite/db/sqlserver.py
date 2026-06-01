@@ -46,7 +46,7 @@ class SQLServerDatabase(Database):
 
             columns = ", ".join(f"[{col}]" for col in headers)
             placeholders = ", ".join(["?" for _ in headers])
-            insert_sql = f"INSERT INTO {self.settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
+            insert_sql = f"INSERT INTO {self.quoted_schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
 
             conn = self.engine.raw_connection()
             try:

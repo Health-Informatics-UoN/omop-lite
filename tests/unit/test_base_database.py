@@ -271,7 +271,23 @@ class TestDatabaseBase:
         database._execute_sql_file("test.sql")
 
         mock_open.assert_called_with("test.sql", "r")
-        mock_cursor.execute.assert_called_once()
+        mock_cursor.execute.assert_called_once_with('SELECT "test_schema"')
         mock_connection.commit.assert_called_once()
         mock_cursor.close.assert_called_once()
         mock_connection.close.assert_called_once()
+
+    def test_quoted_schema_name_postgresql(self, database):
+        """Test quoted_schema_name returns double-quoted name for PostgreSQL."""
+        assert database.quoted_schema_name == '"test_schema"'
+
+    def test_quoted_schema_name_sqlserver(self, settings):
+        """Test quoted_schema_name returns bracket-quoted name for SQL Server."""
+        settings.dialect = "mssql"
+        db = TestDatabase(settings)
+        assert db.quoted_schema_name == "[test_schema]"
+
+    def test_quoted_schema_name_preserves_case(self, settings):
+        """Test quoted_schema_name preserves mixed-case schema names."""
+        settings.schema_name = "MySchema"
+        db = TestDatabase(settings)
+        assert db.quoted_schema_name == '"MySchema"'
