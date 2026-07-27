@@ -19,13 +19,13 @@ on:
 
 jobs:
   release:
-    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.4.11
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.4.12
     with:
       node-version: "24"
     secrets: inherit
 
   publish-container:
-    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.4.11
+    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.4.12
     with:
       image-name: omop-lite
       image-description: "OMOP Lite container image"
@@ -36,7 +36,7 @@ jobs:
     secrets: inherit
 
   semver-container:
-    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.4.11
+    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.4.12
     needs: [release, publish-container]
     if: needs.release.outputs.release-created == 'true'
     with:
@@ -57,7 +57,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
