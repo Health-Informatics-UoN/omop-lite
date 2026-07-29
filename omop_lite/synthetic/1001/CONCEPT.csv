@@ -750,3 +750,5 @@ concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concep
 45760292,"Surgical Nd:YAG/carbon dioxide laser system","Device","SNOMED","Physical Object","S","465948005","2014-07-31","2099-12-31",""
 45760760,"Speech assistive training device","Device","SNOMED","Physical Object","S","466603003","2014-07-31","2099-12-31",""
 45764269,"Specimen container mailer, non-insulated","Device","SNOMED","Physical Object","S","700906003","2014-07-31","2099-12-31",""
+4072900,"United Kingdom of Great Britain and Northern Ireland","Geography","SNOMED","Location","S","223860005","2002-01-31","2099-12-31",""
+4330435,"Denmark","Geography","SNOMED","Location","S","223663009","2002-01-31","2099-12-31",""
