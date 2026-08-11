@@ -46,10 +46,7 @@ test = [
 ]
 
 [tool.uv]
-# Only resolve to package versions published more than 3 days ago, to reduce
-# exposure to supply-chain attacks caught shortly after a malicious release.
-# See https://cooldowns.dev/
-exclude-newer = "3 days"
+exclude-newer = "7 days"
 
 
 [tool.ruff.lint.pydocstyle]
