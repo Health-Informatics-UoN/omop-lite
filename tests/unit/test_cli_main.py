@@ -71,9 +71,18 @@ class TestMainCLI:
             assert result.exit_code == 0
             assert "already exists" in result.output
             mock_db.create_schema.assert_not_called()
+            # The pipeline should still continue (it previously returned early
+            # here for any non-"public" schema that already existed).
+            mock_db.create_tables.assert_called_once()
 
     def test_main_cli_default_command_public_schema(self, runner):
-        """Test default command with public schema (should not create schema)."""
+        """Test default command with the 'public' schema.
+
+        Schema creation is idempotent (CREATE SCHEMA IF NOT EXISTS) and is now
+        always attempted when the schema doesn't exist yet, even for "public" -
+        duckdb, for example, has no "public" schema by default, so this can no
+        longer be special-cased.
+        """
         with (
             patch("omop_lite.cli.main._create_settings") as mock_create_settings,
             patch("omop_lite.cli.main.create_database") as mock_create_db,
@@ -89,7 +98,7 @@ class TestMainCLI:
             result = runner.invoke(app)
 
             assert result.exit_code == 0
-            mock_db.create_schema.assert_not_called()
+            mock_db.create_schema.assert_called_once_with("public")
 
     def test_main_cli_with_subcommand(self, runner):
         """Test that subcommands work correctly."""

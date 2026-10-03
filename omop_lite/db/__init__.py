@@ -1,6 +1,7 @@
 from .base import Database
 from .postgres import PostgresDatabase
 from .sqlserver import SQLServerDatabase
+from .duckdb import DuckDBDatabase
 from omop_lite.settings import Settings
 
 
@@ -10,8 +11,16 @@ def create_database(settings: Settings) -> Database:
         return PostgresDatabase(settings)
     elif settings.dialect == "mssql":
         return SQLServerDatabase(settings)
+    elif settings.dialect == "duckdb":
+        return DuckDBDatabase(settings)
     else:
         raise ValueError(f"Unsupported dialect: {settings.dialect}")
 
 
-__all__ = ["Database", "PostgresDatabase", "SQLServerDatabase", "create_database"]
+__all__ = [
+    "Database",
+    "PostgresDatabase",
+    "SQLServerDatabase",
+    "DuckDBDatabase",
+    "create_database",
+]

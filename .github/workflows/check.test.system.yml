@@ -122,3 +122,52 @@ jobs:
           docker run --rm --network=host \
           mcr.microsoft.com/mssql-tools \
           /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P 'Password123!' -Q "DECLARE @count INT = (SELECT COUNT(*) FROM omop_1000.person); IF @count != 1130 BEGIN RAISERROR('Expected 1130 persons, got %d', 16, 1, @count) END ELSE SELECT 'PASS: Person count is 1130' as result;"
+
+      # DuckDB is file-based, so no service container is needed - just a
+      # mounted directory to write the .duckdb file into and read it back
+      # from on the runner.
+      # 99 persons
+      - name: Run Docker container for DuckDB
+        run: |
+          mkdir -p duckdb-out
+          chmod 777 duckdb-out
+          docker run --rm \
+          -v "$PWD/duckdb-out:/data" \
+          -e DIALECT=duckdb \
+          -e DB_NAME=/data/omop.duckdb \
+          -e SYNTHETIC=true \
+          omop-lite
+
+      - name: Verify data in DuckDB
+        run: |
+          pip install duckdb
+          python3 -c "
+          import duckdb
+          con = duckdb.connect('duckdb-out/omop.duckdb', read_only=True)
+          count = con.execute('SELECT COUNT(*) FROM public.person').fetchone()[0]
+          assert count == 99, f'Expected 99 persons, got {count}'
+          print('PASS: Person count is 99')
+          "
+
+      # 1130 persons
+      - name: Run Docker container for DuckDB (synthetic 1000)
+        run: |
+          mkdir -p duckdb-out-1000
+          chmod 777 duckdb-out-1000
+          docker run --rm \
+          -v "$PWD/duckdb-out-1000:/data" \
+          -e DIALECT=duckdb \
+          -e DB_NAME=/data/omop.duckdb \
+          -e SYNTHETIC=true \
+          -e SYNTHETIC_NUMBER=1000 \
+          omop-lite
+
+      - name: Verify data in DuckDB (synthetic 1000)
+        run: |
+          python3 -c "
+          import duckdb
+          con = duckdb.connect('duckdb-out-1000/omop.duckdb', read_only=True)
+          count = con.execute('SELECT COUNT(*) FROM public.person').fetchone()[0]
+          assert count == 1130, f'Expected 1130 persons, got {count}'
+          print('PASS: Person count is 1130')
+          "

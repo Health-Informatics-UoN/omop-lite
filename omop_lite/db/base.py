@@ -178,7 +178,7 @@ class Database(ABC):
             raise RuntimeError("Database engine not initialized")
 
         with self.engine.connect() as connection:
-            if self.dialect == "postgresql":
+            if self.dialect in ("postgresql", "duckdb"):
                 connection.execute(
                     text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE')
                 )
@@ -285,7 +285,13 @@ class Database(ABC):
                 connection.commit()
             except Exception as e:
                 logger.error(f"Error executing {file_path}: {str(e)}")
-                connection.rollback()
+                try:
+                    connection.rollback()
+                except Exception:
+                    # Some drivers (e.g. duckdb) raise if there's no active
+                    # transaction to roll back - the original error above is
+                    # what matters, so don't let this mask it.
+                    pass
             finally:
                 cursor.close()
         finally:

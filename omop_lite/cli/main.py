@@ -63,7 +63,11 @@ def callback(
         "password", "--db-password", envvar="DB_PASSWORD", help="Database password"
     ),
     db_name: str = typer.Option(
-        "omop", "--db-name", "-d", envvar="DB_NAME", help="Database name"
+        "omop",
+        "--db-name",
+        "-d",
+        envvar="DB_NAME",
+        help="Database name (for duckdb, the path to the .duckdb file)",
     ),
     synthetic: bool = typer.Option(
         False,
@@ -83,11 +87,11 @@ def callback(
     schema_name: str = typer.Option(
         "public", "--schema-name", envvar="SCHEMA_NAME", help="Database schema name"
     ),
-    dialect: Literal["postgresql", "mssql"] = typer.Option(
+    dialect: Literal["postgresql", "mssql", "duckdb"] = typer.Option(
         "postgresql",
         "--dialect",
         envvar="DIALECT",
-        help="Database dialect (postgresql or mssql)",
+        help="Database dialect (postgresql, mssql or duckdb)",
     ),
     omop_version: Literal["omop5_3", "omop5_4"] = typer.Option(
         "omop5_4",
@@ -148,15 +152,16 @@ def callback(
 
         db = create_database(settings)
 
-        # Handle schema creation if not using 'public'
-        if settings.schema_name != "public":
-            if db.schema_exists(settings.schema_name):
-                console.print(f"ℹ️  Schema '{settings.schema_name}' already exists")
-                return
-            else:
-                with console.status("[bold green]Creating schema...", spinner="dots"):
-                    db.create_schema(settings.schema_name)
-                console.print(f"✅ Schema '{settings.schema_name}' created")
+        # Create the schema if it doesn't already exist.
+        # This is idempotent (CREATE SCHEMA IF NOT EXISTS) on every dialect, so it
+        # always runs - unlike postgresql/mssql, duckdb has no 'public' schema by
+        # default, so skipping this when schema_name == "public" would fail later.
+        if db.schema_exists(settings.schema_name):
+            console.print(f"ℹ️  Schema '{settings.schema_name}' already exists")
+        else:
+            with console.status("[bold green]Creating schema...", spinner="dots"):
+                db.create_schema(settings.schema_name)
+            console.print(f"✅ Schema '{settings.schema_name}' created")
 
         # Progress bar for the main pipeline
         with Progress(

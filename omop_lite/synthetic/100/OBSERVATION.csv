@@ -1,4 +1,4 @@
-observation_id	person_id	observation_concept_id	observation_date	observation_datetime	observation_type_concept_id	value_as_number	value_as_string	value_as_concept_id	qualifier_concept_id	unit_concept_id	provider_id	visit_occurrence_id	visit_detail_id	observation_source_value	observation_source_concept_id	unit_source_value	qualifier_source_value
+observation_id	person_id	observation_concept_id	observation_date	observation_datetime	observation_type_concept_id	value_as_number	value_as_string	value_as_concept_id	qualifier_concept_id	unit_concept_id	provider_id	visit_occurrence_id	visit_detail_id	observation_source_value	observation_source_concept_id	unit_source_value	qualifier_source_value	value_source_value	observation_event_id	obs_event_field_concept_id
 1	1	4310136	1972-08-21		32886															
 2	1	4139070	1985-12-28		32885															
 3	1	601390	1964-08-25		32877															
