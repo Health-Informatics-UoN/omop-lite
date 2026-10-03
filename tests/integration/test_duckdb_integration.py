@@ -36,6 +36,8 @@ def test_db(duckdb_settings: Settings):
     try:
         db.drop_all(duckdb_settings.schema_name)
     except Exception:
+        # Best-effort cleanup - tests that don't create the schema/tables
+        # (or already drop them themselves) would otherwise fail teardown.
         pass
 
 
