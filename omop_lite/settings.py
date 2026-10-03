@@ -10,14 +10,18 @@ class Settings(BaseSettings):
     db_port: int = Field(default=5432, description="Database port")
     db_user: str = Field(default="postgres", description="Database user")
     db_password: str = Field(default="password", description="Database password")
-    db_name: str = Field(default="omop", description="Database name")
+    db_name: str = Field(
+        default="omop",
+        description="Database name. For the duckdb dialect, this is instead "
+        "the path to the .duckdb file to create/use.",
+    )
     synthetic: bool = Field(default=False, description="Use synthetic data")
     synthetic_number: int = Field(
         default=100, description="Number of synthetic records"
     )
     data_dir: str = Field(default="data", description="Data directory")
     schema_name: str = Field(default="public", description="Database schema name")
-    dialect: Literal["postgresql", "mssql"] = Field(
+    dialect: Literal["postgresql", "mssql", "duckdb"] = Field(
         default="postgresql", description="Database dialect"
     )
     omop_version: Literal['omop5_3', 'omop5_4'] = Field(default='omop5_4', description="Version of the OMOP-CDM specification to use")

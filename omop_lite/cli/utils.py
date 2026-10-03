@@ -15,7 +15,7 @@ def _create_settings(
     synthetic_number: int = 100,
     data_dir: str = "data",
     schema_name: str = "public",
-    dialect: Literal["postgresql", "mssql"] = "postgresql",
+    dialect: Literal["postgresql", "mssql", "duckdb"] = "postgresql",
     omop_version: Literal["omop5_3", "omop5_4"] = "omop5_4",
     log_level: str = "INFO",
     fts_create: bool = False,
@@ -25,8 +25,10 @@ def _create_settings(
     # Validate dialect
     # I think this should just let pydantic handle it - as these are both Literals in the model, it will throw a validation error anyway
     # Keeping existing logic for now
-    if dialect not in ["postgresql", "mssql"]:
-        raise typer.BadParameter("dialect must be either 'postgresql' or 'mssql'")
+    if dialect not in ["postgresql", "mssql", "duckdb"]:
+        raise typer.BadParameter(
+            "dialect must be one of 'postgresql', 'mssql' or 'duckdb'"
+        )
     # Validate omop_version
     if omop_version not in ["omop5_3", "omop5_4"]:
         raise typer.BadParameter("omop version must be either 'omop5_3' or 'omop5_4'")

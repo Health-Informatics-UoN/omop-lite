@@ -7,7 +7,7 @@
 [![omop-lite Containers][docker-badge]][omop-lite-containers]
 [![omop-lite helm][helm-badge]][omop-lite-containers]
 
-A small container to get an OMOP CDM database running quickly, with support for both PostgreSQL and SQL Server.
+A small container to get an OMOP CDM database running quickly, with support for PostgreSQL, SQL Server, and DuckDB.
 
 Drop your data into `data/`, and run the container.
 
@@ -19,9 +19,9 @@ You can configure the container or CLI using the following environment variables
 - `DB_PORT`: The port number of the database. Default is `5432`.
 - `DB_USER`: The username for the database. Default is `postgres`.
 - `DB_PASSWORD`: The password for the database. Default is `password`.
-- `DB_NAME`: The name of the database. Default is `omop`.
-- `DIALECT`: The type of database to use. Default is `postgresql`, but can also be `mssql`.
-- `OMOP_VERISON`: Version of the OMOP-CDM schema to load. Default is `omop5_4`, but can also be `omop5_3`.
+- `DB_NAME`: The name of the database. Default is `omop`. For the `duckdb` dialect, this is instead the path to the `.duckdb` file to create/use, e.g. `/data/omop.duckdb`.
+- `DIALECT`: The type of database to use. Default is `postgresql`, but can also be `mssql` or `duckdb`.
+- `OMOP_VERSION`: Version of the OMOP-CDM schema to load. Default is `omop5_4`, but can also be `omop5_3`.
 - `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `public`.
 - `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
 - `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
@@ -87,6 +87,24 @@ Install with custom values:
 ```bash
 helm install omop-lite omop-lite/omop-lite -f values.yaml
 ```
+
+### DuckDB
+
+Unlike PostgreSQL/SQL Server, [DuckDB](https://duckdb.org/) is file-based rather than a server you connect to - running omop-lite with `DIALECT=duckdb` creates a single `.duckdb` file, pre-loaded with the OMOP CDM schema and either synthetic or your own data, which you can then open directly with the DuckDB CLI, Python, R, or a notebook.
+
+```bash
+docker run -v ./data:/data -e DIALECT=duckdb -e DB_NAME=/data/omop.duckdb -e SYNTHETIC=true ghcr.io/health-informatics-uon/omop-lite
+```
+
+or with the bundled compose file:
+
+```bash
+docker compose --profile duckdb up
+```
+
+`DB_NAME` is repurposed as the output file path for this dialect (see Configuration above) - point it at a path under a mounted volume so the file persists after the container exits. `DB_HOST`/`DB_PORT`/`DB_USER`/`DB_PASSWORD` are ignored.
+
+DuckDB does not support adding foreign keys to an existing table (only primary keys can be added after creation), so foreign key constraints are skipped for this dialect - primary keys and indices are still created as normal.
 
 ## Synthetic Data
 

@@ -1,4 +1,4 @@
-measurement_id	person_id	measurement_concept_id	measurement_date	measurement_datetime	measurement_time	measurement_type_concept_id	operator_concept_id	value_as_number	value_as_concept_id	unit_concept_id	range_low	range_high	provider_id	visit_occurrence_id	visit_detail_id	measurement_source_value	measurement_source_concept_id	unit_source_value	value_source_value
+measurement_id	person_id	measurement_concept_id	measurement_date	measurement_datetime	measurement_time	measurement_type_concept_id	operator_concept_id	value_as_number	value_as_concept_id	unit_concept_id	range_low	range_high	provider_id	visit_occurrence_id	visit_detail_id	measurement_source_value	measurement_source_concept_id	unit_source_value	unit_source_concept_id	value_source_value	measurement_event_id	meas_event_field_concept_id
 1	1	19498243	1984-01-24			32886		43														
 2	1	35958645	1990-06-25			32830		16														
 3	1	3040783	1960-06-16			32809		98														

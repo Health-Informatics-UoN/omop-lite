@@ -6,6 +6,8 @@ readme = "README.md"
 requires-python = ">=3.11"
 
 dependencies = [
+    "duckdb>=1.1.0",
+    "duckdb-engine>=0.13.0",
     "psycopg2-binary>=2.9.10",
     "pydantic-settings>=2.8.1",
     "pyodbc>=5.2.0",

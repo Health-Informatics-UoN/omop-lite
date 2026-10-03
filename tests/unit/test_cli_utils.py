@@ -64,7 +64,8 @@ class TestCLIUtils:
     def test_create_settings_invalid_dialect(self):
         """Test _create_settings with invalid dialect."""
         with pytest.raises(
-            BadParameter, match="dialect must be either 'postgresql' or 'mssql'"
+            BadParameter,
+            match="dialect must be one of 'postgresql', 'mssql' or 'duckdb'",
         ):
             _create_settings(dialect="invalid")
 
@@ -78,16 +79,23 @@ class TestCLIUtils:
         settings = _create_settings(dialect="mssql")
         assert settings.dialect == "mssql"
 
+    def test_create_settings_duckdb_dialect(self):
+        """Test _create_settings with duckdb dialect."""
+        settings = _create_settings(dialect="duckdb")
+        assert settings.dialect == "duckdb"
+
     def test_create_settings_case_insensitive_dialect(self):
         """Test _create_settings with case insensitive dialect validation."""
         # The actual implementation is case-sensitive, so these should fail
         with pytest.raises(
-            BadParameter, match="dialect must be either 'postgresql' or 'mssql'"
+            BadParameter,
+            match="dialect must be one of 'postgresql', 'mssql' or 'duckdb'",
         ):
             _create_settings(dialect="POSTGRESQL")
 
         with pytest.raises(
-            BadParameter, match="dialect must be either 'postgresql' or 'mssql'"
+            BadParameter,
+            match="dialect must be one of 'postgresql', 'mssql' or 'duckdb'",
         ):
             _create_settings(dialect="MsSql")
 

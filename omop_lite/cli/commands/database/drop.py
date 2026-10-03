@@ -39,7 +39,7 @@ def drop_command() -> typer.Typer:
             "postgresql",
             "--dialect",
             envvar="DIALECT",
-            help="Database dialect (postgresql or mssql)",
+            help="Database dialect (postgresql, mssql or duckdb)",
         ),
         log_level: str = typer.Option(
             "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"

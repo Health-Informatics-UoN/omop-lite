@@ -89,6 +89,18 @@ services:
       start_period: 10s
     profiles: [sqlserver]
 
+  # omop-lite service for the duckdb profile - no database service needed,
+  # DuckDB is file-based. The resulting .duckdb file is written into the
+  # mounted ./data volume so it persists after the container exits.
+  omop-lite-duckdb:
+    <<: *omop-lite-common
+    environment:
+      - SCHEMA_NAME=public
+      - SYNTHETIC=true
+      - DIALECT=duckdb
+      - DB_NAME=/data/omop.duckdb
+    profiles: [duckdb]
+
   text-search:
     build:
       context: ./text-search
