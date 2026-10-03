@@ -21,7 +21,7 @@ You can configure the container or CLI using the following environment variables
 - `DB_PASSWORD`: The password for the database. Default is `password`.
 - `DB_NAME`: The name of the database. Default is `omop`. For the `duckdb` dialect, this is instead the path to the `.duckdb` file to create/use, e.g. `/data/omop.duckdb`.
 - `DIALECT`: The type of database to use. Default is `postgresql`, but can also be `mssql` or `duckdb`.
-- `OMOP_VERSION`: Version of the OMOP-CDM schema to load. Default is `omop5_4`, but can also be `omop5_3`.
+- `OMOP_VERSION`: Version of the OMOP-CDM schema to load. Default is `omop5_4`, but can also be `omop5_3` or `omop5_5`.
 - `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `public`.
 - `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
 - `SYNTHETIC`: Load synthetic data (boolean). Default is `false`

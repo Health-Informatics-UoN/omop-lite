@@ -1,0 +1,7 @@
+--duckdb CDM Foreign Key Constraints for OMOP Common Data Model 5.5
+--
+-- Intentionally empty. DuckDB does not support adding foreign keys to an
+-- existing table via ALTER TABLE ... ADD CONSTRAINT ... FOREIGN KEY (unlike
+-- PRIMARY KEY, which can be added after creation - see primary_keys.sql).
+-- See https://github.com/duckdb/duckdb/pull/24286 for upstream progress.
+-- Foreign key enforcement is skipped entirely for this dialect.

@@ -1,0 +1,47 @@
+name: Sync OHDSI CDM DDL
+
+# Checks the DDL vendored from OHDSI/CommonDataModel (tools/sync_cdm_ddl.py)
+# against the git tags it's pinned to, and opens a PR if OHDSI has changed
+# those files since. This turns silent vendoring drift into a reviewable
+# diff - it does NOT bump the pinned tags itself, see tools/sync_cdm_ddl.py.
+on:
+  schedule:
+    - cron: "0 6 * * 1" # Weekly, Monday 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version: "0.10.4"
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+
+      - name: Setup Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.13"
+
+      - name: Re-sync vendored DDL from the pinned CommonDataModel tags
+        run: uv run python tools/sync_cdm_ddl.py
+
+      - name: Open a PR if the vendored DDL changed
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          commit-message: "fix(ddl): sync vendored CDM DDL from OHDSI/CommonDataModel"
+          title: "fix(ddl): sync vendored CDM DDL from OHDSI/CommonDataModel"
+          body: >
+            OHDSI changed one or more DDL files under the tags currently
+            pinned in `tools/sync_cdm_ddl.py`, without those tags moving.
+            Review the diff against any local edits to the vendored SQL
+            before merging.
+          branch: sync/cdm-ddl
+          delete-branch: true
