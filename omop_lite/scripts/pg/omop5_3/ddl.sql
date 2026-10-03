@@ -143,7 +143,7 @@ CREATE TABLE @cdmDatabaseSchema.DEVICE_EXPOSURE (
 			device_exposure_end_date date NULL,
 			device_exposure_end_datetime TIMESTAMP NULL,
 			device_type_concept_id integer NOT NULL,
-			unique_device_id varchar(50) NULL,
+			unique_device_id varchar(255) NULL,
 			quantity integer NULL,
 			provider_id integer NULL,
 			visit_occurrence_id integer NULL,
