@@ -93,11 +93,11 @@ def callback(
         envvar="DIALECT",
         help="Database dialect (postgresql, mssql or duckdb)",
     ),
-    omop_version: Literal["omop5_3", "omop5_4"] = typer.Option(
+    omop_version: Literal["omop5_3", "omop5_4", "omop5_5"] = typer.Option(
         "omop5_4",
         "--omop_version",
         envvar="OMOP_VERSION",
-        help="Version of the OMOP CDM (omop5_4 or omop5_3)"
+        help="Version of the OMOP CDM (omop5_5, omop5_4 or omop5_3)"
         ),
     log_level: str = typer.Option(
         "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
