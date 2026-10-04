@@ -245,6 +245,30 @@ class TestDatabaseBase:
 
         assert result == "\b"
 
+    def test_load_data_continues_after_table_failure(self, database):
+        """A failing table must not stop the rest of load_data's loop.
+
+        Real OMOP CSVs (vocabulary files especially) sometimes contain rows
+        that fail to load. Postgres/DuckDB's COPY fails the whole table on
+        one bad row, so load_data catches per-table and keeps going - this
+        locks in that intentional behaviour.
+        """
+        database._get_data_dir = Mock(return_value=Path("/data"))
+        database._file_exists = Mock(return_value=True)
+
+        attempted = []
+
+        def fake_bulk_load(table_name, file_path):
+            attempted.append(table_name)
+            if table_name == database.omop_tables[0].lower():
+                raise RuntimeError("bad row")
+
+        database._bulk_load = Mock(side_effect=fake_bulk_load)
+
+        database.load_data()  # must not raise
+
+        assert attempted == [t.lower() for t in database.omop_tables]
+
     @patch("builtins.open")
     @patch("sqlalchemy.sql.text")
     def test_execute_sql_file_without_engine(self, mock_text, mock_open, database):
@@ -273,5 +297,51 @@ class TestDatabaseBase:
         mock_open.assert_called_with("test.sql", "r")
         mock_cursor.execute.assert_called_once()
         mock_connection.commit.assert_called_once()
+        mock_cursor.close.assert_called_once()
+        mock_connection.close.assert_called_once()
+
+    @patch("builtins.open")
+    @patch("sqlalchemy.sql.text")
+    def test_execute_sql_file_failure_reraises(self, mock_text, mock_open, database):
+        """Test _execute_sql_file re-raises on failure instead of swallowing it."""
+        database.engine = Mock()
+        mock_connection = Mock()
+        mock_cursor = Mock()
+        database.engine.raw_connection.return_value = mock_connection
+        mock_connection.cursor.return_value = mock_cursor
+        mock_cursor.execute.side_effect = RuntimeError("boom")
+
+        mock_open.return_value.__enter__.return_value.read.return_value = (
+            "SELECT @cdmDatabaseSchema"
+        )
+
+        with pytest.raises(RuntimeError, match="boom"):
+            database._execute_sql_file("test.sql")
+
+        mock_connection.rollback.assert_called_once()
+        mock_cursor.close.assert_called_once()
+        mock_connection.close.assert_called_once()
+
+    @patch("builtins.open")
+    @patch("sqlalchemy.sql.text")
+    def test_execute_sql_file_failure_rollback_also_fails(
+        self, mock_text, mock_open, database
+    ):
+        """Test the original error still propagates when rollback itself fails."""
+        database.engine = Mock()
+        mock_connection = Mock()
+        mock_cursor = Mock()
+        database.engine.raw_connection.return_value = mock_connection
+        mock_connection.cursor.return_value = mock_cursor
+        mock_cursor.execute.side_effect = RuntimeError("boom")
+        mock_connection.rollback.side_effect = Exception("no active transaction")
+
+        mock_open.return_value.__enter__.return_value.read.return_value = (
+            "SELECT @cdmDatabaseSchema"
+        )
+
+        with pytest.raises(RuntimeError, match="boom"):
+            database._execute_sql_file("test.sql")
+
         mock_cursor.close.assert_called_once()
         mock_connection.close.assert_called_once()

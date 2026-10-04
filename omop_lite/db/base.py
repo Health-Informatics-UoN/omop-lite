@@ -292,6 +292,7 @@ class Database(ABC):
                     # transaction to roll back - the original error above is
                     # what matters, so don't let this mask it.
                     pass
+                raise
             finally:
                 cursor.close()
         finally:
