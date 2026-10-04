@@ -66,6 +66,18 @@ class DuckDBDatabase(Database):
             )
             return result.first() is not None
 
+    def tables_exist(self, schema_name: str) -> bool:
+        """Check if any OMOP table already exists, via DuckDB's own catalog
+        function (see class docstring)."""
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        with self.engine.connect() as connection:
+            result = connection.execute(
+                text("SELECT 1 FROM duckdb_tables() WHERE schema_name = :schema_name"),
+                {"schema_name": schema_name},
+            )
+            return result.first() is not None
+
     def refresh_metadata(self) -> None:
         """No-op for DuckDB.
 

@@ -125,10 +125,18 @@ class Database(ABC):
             return file_path.is_file()
 
     def refresh_metadata(self) -> None:
-        """Refresh the metadata for the database."""
+        """Refresh the metadata for the database.
+
+        extend_existing re-reflects tables already known to metadata too,
+        not just newly-discovered ones - otherwise constraints added via
+        raw SQL after the first reflect (e.g. add_constraints's foreign
+        keys) would never be picked up, and drop_tables (which computes its
+        drop order from this metadata) could then try to drop a table
+        before another table that still has a live FK referencing it.
+        """
         if not self.metadata or not self.engine:
             raise RuntimeError("Database not properly initialized")
-        self.metadata.reflect(bind=self.engine)
+        self.metadata.reflect(bind=self.engine, extend_existing=True)
 
     def schema_exists(self, schema_name: str) -> bool:
         """Check if a schema exists in the database."""
@@ -136,6 +144,23 @@ class Database(ABC):
             raise RuntimeError("Database engine not initialized")
         inspector = inspect(self.engine)
         return schema_name in inspector.get_schema_names()
+
+    def tables_exist(self, schema_name: str) -> bool:
+        """Check if any of the OMOP tables already exist in this schema.
+
+        Used by the default pipeline to detect a schema a previous run
+        already populated, so re-running (e.g. on every container restart
+        under docker-compose) doesn't try to redo create_tables/load_data
+        against existing tables - which would either crash on duplicate
+        objects, or silently duplicate data.
+        """
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        inspector = inspect(self.engine)
+        existing = {
+            name.lower() for name in inspector.get_table_names(schema=schema_name)
+        }
+        return any(table.lower() in existing for table in self.omop_tables)
 
     def create_tables(self) -> None:
         """Create the tables in the database."""
@@ -149,6 +174,7 @@ class Database(ABC):
     def add_constraints(self) -> None:
         """Add constraints to the tables in the database."""
         self._execute_sql_file(self.file_path.joinpath("constraints.sql"))
+        self.refresh_metadata()
 
     def add_indices(self) -> None:
         """Add indices to the tables in the database."""

@@ -85,6 +85,32 @@ def test_schema_exists_true(mock_duckdb_db):
     assert "duckdb_schemas()" in str(args[0])
 
 
+def test_tables_exist_true(mock_duckdb_db):
+    """tables_exist should query duckdb_tables() directly, not reflection."""
+    mock_connection = Mock()
+    mock_connection.execute.return_value.first.return_value = (1,)
+    mock_duckdb_db.engine.connect.return_value.__enter__ = Mock(
+        return_value=mock_connection
+    )
+    mock_duckdb_db.engine.connect.return_value.__exit__ = Mock(return_value=False)
+
+    assert mock_duckdb_db.tables_exist("cdm") is True
+    args, _ = mock_connection.execute.call_args
+    assert "duckdb_tables()" in str(args[0])
+
+
+def test_tables_exist_false(mock_duckdb_db):
+    """tables_exist should return False when no matching table is found."""
+    mock_connection = Mock()
+    mock_connection.execute.return_value.first.return_value = None
+    mock_duckdb_db.engine.connect.return_value.__enter__ = Mock(
+        return_value=mock_connection
+    )
+    mock_duckdb_db.engine.connect.return_value.__exit__ = Mock(return_value=False)
+
+    assert mock_duckdb_db.tables_exist("cdm") is False
+
+
 def test_schema_exists_false(mock_duckdb_db):
     """schema_exists should return False when no matching schema is found."""
     mock_connection = Mock()

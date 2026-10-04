@@ -637,3 +637,4 @@ concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concep
 46275444,piperacillin 4000 MG / tazobactam 500 MG Injection,Drug,RxNorm,Clinical Drug,S,1659149,2015-09-08,2099-12-31,
 46275916,1 ML epinephrine 1 MG/ML Injection,Drug,RxNorm,Quant Clinical Drug,S,1660014,2015-09-08,2099-12-31,
 45905770,Patient Self-Reported Condition,Type Concept,Condition Type,Condition Type,,OMOP4822157,1970-01-01,2099-12-31,
+37169474,Bilateral viral arthritis of knee joints,Condition,SNOMED,Disorder,S,16016871000119108,2002-01-31,2099-12-31,

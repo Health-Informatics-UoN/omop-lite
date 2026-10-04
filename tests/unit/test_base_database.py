@@ -75,12 +75,36 @@ class TestDatabaseBase:
         database.engine = Mock()
         database.metadata = Mock()
         database.refresh_metadata()
-        database.metadata.reflect.assert_called_once_with(bind=database.engine)
+        database.metadata.reflect.assert_called_once_with(
+            bind=database.engine, extend_existing=True
+        )
 
     def test_schema_exists_without_engine(self, database):
         """Test schema_exists raises error when engine is None."""
         with pytest.raises(RuntimeError, match="Database engine not initialized"):
             database.schema_exists("test_schema")
+
+    def test_tables_exist_without_engine(self, database):
+        """Test tables_exist raises error when engine is None."""
+        with pytest.raises(RuntimeError, match="Database engine not initialized"):
+            database.tables_exist("test_schema")
+
+    def test_tables_exist_true(self, database):
+        """tables_exist is True if any OMOP table is present, regardless of case."""
+        database.engine = Mock()
+        with patch("omop_lite.db.base.inspect") as mock_inspect:
+            mock_inspect.return_value.get_table_names.return_value = [
+                "some_other_table",
+                "PERSON".lower(),
+            ]
+            assert database.tables_exist("test_schema") is True
+
+    def test_tables_exist_false(self, database):
+        """tables_exist is False when none of the OMOP tables are present."""
+        database.engine = Mock()
+        with patch("omop_lite.db.base.inspect") as mock_inspect:
+            mock_inspect.return_value.get_table_names.return_value = ["unrelated"]
+            assert database.tables_exist("test_schema") is False
 
     @patch("omop_lite.db.base.Database._execute_sql_file")
     def test_add_primary_keys(self, mock_execute_sql, database):
@@ -92,15 +116,19 @@ class TestDatabaseBase:
 
         mock_execute_sql.assert_called_once_with("primary_keys.sql")
 
+    @patch("omop_lite.db.base.Database.refresh_metadata")
     @patch("omop_lite.db.base.Database._execute_sql_file")
-    def test_add_constraints(self, mock_execute_sql, database):
-        """Test add_constraints method."""
+    def test_add_constraints(self, mock_execute_sql, mock_refresh_metadata, database):
+        """add_constraints must refresh metadata afterwards, so drop_tables
+        later knows about any foreign keys constraints.sql just added (see
+        #145's CI fallout: stale metadata gave drop_tables the wrong order)."""
         database.file_path = Mock()
         database.file_path.joinpath.return_value = "constraints.sql"
 
         database.add_constraints()
 
         mock_execute_sql.assert_called_once_with("constraints.sql")
+        mock_refresh_metadata.assert_called_once()
 
     @patch("omop_lite.db.base.Database._execute_sql_file")
     def test_add_indices(self, mock_execute_sql, database):

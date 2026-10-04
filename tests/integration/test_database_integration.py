@@ -498,15 +498,18 @@ def test_full_pipeline_integration(test_db, integration_settings: Settings, db_c
 def test_create_tables_twice_integration(
     test_db, integration_settings: Settings, db_class
 ):
-    """Test that creating tables twice doesn't fail."""
+    """create_tables is not idempotent (ddl.sql has no IF NOT EXISTS), so
+    calling it again against an already-populated schema must raise - a DDL
+    failure must never be silently swallowed (see #145)."""
     # Arrange
     test_db.create_schema(integration_settings.schema_name)
     test_db.create_tables()
 
-    # Act
-    test_db.create_tables()
+    # Act / Assert
+    with pytest.raises(Exception):
+        test_db.create_tables()
 
-    # Assert
+    # The first (successful) call's tables are still there.
     inspector = inspect(test_db.engine)
     tables = inspector.get_table_names(schema=integration_settings.schema_name)
     assert len(tables) == 39
