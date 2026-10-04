@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, mock_open, patch
 from pathlib import Path
 
 from omop_lite.settings import Settings
@@ -94,44 +94,21 @@ def test_schema_creation_sql_generation(mock_sqlserver_db):
     assert f"CREATE SCHEMA [{schema_name}]" == expected_sql
 
 
-def test_insert_sql_generation():
-    """Test that the correct INSERT SQL is generated."""
-    settings = Settings(
-        schema_name="cdm",
-        delimiter="\t",
-        synthetic=True,
-        synthetic_number=1000,
-        dialect="mssql",
-    )
+def test_bulk_load_quotes_mixed_case_schema(mock_sqlserver_db):
+    """_bulk_load must bracket-quote the schema name in the INSERT
+    statement, for consistency with create_schema (see #97)."""
+    mock_sqlserver_db.settings.schema_name = "MixedCase"
+    mock_connection = Mock()
+    mock_cursor = Mock()
+    mock_sqlserver_db.engine.raw_connection.return_value = mock_connection
+    mock_connection.cursor.return_value = mock_cursor
 
-    # Test the SQL generation logic for INSERT command
-    table_name = "test_table"
-    headers = ["id", "name", "value"]
+    csv_data = "id\tname\tvalue\n1\ttest\t42\n"
+    with patch("builtins.open", mock_open(read_data=csv_data)):
+        mock_sqlserver_db._bulk_load("person", Path("/data/person.csv"))
 
-    columns = ", ".join(f"[{col}]" for col in headers)
-    placeholders = ", ".join(["?" for _ in headers])
-    expected_sql = f"INSERT INTO cdm.[{table_name}] ({columns}) VALUES ({placeholders})"
-
-    # This tests the SQL generation logic, not the execution
-    generated_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
-    assert generated_sql == expected_sql
-
-
-def test_insert_sql_with_single_column():
-    """Test INSERT SQL with single column."""
-    settings = Settings(
-        schema_name="cdm", delimiter="|", synthetic=False, dialect="mssql"
-    )
-
-    table_name = "test_table"
-    headers = ["id"]
-
-    columns = ", ".join(f"[{col}]" for col in headers)
-    placeholders = ", ".join(["?" for _ in headers])
-    expected_sql = f"INSERT INTO cdm.[{table_name}] ({columns}) VALUES ({placeholders})"
-
-    generated_sql = f"INSERT INTO {settings.schema_name}.[{table_name}] ({columns}) VALUES ({placeholders})"
-    assert generated_sql == expected_sql
+    executed_sql = mock_cursor.execute.call_args[0][0]
+    assert executed_sql.startswith("INSERT INTO [MixedCase].[person]")
 
 
 def test_file_path_handling():

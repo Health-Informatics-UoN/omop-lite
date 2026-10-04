@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
@@ -125,27 +126,38 @@ def test_add_constraints_warns_and_delegates(mock_duckdb_db, caplog):
     assert "not supported by DuckDB" in caplog.text
 
 
-def test_copy_command_sql_generation():
-    """Test that the correct COPY command SQL is generated for DuckDB."""
-    settings = Settings(schema_name="cdm", delimiter=",", dialect="duckdb")
+def test_bulk_load_quotes_mixed_case_schema(mock_duckdb_db):
+    """_bulk_load must quote the schema name in the COPY statement.
 
-    table_name = "test_table"
-    delimiter = ","
-    quote = '"'
-    csv_path = "/data/test_table.csv"
+    DuckDB folds an unquoted mixed-case schema name to lower-case, which
+    would silently divert the COPY into a different (likely non-existent)
+    schema than the one create_schema actually created - see #97.
+    """
+    mock_duckdb_db.settings.schema_name = "MixedCase"
+    mock_connection = Mock()
+    mock_cursor = Mock()
+    mock_duckdb_db.engine.raw_connection.return_value = mock_connection
+    mock_connection.cursor.return_value = mock_cursor
 
-    expected_sql = (
-        f"COPY {settings.schema_name}.{table_name} FROM "
-        f"'{csv_path}' WITH (FORMAT csv, DELIMITER E'{delimiter}', "
-        f"NULL '', QUOTE E'{quote}', HEADER, ENCODING 'utf-8')"
+    mock_duckdb_db._bulk_load("person", Path("/data/person.csv"))
+
+    executed_sql = mock_cursor.execute.call_args[0][0]
+    assert executed_sql.startswith('COPY "MixedCase".person')
+
+
+def test_drop_tables_quotes_mixed_case_schema(mock_duckdb_db):
+    """drop_tables must quote the schema name in the DROP TABLE statement."""
+    mock_duckdb_db.settings.schema_name = "MixedCase"
+    mock_connection = Mock()
+    mock_duckdb_db.engine.connect.return_value.__enter__ = Mock(
+        return_value=mock_connection
     )
+    mock_duckdb_db.engine.connect.return_value.__exit__ = Mock(return_value=False)
 
-    generated_sql = (
-        f"COPY {settings.schema_name}.{table_name} FROM "
-        f"'{csv_path}' WITH (FORMAT csv, DELIMITER E'{delimiter}', "
-        f"NULL '', QUOTE E'{quote}', HEADER, ENCODING 'utf-8')"
-    )
-    assert generated_sql == expected_sql
+    mock_duckdb_db.drop_tables()
+
+    executed_sql = str(mock_connection.execute.call_args_list[0][0][0])
+    assert '"MixedCase".' in executed_sql
 
 
 def test_omop_tables_list(mock_duckdb_db):

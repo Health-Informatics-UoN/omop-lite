@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, mock_open, patch
 from pathlib import Path
 
 from omop_lite.settings import Settings
@@ -106,42 +106,24 @@ def test_fts_disabled_setting(mock_postgres_db):
     assert mock_postgres_db.settings.fts_create is False
 
 
-def test_copy_command_sql_generation():
-    """Test that the correct COPY command SQL is generated."""
-    settings = Settings(
-        schema_name="cdm",
-        delimiter="\t",
-        synthetic=True,
-        synthetic_number=1000,
-        dialect="postgresql",
-    )
+def test_bulk_load_quotes_mixed_case_schema(mock_postgres_db):
+    """_bulk_load must quote the schema name in the COPY statement.
 
-    # Test the SQL generation logic for COPY command
-    table_name = "test_table"
-    delimiter = ","
-    quote = '"'
+    Postgres folds an unquoted mixed-case schema name to lower-case, which
+    would silently divert the COPY into a different (likely non-existent)
+    schema than the one create_schema actually created - see #97.
+    """
+    mock_postgres_db.settings.schema_name = "MixedCase"
+    mock_connection = Mock()
+    mock_cursor = Mock()
+    mock_postgres_db.engine.raw_connection.return_value = mock_connection
+    mock_connection.cursor.return_value = mock_cursor
 
-    expected_sql = f"COPY cdm.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
+    with patch("builtins.open", mock_open()):
+        mock_postgres_db._bulk_load("person", Path("/data/person.csv"))
 
-    # This tests the SQL generation logic, not the execution
-    generated_sql = f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-    assert generated_sql == expected_sql
-
-
-def test_copy_command_with_custom_delimiter():
-    """Test COPY command SQL with custom delimiter."""
-    settings = Settings(
-        schema_name="cdm", delimiter="|", synthetic=False, dialect="postgresql"
-    )
-
-    table_name = "test_table"
-    delimiter = "|"
-    quote = "\b"
-
-    expected_sql = f"COPY cdm.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-
-    generated_sql = f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-    assert generated_sql == expected_sql
+    executed_sql = mock_cursor.copy_expert.call_args[0][0]
+    assert executed_sql.startswith('COPY "MixedCase".person')
 
 
 def test_file_path_handling():

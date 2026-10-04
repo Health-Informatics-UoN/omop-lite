@@ -269,6 +269,47 @@ class TestDatabaseBase:
 
         assert attempted == [t.lower() for t in database.omop_tables]
 
+    def test_quote_identifier_postgresql(self, database):
+        """Postgres/duckdb identifiers are double-quoted, preserving case."""
+        database.settings.dialect = "postgresql"
+        assert database._quote_identifier("MixedCase") == '"MixedCase"'
+
+    def test_quote_identifier_duckdb(self, database):
+        database.settings.dialect = "duckdb"
+        assert database._quote_identifier("MixedCase") == '"MixedCase"'
+
+    def test_quote_identifier_mssql(self, database):
+        """SQL Server identifiers are bracket-quoted."""
+        database.settings.dialect = "mssql"
+        assert database._quote_identifier("MixedCase") == "[MixedCase]"
+
+    @patch("builtins.open")
+    @patch("sqlalchemy.sql.text")
+    def test_execute_sql_file_quotes_schema_placeholder(
+        self, mock_text, mock_open, database
+    ):
+        """@cdmDatabaseSchema must substitute to a quoted identifier.
+
+        Mixed-case schema names are folded to lower-case by postgres/duckdb
+        when left unquoted, silently diverging from the exact-case schema
+        create_schema (which already quotes) created - see #97.
+        """
+        database.engine = Mock()
+        mock_connection = Mock()
+        mock_cursor = Mock()
+        database.engine.raw_connection.return_value = mock_connection
+        mock_connection.cursor.return_value = mock_cursor
+        database.settings.schema_name = "MixedCase"
+
+        mock_open.return_value.__enter__.return_value.read.return_value = (
+            "SELECT * FROM @cdmDatabaseSchema.person"
+        )
+
+        database._execute_sql_file("test.sql")
+
+        executed_sql = mock_cursor.execute.call_args[0][0]
+        assert executed_sql == 'SELECT * FROM "MixedCase".person'
+
     @patch("builtins.open")
     @patch("sqlalchemy.sql.text")
     def test_execute_sql_file_without_engine(self, mock_text, mock_open, database):

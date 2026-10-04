@@ -263,6 +263,18 @@ class Database(ABC):
                 return '"'
         return "\b"
 
+    def _quote_identifier(self, name: str) -> str:
+        """
+        Quote a schema/table identifier for this dialect.
+
+        Unquoted identifiers are case-folded to lower-case by postgres and
+        duckdb, which silently diverges from the exact-case schema that
+        create_schema (which already quotes) created.
+        """
+        if self.dialect == "mssql":
+            return f"[{name}]"
+        return f'"{name}"'
+
     def _execute_sql_file(self, file_path: Union[str, Traversable]) -> None:
         """
         Execute a SQL file directly.
@@ -272,7 +284,9 @@ class Database(ABC):
             file_path = str(file_path)
 
         with open(file_path, "r") as f:
-            sql = f.read().replace("@cdmDatabaseSchema", self.settings.schema_name)
+            sql = f.read().replace(
+                "@cdmDatabaseSchema", self._quote_identifier(self.settings.schema_name)
+            )
 
         if not self.engine:
             raise RuntimeError("Database engine not initialized")

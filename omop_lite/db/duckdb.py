@@ -83,7 +83,7 @@ class DuckDBDatabase(Database):
             for table_name in self.omop_tables:
                 connection.execute(
                     text(
-                        f"DROP TABLE IF EXISTS {self.settings.schema_name}."
+                        f"DROP TABLE IF EXISTS {self._quote_identifier(self.settings.schema_name)}."
                         f'"{table_name.lower()}"'
                     )
                 )
@@ -118,7 +118,7 @@ class DuckDBDatabase(Database):
             cursor = connection.cursor()
             try:
                 cursor.execute(
-                    f"COPY {self.settings.schema_name}.{table_name} FROM "
+                    f"COPY {self._quote_identifier(self.settings.schema_name)}.{table_name} FROM "
                     f"'{csv_path}' WITH (FORMAT csv, DELIMITER E'{delimiter}', "
                     f"NULL '', QUOTE E'{quote}', HEADER, ENCODING 'utf-8')"
                 )
