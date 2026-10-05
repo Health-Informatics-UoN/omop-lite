@@ -13,27 +13,79 @@ Drop your data into `data/`, and run the container.
 
 ## Configuration
 
-You can configure the container or CLI using the following environment variables:
+You can configure the container or CLI using environment variables, or the equivalent CLI flag. A CLI flag always overrides its environment variable.
 
-- `DB_HOST`: The hostname of the database. Default is `db`.
-- `DB_PORT`: The port number of the database. Default is `5432`.
-- `DB_USER`: The username for the database. Default is `postgres`.
-- `DB_PASSWORD`: The password for the database. Default is `password`.
-- `DB_NAME`: The name of the database. Default is `omop`. For the `duckdb` dialect, this is instead the path to the `.duckdb` file to create/use, e.g. `/data/omop.duckdb`.
-- `DIALECT`: The type of database to use. Default is `postgresql`, but can also be `mssql` or `duckdb`.
-- `OMOP_VERSION`: Version of the OMOP-CDM schema to load. Default is `omop5_4`, but can also be `omop5_3` or `omop5_5`.
-- `SCHEMA_NAME`: The name of the schema to be created/used in the database. Default is `public`.
-- `DATA_DIR`: The directory containing the data CSV files. Default is `data`.
-- `SYNTHETIC`: Load synthetic data (boolean). Default is `false`
-- `SYNTHETIC_NUMBER`: Size of synthetic data, `100` or `1000`. Default is `100`.
-- `DELIMITER`: The delimiter used to separate data. Default is `tab`, can also be `,`
+| Environment Variable | CLI Flag                           | Default      | Description                                                                                                   |
+| --------------------- | ----------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------- |
+| `DB_HOST`             | `--db-host`, `-h`                   | `db`         | The hostname of the database.                                                                                   |
+| `DB_PORT`             | `--db-port`, `-p`                   | `5432`       | The port number of the database.                                                                                 |
+| `DB_USER`             | `--db-user`, `-u`                   | `postgres`   | The username for the database.                                                                                   |
+| `DB_PASSWORD`         | `--db-password`                     | `password`   | The password for the database.                                                                                   |
+| `DB_NAME`             | `--db-name`, `-d`                   | `omop`       | The name of the database. For the `duckdb` dialect, this is instead the path to the `.duckdb` file to create/use, e.g. `/data/omop.duckdb`. |
+| `DIALECT`             | `--dialect`                         | `postgresql` | The type of database to use: `postgresql`, `mssql`, or `duckdb`.                                                 |
+| `OMOP_VERSION`        | `--omop_version`                    | `omop5_4`    | Version of the OMOP CDM schema to load: `omop5_3`, `omop5_4`, or `omop5_5`.                                     |
+| `SCHEMA_NAME`         | `--schema-name`                     | `public`     | The name of the schema to be created/used in the database.                                                       |
+| `DATA_DIR`            | `--data-dir`                        | `data`       | The directory containing the data CSV files.                                                                     |
+| `SYNTHETIC`           | `--synthetic` / `--no-synthetic`    | `false`      | Load synthetic data instead of your own.                                                                         |
+| `SYNTHETIC_NUMBER`    | `--synthetic-number`                | `100`        | Size of synthetic data: `100`, `1000`, or `1001` (see [Synthetic Data](#synthetic-data)).                        |
+| `DELIMITER`           | `--delimiter`                       | tab          | The delimiter used to separate values in the data files, e.g. `,`.                                               |
+| `LOG_LEVEL`           | `--log-level`                       | `INFO`       | Logging verbosity.                                                                                                |
+| `FTS_CREATE`          | `--fts-create` / `--no-fts-create`  | `false`      | Create full-text search indexes on the `concept` table (PostgreSQL only).                                        |
+
+> `--fts-create`/`FTS_CREATE` is not currently functional. For full-text and vector search, use the `text-search` Compose profile described in [Text search OMOP](#text-search-omop).
 
 ## Usage
 
 ### CLI
 
-`pip install omop-lite`
-`python omop-lite --help`
+Install the package, which provides the `omop-lite` command:
+
+```bash
+pip install omop-lite
+omop-lite --help
+```
+
+Running `omop-lite` with no subcommand runs the full pipeline: it creates the schema (if needed), creates the tables, loads the data, and adds constraints. This is the same thing the Docker image and Helm chart run by default.
+
+```bash
+# Quick start with bundled synthetic data
+omop-lite --synthetic
+```
+
+#### Commands
+
+Besides the default pipeline, `omop-lite` has subcommands for running each step on its own - useful for custom workflows, or recovering partway through a failed run:
+
+| Command            | Description                                                 |
+| ------------------- | ------------------------------------------------------------- |
+| `test`              | Test database connectivity, without changing anything.        |
+| `create-tables`     | Create the schema (if needed) and tables, without loading data. |
+| `load-data`         | Load data into tables that already exist.                     |
+| `add-constraints`   | Add primary keys, foreign keys, and indices.                  |
+| `add-primary-keys`  | Add only primary key constraints.                              |
+| `add-foreign-keys`  | Add only foreign key constraints.                              |
+| `add-indices`       | Add only indices.                                              |
+| `drop`              | Drop tables and/or the schema.                                 |
+| `help-commands`     | Print this table from the CLI.                                 |
+
+Every subcommand accepts the database connection options from the table above (`--db-host`, `--db-port`, `--db-user`, `--db-password`, `--db-name`, `--schema-name`, `--dialect`, `--log-level`). `--omop_version` is also accepted by every subcommand except `test` and `drop`, since those two don't touch version-specific SQL. `load-data` additionally accepts `--synthetic`, `--synthetic-number`, `--data-dir`, and `--delimiter`; `drop` additionally accepts `--tables-only`, `--schema-only`, and `--confirm`. Run `omop-lite <command> --help` to see a command's exact options.
+
+For example, to set up a database step by step instead of running the full pipeline at once:
+
+```bash
+omop-lite test                    # check the connection first
+omop-lite create-tables
+omop-lite load-data --synthetic
+omop-lite add-constraints
+```
+
+Or to reload data without recreating the schema:
+
+```bash
+omop-lite drop --tables-only --confirm
+omop-lite create-tables
+omop-lite load-data
+```
 
 ### Docker
 
