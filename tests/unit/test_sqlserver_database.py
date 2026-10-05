@@ -84,14 +84,21 @@ def test_db_url_with_different_credentials():
         assert db.db_url == expected_url
 
 
-def test_schema_creation_sql_generation(mock_sqlserver_db):
-    """Test that the correct SQL is generated for schema creation."""
-    # Test the SQL generation logic
-    schema_name = "test_schema"
-    expected_sql = "CREATE SCHEMA [test_schema]"
+def test_create_schema_issues_create_schema_sql(mock_sqlserver_db):
+    """create_schema must actually run the guarded CREATE SCHEMA statement,
+    bracket-quoted to preserve case (see #97)."""
+    mock_connection = Mock()
+    mock_sqlserver_db.engine.connect.return_value.__enter__ = Mock(
+        return_value=mock_connection
+    )
+    mock_sqlserver_db.engine.connect.return_value.__exit__ = Mock(return_value=False)
 
-    # This tests the SQL generation, not the execution
-    assert f"CREATE SCHEMA [{schema_name}]" == expected_sql
+    mock_sqlserver_db.create_schema("test_schema")
+
+    executed_sql = str(mock_connection.execute.call_args[0][0])
+    assert "CREATE SCHEMA [test_schema]" in executed_sql
+    assert "IF NOT EXISTS" in executed_sql
+    mock_connection.commit.assert_called_once()
 
 
 def test_bulk_load_quotes_mixed_case_schema(mock_sqlserver_db):
@@ -109,19 +116,6 @@ def test_bulk_load_quotes_mixed_case_schema(mock_sqlserver_db):
 
     executed_sql = mock_cursor.execute.call_args[0][0]
     assert executed_sql.startswith("INSERT INTO [MixedCase].[person]")
-
-
-def test_file_path_handling():
-    """Test that file paths are handled correctly."""
-    file_path = Path("/test/file.csv")
-
-    # Test string conversion
-    assert str(file_path) == "/test/file.csv"
-
-    # Test path joining
-    data_dir = Path("/data")
-    full_path = data_dir / "test.csv"
-    assert str(full_path) == "/data/test.csv"
 
 
 def test_settings_validation():
@@ -145,35 +139,20 @@ def test_settings_validation():
         Settings(dialect="invalid")
 
 
-def test_delimiter_logic():
-    """Test the delimiter selection logic."""
-    # Test synthetic 1000
-    settings_1000 = Settings(synthetic=True, synthetic_number=1000)
-    assert settings_1000.synthetic is True
-    assert settings_1000.synthetic_number == 1000
-
-    # Test synthetic 100
-    settings_100 = Settings(synthetic=True, synthetic_number=100)
-    assert settings_100.synthetic is True
-    assert settings_100.synthetic_number == 100
-
-    # Test non-synthetic
-    settings_real = Settings(synthetic=False, delimiter="|")
-    assert settings_real.synthetic is False
-    assert settings_real.delimiter == "|"
+def test_get_delimiter_and_quote_synthetic_1000(mock_sqlserver_db):
+    """Synthetic 1000/1001 data is comma-delimited with '\"' quoting."""
+    mock_sqlserver_db.settings.synthetic = True
+    mock_sqlserver_db.settings.synthetic_number = 1000
+    assert mock_sqlserver_db._get_delimiter() == ","
+    assert mock_sqlserver_db._get_quote() == '"'
 
 
-def test_quote_logic():
-    """Test the quote selection logic."""
-    # Test synthetic 1000
-    settings_1000 = Settings(synthetic=True, synthetic_number=1000)
-    assert settings_1000.synthetic is True
-    assert settings_1000.synthetic_number == 1000
-
-    # Test synthetic 100
-    settings_100 = Settings(synthetic=True, synthetic_number=100)
-    assert settings_100.synthetic is True
-    assert settings_100.synthetic_number == 100
+def test_get_delimiter_and_quote_real_data(mock_sqlserver_db):
+    """Non-synthetic data uses the configured delimiter and no quote char."""
+    mock_sqlserver_db.settings.synthetic = False
+    mock_sqlserver_db.settings.delimiter = "|"
+    assert mock_sqlserver_db._get_delimiter() == "|"
+    assert mock_sqlserver_db._get_quote() == "\b"
 
 
 def test_schema_name_handling():
@@ -185,11 +164,6 @@ def test_schema_name_handling():
     # Test custom schema
     custom_settings = Settings(schema_name="cdm")
     assert custom_settings.schema_name == "cdm"
-
-    # Test schema name in SQL context (SQL Server uses brackets)
-    schema_name = "test_schema"
-    sql_safe_name = f"[{schema_name}]"
-    assert sql_safe_name == "[test_schema]"
 
 
 def test_omop_tables_list(mock_sqlserver_db):
@@ -211,60 +185,31 @@ def test_omop_tables_list(mock_sqlserver_db):
     assert len(mock_sqlserver_db.omop_tables) == 39
 
 
-def test_csv_reader_logic():
-    """Test CSV reader logic for SQL Server."""
-    # Test delimiter handling
-    delimiter = "\t"
-    assert delimiter == "\t"
+def test_bulk_load_builds_insert_and_pads_trims_rows(mock_sqlserver_db):
+    """_bulk_load must bracket-escape column names, build one '?'
+    placeholder per column, pad a short row with None, and trim a long
+    row - exercising the real method instead of re-implementing its
+    logic (padding/trimming/placeholders/escaping) inline in the test.
+    """
+    mock_connection = Mock()
+    mock_cursor = Mock()
+    mock_sqlserver_db.engine.raw_connection.return_value = mock_connection
+    mock_connection.cursor.return_value = mock_cursor
 
-    # Test encoding
-    encoding = "utf-8"
-    assert encoding == "utf-8"
+    csv_data = (
+        "id\tuser name\tvalue\n"
+        "1\tshort\n"  # fewer values than headers -> padded with None
+        "2\tlong\textra\tvalues\n"  # more values than headers -> trimmed
+    )
+    with patch("builtins.open", mock_open(read_data=csv_data)):
+        mock_sqlserver_db._bulk_load("person", Path("/data/person.csv"))
 
-    # Test newline handling
-    newline = ""
-    assert newline == ""
+    insert_sql, short_row = mock_cursor.execute.call_args_list[0][0]
+    assert insert_sql == (
+        "INSERT INTO [cdm].[person] ([id], [user name], [value]) "
+        "VALUES (?, ?, ?)"
+    )
+    assert short_row == ["1", "short", None]
 
-
-def test_row_padding_logic():
-    """Test row padding logic for SQL Server."""
-    headers = ["id", "name", "value"]
-    short_row = ["1", "test"]
-
-    # Test padding logic
-    if len(short_row) < len(headers):
-        padded_row = short_row + [None] * (len(headers) - len(short_row))
-        expected = ["1", "test", None]
-        assert padded_row == expected
-
-
-def test_row_trimming_logic():
-    """Test row trimming logic for SQL Server."""
-    headers = ["id", "name"]
-    long_row = ["1", "test", "extra", "values"]
-
-    # Test trimming logic
-    if len(long_row) > len(headers):
-        trimmed_row = long_row[: len(headers)]
-        expected = ["1", "test"]
-        assert trimmed_row == expected
-
-
-def test_placeholder_generation():
-    """Test placeholder generation for SQL Server."""
-    headers = ["id", "name", "value"]
-
-    # Test placeholder generation
-    placeholders = ", ".join(["?" for _ in headers])
-    expected = "?, ?, ?"
-    assert placeholders == expected
-
-
-def test_column_name_escaping():
-    """Test column name escaping for SQL Server."""
-    headers = ["id", "user name", "value"]
-
-    # Test column name escaping with brackets
-    columns = ", ".join(f"[{col}]" for col in headers)
-    expected = "[id], [user name], [value]"
-    assert columns == expected
+    _, long_row = mock_cursor.execute.call_args_list[1][0]
+    assert long_row == ["2", "long", "extra"]
