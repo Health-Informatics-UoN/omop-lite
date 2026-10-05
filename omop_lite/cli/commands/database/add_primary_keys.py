@@ -3,7 +3,7 @@
 import typer
 
 from omop_lite.db import create_database
-from ...utils import _create_settings, _setup_logging
+from ...utils import _create_settings, _setup_logging, _format_batch_summary
 
 
 def add_primary_keys_command() -> typer.Typer:
@@ -60,8 +60,9 @@ def add_primary_keys_command() -> typer.Typer:
         logger = _setup_logging(settings)
         db = create_database(settings)
 
-        # Add primary keys only
-        db.add_primary_keys()
-        logger.info("✅ Primary keys added successfully")
+        # Add primary keys only. A failed statement is never fatal here -
+        # real OMOP data can have rows that don't satisfy every key.
+        result = db.add_primary_keys()
+        logger.info(_format_batch_summary(result, "Primary keys"))
 
     return app

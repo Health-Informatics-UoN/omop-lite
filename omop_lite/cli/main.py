@@ -12,7 +12,7 @@ from rich.progress import (
 )
 from rich.panel import Panel
 
-from .utils import _create_settings
+from .utils import _create_settings, _format_batch_summary
 
 console = Console()
 
@@ -163,6 +163,26 @@ def callback(
                 db.create_schema(settings.schema_name)
             console.print(f"✅ Schema '{settings.schema_name}' created")
 
+        # If a previous run already populated this schema, don't redo it.
+        # Re-running create_tables/load_data against existing tables would
+        # either crash (duplicate tables/constraints) or silently duplicate
+        # data - this matters a lot for containers that restart, e.g. under
+        # docker-compose, where this command may run many times even though
+        # the data should only ever be loaded once.
+        if db.tables_exist(settings.schema_name):
+            console.print(
+                Panel(
+                    f"[bold blue]Tables already exist in schema "
+                    f"'{settings.schema_name}' - nothing to do.[/bold blue]\n"
+                    "[dim]omop-lite only loads data once per schema. To "
+                    "reload, drop the schema/tables first (e.g. "
+                    "`omop-lite drop`).[/dim]",
+                    title="⏭️  Already Loaded",
+                    border_style="blue",
+                )
+            )
+            return
+
         # Progress bar for the main pipeline
         with Progress(
             SpinnerColumn(),
@@ -183,15 +203,22 @@ def callback(
 
             # Add constraints
             task3 = progress.add_task("[green]Adding constraints...", total=1)
-            db.add_all_constraints()
+            constraints_result = db.add_all_constraints()
             progress.update(task3, completed=1)
 
+        # A constraint/index failure is never fatal here - real OMOP
+        # vocabulary data routinely doesn't satisfy every foreign key (a
+        # trimmed vocabulary subset missing a referenced concept, for
+        # example). The data is loaded either way; this is just an honest
+        # summary instead of an unconditional "success".
+        constraints_line = _format_batch_summary(constraints_result, "Constraints")
         console.print(
             Panel(
                 "[bold green]✅ OMOP Lite database created successfully![/bold green]\n"
                 f"[dim]Database: {settings.db_name}\n"
                 f"Schema: {settings.schema_name}\n"
-                f"Dialect: {settings.dialect}[/dim]",
+                f"Dialect: {settings.dialect}[/dim]\n"
+                f"{constraints_line}",
                 title="🎉 Success",
                 border_style="green",
             )

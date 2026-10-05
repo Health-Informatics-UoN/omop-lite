@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch
+from unittest.mock import Mock, mock_open, patch
 from pathlib import Path
 
 from omop_lite.settings import Settings
@@ -84,77 +84,63 @@ def test_db_url_with_different_credentials():
         assert db.db_url == expected_url
 
 
-def test_schema_creation_sql_generation(mock_postgres_db):
-    """Test that the correct SQL is generated for schema creation."""
-    # Test the SQL generation logic
-    schema_name = "test_schema"
-    expected_sql = 'CREATE SCHEMA "test_schema"'
+def test_create_schema_issues_create_schema_sql(mock_postgres_db):
+    """create_schema must actually run CREATE SCHEMA IF NOT EXISTS, quoted
+    to preserve case (see #97)."""
+    mock_connection = Mock()
+    mock_postgres_db.engine.connect.return_value.__enter__ = Mock(
+        return_value=mock_connection
+    )
+    mock_postgres_db.engine.connect.return_value.__exit__ = Mock(return_value=False)
 
-    # This tests the SQL generation, not the execution
-    assert f'CREATE SCHEMA "{schema_name}"' == expected_sql
+    mock_postgres_db.create_schema("test_schema")
+
+    executed_sql = str(mock_connection.execute.call_args[0][0])
+    assert executed_sql == 'CREATE SCHEMA IF NOT EXISTS "test_schema"'
+    mock_connection.commit.assert_called_once()
 
 
-def test_fts_enabled_setting(mock_postgres_db):
-    """Test that FTS setting is properly configured."""
-    mock_postgres_db.settings.fts_create = True
-    assert mock_postgres_db.settings.fts_create is True
-
-
-def test_fts_disabled_setting(mock_postgres_db):
-    """Test that FTS setting is properly configured when disabled."""
+def test_fts_disabled_is_a_noop(mock_postgres_db):
+    """_add_full_text_search must do nothing when fts_create is disabled."""
     mock_postgres_db.settings.fts_create = False
-    assert mock_postgres_db.settings.fts_create is False
+    with patch.object(mock_postgres_db, "_execute_sql_file") as mock_execute:
+        mock_postgres_db._add_full_text_search()
+    mock_execute.assert_not_called()
 
 
-def test_copy_command_sql_generation():
-    """Test that the correct COPY command SQL is generated."""
-    settings = Settings(
-        schema_name="cdm",
-        delimiter="\t",
-        synthetic=True,
-        synthetic_number=1000,
-        dialect="postgresql",
-    )
+def test_fts_enabled_runs_both_sql_files(mock_postgres_db):
+    """_add_full_text_search must run the column and index SQL files when
+    fts_create is enabled.
 
-    # Test the SQL generation logic for COPY command
-    table_name = "test_table"
-    delimiter = ","
-    quote = '"'
-
-    expected_sql = f"COPY cdm.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-
-    # This tests the SQL generation logic, not the execution
-    generated_sql = f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-    assert generated_sql == expected_sql
+    _execute_sql_file is mocked here because fts.sql/fts_index.sql don't
+    actually exist in the repo yet (a separate, already-flagged bug) -
+    this test is about whether add_constraints wires FTS up correctly,
+    not about those files' content.
+    """
+    mock_postgres_db.settings.fts_create = True
+    with patch.object(mock_postgres_db, "_execute_sql_file") as mock_execute:
+        mock_postgres_db._add_full_text_search()
+    assert mock_execute.call_count == 2
 
 
-def test_copy_command_with_custom_delimiter():
-    """Test COPY command SQL with custom delimiter."""
-    settings = Settings(
-        schema_name="cdm", delimiter="|", synthetic=False, dialect="postgresql"
-    )
+def test_bulk_load_quotes_mixed_case_schema(mock_postgres_db):
+    """_bulk_load must quote the schema name in the COPY statement.
 
-    table_name = "test_table"
-    delimiter = "|"
-    quote = "\b"
+    Postgres folds an unquoted mixed-case schema name to lower-case, which
+    would silently divert the COPY into a different (likely non-existent)
+    schema than the one create_schema actually created - see #97.
+    """
+    mock_postgres_db.settings.schema_name = "MixedCase"
+    mock_connection = Mock()
+    mock_cursor = Mock()
+    mock_postgres_db.engine.raw_connection.return_value = mock_connection
+    mock_connection.cursor.return_value = mock_cursor
 
-    expected_sql = f"COPY cdm.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
+    with patch("builtins.open", mock_open()):
+        mock_postgres_db._bulk_load("person", Path("/data/person.csv"))
 
-    generated_sql = f"COPY {settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')"
-    assert generated_sql == expected_sql
-
-
-def test_file_path_handling():
-    """Test that file paths are handled correctly."""
-    file_path = Path("/test/file.csv")
-
-    # Test string conversion
-    assert str(file_path) == "/test/file.csv"
-
-    # Test path joining
-    data_dir = Path("/data")
-    full_path = data_dir / "test.csv"
-    assert str(full_path) == "/data/test.csv"
+    executed_sql = mock_cursor.copy_expert.call_args[0][0]
+    assert executed_sql.startswith('COPY "MixedCase".person')
 
 
 def test_settings_validation():
@@ -178,35 +164,20 @@ def test_settings_validation():
         Settings(dialect="invalid")
 
 
-def test_delimiter_logic():
-    """Test the delimiter selection logic."""
-    # Test synthetic 1000
-    settings_1000 = Settings(synthetic=True, synthetic_number=1000)
-    assert settings_1000.synthetic is True
-    assert settings_1000.synthetic_number == 1000
-
-    # Test synthetic 100
-    settings_100 = Settings(synthetic=True, synthetic_number=100)
-    assert settings_100.synthetic is True
-    assert settings_100.synthetic_number == 100
-
-    # Test non-synthetic
-    settings_real = Settings(synthetic=False, delimiter="|")
-    assert settings_real.synthetic is False
-    assert settings_real.delimiter == "|"
+def test_get_delimiter_and_quote_synthetic_1000(mock_postgres_db):
+    """Synthetic 1000/1001 data is comma-delimited with '\"' quoting."""
+    mock_postgres_db.settings.synthetic = True
+    mock_postgres_db.settings.synthetic_number = 1000
+    assert mock_postgres_db._get_delimiter() == ","
+    assert mock_postgres_db._get_quote() == '"'
 
 
-def test_quote_logic():
-    """Test the quote selection logic."""
-    # Test synthetic 1000
-    settings_1000 = Settings(synthetic=True, synthetic_number=1000)
-    assert settings_1000.synthetic is True
-    assert settings_1000.synthetic_number == 1000
-
-    # Test synthetic 100
-    settings_100 = Settings(synthetic=True, synthetic_number=100)
-    assert settings_100.synthetic is True
-    assert settings_100.synthetic_number == 100
+def test_get_delimiter_and_quote_real_data(mock_postgres_db):
+    """Non-synthetic data uses the configured delimiter and no quote char."""
+    mock_postgres_db.settings.synthetic = False
+    mock_postgres_db.settings.delimiter = "|"
+    assert mock_postgres_db._get_delimiter() == "|"
+    assert mock_postgres_db._get_quote() == "\b"
 
 
 def test_schema_name_handling():
@@ -218,11 +189,6 @@ def test_schema_name_handling():
     # Test custom schema
     custom_settings = Settings(schema_name="cdm")
     assert custom_settings.schema_name == "cdm"
-
-    # Test schema name in SQL context
-    schema_name = "test_schema"
-    sql_safe_name = f'"{schema_name}"'
-    assert sql_safe_name == '"test_schema"'
 
 
 def test_omop_tables_list(mock_postgres_db):

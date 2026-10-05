@@ -7,7 +7,7 @@ from sqlalchemy import MetaData, create_engine, text
 
 from omop_lite.settings import Settings
 
-from .base import Database
+from .base import Database, SqlBatchResult
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +66,18 @@ class DuckDBDatabase(Database):
             )
             return result.first() is not None
 
+    def tables_exist(self, schema_name: str) -> bool:
+        """Check if any OMOP table already exists, via DuckDB's own catalog
+        function (see class docstring)."""
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+        with self.engine.connect() as connection:
+            result = connection.execute(
+                text("SELECT 1 FROM duckdb_tables() WHERE schema_name = :schema_name"),
+                {"schema_name": schema_name},
+            )
+            return result.first() is not None
+
     def refresh_metadata(self) -> None:
         """No-op for DuckDB.
 
@@ -83,14 +95,14 @@ class DuckDBDatabase(Database):
             for table_name in self.omop_tables:
                 connection.execute(
                     text(
-                        f"DROP TABLE IF EXISTS {self.settings.schema_name}."
+                        f"DROP TABLE IF EXISTS {self._quote_identifier(self.settings.schema_name)}."
                         f'"{table_name.lower()}"'
                     )
                 )
             connection.commit()
         logger.info("✅ All tables dropped successfully")
 
-    def add_constraints(self) -> None:
+    def add_constraints(self) -> SqlBatchResult:
         """Add constraints to the tables in the database.
 
         DuckDB does not support adding foreign keys to an existing table via
@@ -101,7 +113,7 @@ class DuckDBDatabase(Database):
         logger.warning(
             "Foreign key constraints are not supported by DuckDB and were skipped"
         )
-        super().add_constraints()
+        return super().add_constraints()
 
     def _bulk_load(self, table_name: str, file_path: Path | Traversable) -> None:
         if not self.engine:
@@ -118,7 +130,7 @@ class DuckDBDatabase(Database):
             cursor = connection.cursor()
             try:
                 cursor.execute(
-                    f"COPY {self.settings.schema_name}.{table_name} FROM "
+                    f"COPY {self._quote_identifier(self.settings.schema_name)}.{table_name} FROM "
                     f"'{csv_path}' WITH (FORMAT csv, DELIMITER E'{delimiter}', "
                     f"NULL '', QUOTE E'{quote}', HEADER, ENCODING 'utf-8')"
                 )

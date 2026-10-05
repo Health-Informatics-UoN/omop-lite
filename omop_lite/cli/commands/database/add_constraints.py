@@ -12,7 +12,7 @@ from rich.progress import (
 from rich.panel import Panel
 
 from omop_lite.db import create_database
-from ...utils import _create_settings
+from ...utils import _create_settings, _format_batch_summary
 
 console = Console()
 
@@ -82,25 +82,28 @@ def add_constraints_command() -> typer.Typer:
 
             # Primary keys
             progress.update(task, description="[cyan]Adding primary keys...")
-            db.add_primary_keys()
+            primary_keys_result = db.add_primary_keys()
             progress.advance(task)
 
             # Foreign keys
             progress.update(task, description="[cyan]Adding foreign key constraints...")
-            db.add_constraints()
+            constraints_result = db.add_constraints()
             progress.advance(task)
 
             # Indices
             progress.update(task, description="[cyan]Adding indices...")
-            db.add_indices()
+            indices_result = db.add_indices()
             progress.advance(task)
 
+        # A failed statement is never fatal here - real OMOP vocabulary
+        # data routinely doesn't satisfy every foreign key, so this is an
+        # honest summary rather than an unconditional "success".
         console.print(
             Panel(
-                "[bold green]✅ All constraints added successfully![/bold green]\n\n"
-                "[dim]• Primary keys\n"
-                "• Foreign key constraints\n"
-                "• Indices[/dim]",
+                "[bold green]Constraints processed[/bold green]\n\n"
+                f"• {_format_batch_summary(primary_keys_result, 'Primary keys')}\n"
+                f"• {_format_batch_summary(constraints_result, 'Foreign key constraints')}\n"
+                f"• {_format_batch_summary(indices_result, 'Indices')}",
                 title="🔗 Constraints Added",
                 border_style="green",
             )

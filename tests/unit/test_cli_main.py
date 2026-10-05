@@ -41,6 +41,7 @@ class TestMainCLI:
 
             mock_db = Mock()
             mock_db.schema_exists.return_value = False
+            mock_db.tables_exist.return_value = False
             mock_create_db.return_value = mock_db
             mock_version.return_value = "1.0.0"
 
@@ -53,7 +54,11 @@ class TestMainCLI:
             mock_create_db.assert_called_once()
 
     def test_main_cli_default_command_schema_exists(self, runner):
-        """Test default command when schema already exists."""
+        """Test default command when schema already exists but is empty.
+
+        Schema existence alone (e.g. "public" always existing by default)
+        must not skip the pipeline - only actual tables existing should.
+        """
         with (
             patch("omop_lite.cli.main._create_settings") as mock_create_settings,
             patch("omop_lite.cli.main.create_database") as mock_create_db,
@@ -64,6 +69,7 @@ class TestMainCLI:
 
             mock_db = Mock()
             mock_db.schema_exists.return_value = True
+            mock_db.tables_exist.return_value = False
             mock_create_db.return_value = mock_db
 
             result = runner.invoke(app)
@@ -74,6 +80,34 @@ class TestMainCLI:
             # The pipeline should still continue (it previously returned early
             # here for any non-"public" schema that already existed).
             mock_db.create_tables.assert_called_once()
+
+    def test_main_cli_default_command_tables_exist(self, runner):
+        """A schema a previous run already populated must be left alone.
+
+        Re-running create_tables/load_data against existing tables would
+        either crash (duplicate objects) or silently duplicate data - this
+        matters for containers that restart under docker-compose.
+        """
+        with (
+            patch("omop_lite.cli.main._create_settings") as mock_create_settings,
+            patch("omop_lite.cli.main.create_database") as mock_create_db,
+        ):
+            mock_settings = Mock()
+            mock_settings.schema_name = "test_schema"
+            mock_create_settings.return_value = mock_settings
+
+            mock_db = Mock()
+            mock_db.schema_exists.return_value = True
+            mock_db.tables_exist.return_value = True
+            mock_create_db.return_value = mock_db
+
+            result = runner.invoke(app)
+
+            assert result.exit_code == 0
+            assert "Already Loaded" in result.output or "nothing to do" in result.output
+            mock_db.create_tables.assert_not_called()
+            mock_db.load_data.assert_not_called()
+            mock_db.add_all_constraints.assert_not_called()
 
     def test_main_cli_default_command_public_schema(self, runner):
         """Test default command with the 'public' schema.
@@ -93,6 +127,7 @@ class TestMainCLI:
 
             mock_db = Mock()
             mock_db.schema_exists.return_value = False
+            mock_db.tables_exist.return_value = False
             mock_create_db.return_value = mock_db
 
             result = runner.invoke(app)
@@ -205,6 +240,7 @@ class TestMainCLI:
 
             mock_db = Mock()
             mock_db.schema_exists.return_value = False
+            mock_db.tables_exist.return_value = False
             mock_create_db.return_value = mock_db
 
             result = runner.invoke(app)

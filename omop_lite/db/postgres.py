@@ -1,7 +1,7 @@
 from sqlalchemy import create_engine, MetaData, text
 from importlib.resources import files
 import logging
-from .base import Database
+from .base import Database, SqlBatchResult
 from omop_lite.settings import Settings
 from typing import Union
 from pathlib import Path
@@ -27,14 +27,15 @@ class PostgresDatabase(Database):
             logger.info(f"Schema '{schema_name}' created.")
             connection.commit()
 
-    def add_constraints(self) -> None:
+    def add_constraints(self) -> SqlBatchResult:
         """
         Add primary keys, constraints, and indices.
 
         Override to add full-text search.
         """
-        super().add_constraints()
+        result = super().add_constraints()
         self._add_full_text_search()
+        return result
 
     def _add_full_text_search(self) -> None:
         """Add full-text search capabilities to the concept table."""
@@ -71,7 +72,7 @@ class PostgresDatabase(Database):
                 try:
                     with open(str(file_path), "r") as f:
                         cursor.copy_expert(
-                            f"COPY {self.settings.schema_name}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')",
+                            f"COPY {self._quote_identifier(self.settings.schema_name)}.{table_name} FROM STDIN WITH (FORMAT csv, DELIMITER E'{delimiter}', NULL '', QUOTE E'{quote}', HEADER, ENCODING 'UTF8')",
                             f,
                         )
                     connection.commit()

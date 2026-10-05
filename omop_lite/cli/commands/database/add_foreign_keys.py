@@ -3,7 +3,7 @@
 import typer
 
 from omop_lite.db import create_database
-from ...utils import _create_settings, _setup_logging
+from ...utils import _create_settings, _setup_logging, _format_batch_summary
 
 
 def add_foreign_keys_command() -> typer.Typer:
@@ -61,8 +61,11 @@ def add_foreign_keys_command() -> typer.Typer:
         logger = _setup_logging(settings)
         db = create_database(settings)
 
-        # Add foreign key constraints only
-        db.add_constraints()
-        logger.info("✅ Foreign key constraints added successfully")
+        # Add foreign key constraints only. A failed one is never fatal -
+        # real OMOP vocabulary data routinely doesn't satisfy every foreign
+        # key (a trimmed vocabulary subset missing a referenced concept,
+        # for example).
+        result = db.add_constraints()
+        logger.info(_format_batch_summary(result, "Foreign key constraints"))
 
     return app
