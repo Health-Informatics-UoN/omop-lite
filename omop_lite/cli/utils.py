@@ -1,5 +1,6 @@
 from typing import Literal
 from omop_lite.settings import Settings
+from omop_lite.db.base import SqlBatchResult
 import logging
 import typer
 from importlib.metadata import version
@@ -58,3 +59,19 @@ def _setup_logging(settings: Settings) -> logging.Logger:
     logger.info(f"Starting OMOP Lite {version('omop-lite')}")
     logger.debug(f"Settings: {settings.model_dump()}")
     return logger
+
+
+def _format_batch_summary(result: SqlBatchResult, label: str) -> str:
+    """Summarise a SqlBatchResult for CLI output.
+
+    A failed statement is never fatal (real OMOP vocabulary data routinely
+    doesn't satisfy every constraint), so this is purely informational -
+    callers should not treat a non-zero `failed` count as a reason to exit
+    non-zero.
+    """
+    if result.failed:
+        return (
+            f"⚠️  {label}: {result.succeeded} of {result.total} applied, "
+            f"{result.failed} failed - see the log above for details."
+        )
+    return f"✅ {label}: all {result.succeeded} applied."

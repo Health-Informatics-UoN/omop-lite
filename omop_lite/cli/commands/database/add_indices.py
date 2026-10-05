@@ -3,7 +3,7 @@
 import typer
 
 from omop_lite.db import create_database
-from ...utils import _create_settings, _setup_logging
+from ...utils import _create_settings, _setup_logging, _format_batch_summary
 
 
 def add_indices_command() -> typer.Typer:
@@ -60,8 +60,9 @@ def add_indices_command() -> typer.Typer:
         logger = _setup_logging(settings)
         db = create_database(settings)
 
-        # Add indices only
-        db.add_indices()
-        logger.info("✅ Indices added successfully")
+        # Add indices only. A failed one is never fatal here - real OMOP
+        # data can have rows that don't satisfy a unique index, for example.
+        result = db.add_indices()
+        logger.info(_format_batch_summary(result, "Indices"))
 
     return app

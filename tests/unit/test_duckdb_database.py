@@ -3,6 +3,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+from omop_lite.db.base import SqlBatchResult
 from omop_lite.db.duckdb import DuckDBDatabase
 from omop_lite.settings import Settings
 
@@ -145,11 +146,13 @@ def test_drop_tables_issues_drop_statements(mock_duckdb_db):
 
 def test_add_constraints_warns_and_delegates(mock_duckdb_db, caplog):
     """add_constraints should warn about skipped FKs, then run the (empty) SQL file."""
-    with patch.object(mock_duckdb_db, "_execute_sql_file") as mock_execute:
-        mock_duckdb_db.add_constraints()
+    with patch.object(mock_duckdb_db, "_apply_sql_statements") as mock_apply:
+        mock_apply.return_value = SqlBatchResult(succeeded=0, failed=0)
+        result = mock_duckdb_db.add_constraints()
 
-    mock_execute.assert_called_once()
+    mock_apply.assert_called_once()
     assert "not supported by DuckDB" in caplog.text
+    assert result == SqlBatchResult(succeeded=0, failed=0)
 
 
 def test_bulk_load_quotes_mixed_case_schema(mock_duckdb_db):

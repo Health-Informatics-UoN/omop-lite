@@ -1,14 +1,48 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from sqlalchemy import MetaData, inspect, Engine
 from pathlib import Path
 from typing import Union, Optional
 import logging
+import re
 from importlib.resources import files
 from importlib.abc import Traversable
 from omop_lite.settings import Settings
 from sqlalchemy.sql import text
 
 logger = logging.getLogger(__name__)
+
+_BLOCK_COMMENT_RE = re.compile(r"/\*.*?\*/", re.DOTALL)
+_LINE_COMMENT_RE = re.compile(r"--[^\n]*")
+
+
+def _split_sql_statements(sql: str) -> list[str]:
+    """
+    Split a SQL script into individual statements, stripping comments
+    first.
+
+    Verified safe for the bundled CDM scripts - no ';' or comment markers
+    ('--', '/* */') appear inside string literals there, so this simple
+    approach doesn't need a real SQL parser.
+    """
+    sql = _BLOCK_COMMENT_RE.sub("", sql)
+    sql = _LINE_COMMENT_RE.sub("", sql)
+    return [statement.strip() for statement in sql.split(";") if statement.strip()]
+
+
+@dataclass
+class SqlBatchResult:
+    """How many statements in a batch (e.g. constraints.sql) succeeded vs
+    failed. A failed statement doesn't block the others - see
+    Database._apply_sql_statements."""
+
+    succeeded: int
+    failed: int
+
+    @property
+    def total(self) -> int:
+        return self.succeeded + self.failed
+
 
 # I thought about having a COMMON_TABLES list, but I think that's trying to be too clever
 OMOP_TABLES = {
@@ -167,27 +201,32 @@ class Database(ABC):
         self._execute_sql_file(self.file_path.joinpath("ddl.sql"))
         self.refresh_metadata()
 
-    def add_primary_keys(self) -> None:
+    def add_primary_keys(self) -> SqlBatchResult:
         """Add primary keys to the tables in the database."""
-        self._execute_sql_file(self.file_path.joinpath("primary_keys.sql"))
+        return self._apply_sql_statements(self.file_path.joinpath("primary_keys.sql"))
 
-    def add_constraints(self) -> None:
+    def add_constraints(self) -> SqlBatchResult:
         """Add constraints to the tables in the database."""
-        self._execute_sql_file(self.file_path.joinpath("constraints.sql"))
+        result = self._apply_sql_statements(self.file_path.joinpath("constraints.sql"))
         self.refresh_metadata()
+        return result
 
-    def add_indices(self) -> None:
+    def add_indices(self) -> SqlBatchResult:
         """Add indices to the tables in the database."""
-        self._execute_sql_file(self.file_path.joinpath("indices.sql"))
+        return self._apply_sql_statements(self.file_path.joinpath("indices.sql"))
 
-    def add_all_constraints(self) -> None:
+    def add_all_constraints(self) -> SqlBatchResult:
         """Add all constraints, primary keys, and indices to the tables in the database.
 
         This is a convenience method that calls all three constraint methods.
         """
-        self.add_primary_keys()
-        self.add_constraints()
-        self.add_indices()
+        primary_keys = self.add_primary_keys()
+        constraints = self.add_constraints()
+        indices = self.add_indices()
+        return SqlBatchResult(
+            succeeded=primary_keys.succeeded + constraints.succeeded + indices.succeeded,
+            failed=primary_keys.failed + constraints.failed + indices.failed,
+        )
 
     def drop_tables(self) -> None:
         """Drop all tables in the database."""
@@ -337,3 +376,60 @@ class Database(ABC):
                 cursor.close()
         finally:
             connection.close()
+
+    def _apply_sql_statements(
+        self, file_path: Union[str, Traversable]
+    ) -> SqlBatchResult:
+        """
+        Execute each statement in a SQL file independently, continuing past
+        a failed statement instead of aborting the whole file.
+
+        Real OMOP vocabulary data routinely doesn't satisfy every foreign
+        key (a trimmed vocabulary subset missing some referenced concept,
+        for example). Treating the whole file as one transaction - which
+        _execute_sql_file does - would let a single such gap roll back
+        every other independent constraint/index too. Each statement is
+        logged and counted on failure, not silently dropped, and every
+        other statement still gets its chance to apply.
+        """
+        if isinstance(file_path, Traversable):
+            file_path = str(file_path)
+
+        with open(file_path, "r") as f:
+            sql = f.read().replace(
+                "@cdmDatabaseSchema", self._quote_identifier(self.settings.schema_name)
+            )
+
+        if not self.engine:
+            raise RuntimeError("Database engine not initialized")
+
+        statements = _split_sql_statements(sql)
+        succeeded = 0
+        failed = 0
+
+        connection = self.engine.raw_connection()
+        try:
+            cursor = connection.cursor()
+            try:
+                for statement in statements:
+                    try:
+                        cursor.execute(statement)
+                        connection.commit()
+                        succeeded += 1
+                    except Exception as e:
+                        logger.error(
+                            f"Error executing statement in {file_path}: {str(e)}"
+                        )
+                        try:
+                            connection.rollback()
+                        except Exception:
+                            # See _execute_sql_file - some drivers raise if
+                            # there's no active transaction to roll back.
+                            pass
+                        failed += 1
+            finally:
+                cursor.close()
+        finally:
+            connection.close()
+
+        return SqlBatchResult(succeeded=succeeded, failed=failed)

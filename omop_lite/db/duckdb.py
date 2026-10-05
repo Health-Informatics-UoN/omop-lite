@@ -7,7 +7,7 @@ from sqlalchemy import MetaData, create_engine, text
 
 from omop_lite.settings import Settings
 
-from .base import Database
+from .base import Database, SqlBatchResult
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ class DuckDBDatabase(Database):
             connection.commit()
         logger.info("✅ All tables dropped successfully")
 
-    def add_constraints(self) -> None:
+    def add_constraints(self) -> SqlBatchResult:
         """Add constraints to the tables in the database.
 
         DuckDB does not support adding foreign keys to an existing table via
@@ -113,7 +113,7 @@ class DuckDBDatabase(Database):
         logger.warning(
             "Foreign key constraints are not supported by DuckDB and were skipped"
         )
-        super().add_constraints()
+        return super().add_constraints()
 
     def _bulk_load(self, table_name: str, file_path: Path | Traversable) -> None:
         if not self.engine:
