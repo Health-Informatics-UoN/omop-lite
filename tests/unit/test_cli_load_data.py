@@ -78,6 +78,8 @@ class TestLoadDataCommand:
                     "custom-schema",
                     "--dialect",
                     "mssql",
+                    "--omop_version",
+                    "omop5_3",
                     "--log-level",
                     "DEBUG",
                     "--delimiter",
@@ -97,6 +99,7 @@ class TestLoadDataCommand:
                 data_dir="custom-data",
                 schema_name="custom-schema",
                 dialect="mssql",
+                omop_version="omop5_3",
                 log_level="DEBUG",
                 delimiter=",",
             )

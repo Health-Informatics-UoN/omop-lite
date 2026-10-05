@@ -1,9 +1,12 @@
 """Add only foreign key constraints to existing tables."""
 
+from typing import Literal
+
 import typer
 
 from omop_lite.db import create_database
-from ...utils import _create_settings, _setup_logging, _format_batch_summary
+
+from ...utils import _create_settings, _format_batch_summary, _setup_logging
 
 
 def add_foreign_keys_command() -> typer.Typer:
@@ -36,6 +39,12 @@ def add_foreign_keys_command() -> typer.Typer:
             envvar="DIALECT",
             help="Database dialect (postgresql, mssql or duckdb)",
         ),
+        omop_version: Literal["omop5_3", "omop5_4", "omop5_5"] = typer.Option(
+            "omop5_4",
+            "--omop_version",
+            envvar="OMOP_VERSION",
+            help="Version of the OMOP CDM (omop5_5, omop5_4 or omop5_3)",
+        ),
         log_level: str = typer.Option(
             "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
         ),
@@ -55,6 +64,7 @@ def add_foreign_keys_command() -> typer.Typer:
             db_name=db_name,
             schema_name=schema_name,
             dialect=dialect,
+            omop_version=omop_version,
             log_level=log_level,
         )
 
