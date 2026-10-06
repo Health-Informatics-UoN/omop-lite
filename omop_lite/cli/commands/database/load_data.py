@@ -1,17 +1,20 @@
 """Load data into existing tables."""
 
+from typing import Literal
+
 import typer
 from rich.console import Console
+from rich.panel import Panel
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
-    TextColumn,
-    BarColumn,
     TaskProgressColumn,
+    TextColumn,
 )
-from rich.panel import Panel
 
 from omop_lite.db import create_database
+
 from ...utils import _create_settings
 
 console = Console()
@@ -62,6 +65,12 @@ def load_data_command() -> typer.Typer:
             envvar="DIALECT",
             help="Database dialect (postgresql, mssql or duckdb)",
         ),
+        omop_version: Literal["omop5_3", "omop5_4", "omop5_5"] = typer.Option(
+            "omop5_4",
+            "--omop_version",
+            envvar="OMOP_VERSION",
+            help="Version of the OMOP CDM (omop5_5, omop5_4 or omop5_3)",
+        ),
         log_level: str = typer.Option(
             "INFO", "--log-level", envvar="LOG_LEVEL", help="Logging level"
         ),
@@ -86,6 +95,7 @@ def load_data_command() -> typer.Typer:
             data_dir=data_dir,
             schema_name=schema_name,
             dialect=dialect,
+            omop_version=omop_version,
             log_level=log_level,
             delimiter=delimiter,
         )

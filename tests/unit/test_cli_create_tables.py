@@ -83,6 +83,8 @@ class TestCreateTablesCommand:
                     "custom-schema",
                     "--dialect",
                     "mssql",
+                    "--omop_version",
+                    "omop5_3",
                     "--log-level",
                     "DEBUG",
                 ],
@@ -97,6 +99,7 @@ class TestCreateTablesCommand:
                 db_name="custom-db",
                 schema_name="custom-schema",
                 dialect="mssql",
+                omop_version="omop5_3",
                 log_level="DEBUG",
             )
 
