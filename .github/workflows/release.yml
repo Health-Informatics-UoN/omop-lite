@@ -19,13 +19,13 @@ on:
 
 jobs:
   release:
-    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.6.0
+    uses: health-informatics-uon/workflows/.github/workflows/semantic-release.yml@1.6.1
     with:
       node-version: "24"
     secrets: inherit
 
   publish-container:
-    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.6.0
+    uses: health-informatics-uon/workflows/.github/workflows/publish-container.yml@1.6.1
     with:
       image-name: omop-lite
       image-description: "OMOP Lite container image"
@@ -36,7 +36,7 @@ jobs:
     secrets: inherit
 
   semver-container:
-    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.6.0
+    uses: health-informatics-uon/workflows/.github/workflows/semver-container.yml@1.6.1
     needs: [release, publish-container]
     if: needs.release.outputs.release-created == 'true'
     with:
@@ -61,7 +61,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.x"
 
@@ -71,4 +71,4 @@ jobs:
           python -m build
 
       - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
+        uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
