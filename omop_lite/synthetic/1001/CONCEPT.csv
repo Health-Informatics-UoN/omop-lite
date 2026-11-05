@@ -753,3 +753,11 @@ concept_id,concept_name,domain_id,vocabulary_id,concept_class_id,standard_concep
 4072900,"United Kingdom of Great Britain and Northern Ireland","Geography","SNOMED","Location","S","223860005","2002-01-31","2099-12-31",""
 4330435,"Denmark","Geography","SNOMED","Location","S","223663009","2002-01-31","2099-12-31",""
 37169474,Bilateral viral arthritis of knee joints,Condition,SNOMED,Disorder,S,16016871000119108,2002-01-31,2099-12-31,
+32817,EHR,Type Concept,Type Concept,Type Concept,S,OMOP32817,1970-01-01,2099-12-31,
+32678,UTF-8,Metadata,None,Undefined,,OMOP32678,1970-01-01,2099-12-31,
+4180186,English language,Language,SNOMED,Qualifier Value,S,OMOP4180186,1970-01-01,2099-12-31,
+3965090,Discharge summary,Note,LOINC,Clinical Observation,S,OMOP3965090,1970-01-01,2099-12-31,
+40770449,Admission evaluation note,Note,LOINC,Clinical Observation,S,OMOP40770449,1970-01-01,2099-12-31,
+3030624,Outpatient note,Note,LOINC,Clinical Observation,S,OMOP3030624,1970-01-01,2099-12-31,
+42528196,Radiology Technician Note,Note,LOINC,Clinical Observation,S,OMOP42528196,1970-01-01,2099-12-31,
+3029201,Emergency department Note,Note,LOINC,Clinical Observation,S,OMOP3029201,1970-01-01,2099-12-31,
