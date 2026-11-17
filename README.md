@@ -28,6 +28,7 @@ You can configure the container or CLI using environment variables, or the equiv
 | `DATA_DIR`            | `--data-dir`                        | `data`       | The directory containing the data CSV files.                                                                     |
 | `SYNTHETIC`           | `--synthetic` / `--no-synthetic`    | `false`      | Load synthetic data instead of your own.                                                                         |
 | `SYNTHETIC_NUMBER`    | `--synthetic-number`                | `100`        | Size of synthetic data: `100`, `1000`, or `1001` (see [Synthetic Data](#synthetic-data)).                        |
+| `SYNTHETIC_NOTES`     | `--synthetic-notes` / `--no-synthetic-notes` | `false` | Generate and load synthetic `NOTE` and `NOTE_NLP` data. Needs `SYNTHETIC=true` with `SYNTHETIC_NUMBER` `1000` or `1001`, and `omop5_4`/`omop5_5` (see [Synthetic Data](#synthetic-data)). |
 | `DELIMITER`           | `--delimiter`                       | tab          | The delimiter used to separate values in the data files, e.g. `,`.                                               |
 | `LOG_LEVEL`           | `--log-level`                       | `INFO`       | Logging verbosity.                                                                                                |
 | `FTS_CREATE`          | `--fts-create` / `--no-fts-create`  | `false`      | Create full-text search indexes on the `concept` table (PostgreSQL only).                                        |
@@ -166,6 +167,18 @@ To load the synthetic data, run the container with the `SYNTHETIC` environment v
 - 100 is fake data
 - 1000 is [Synthea 1k](https://registry.opendata.aws/synthea-omop/) data.
 - 1001 is [Synthea 1k](https://registry.opendata.aws/synthea-omop/) data but with Specimen, Death, Device Exposure added in
+
+### Synthetic clinical notes
+
+The 1000 and 1001 sets can also get UK-style clinical notes (`NOTE`) and matching NLP annotations (`NOTE_NLP`), built from each patient's own records. These are generated when omop-lite loads the data rather than shipped in the package, which keeps the image and package small. Generation is deterministic and takes a few seconds.
+
+```bash
+omop-lite --synthetic --synthetic-number 1001 --synthetic-notes
+# or
+docker run -e SYNTHETIC=true -e SYNTHETIC_NUMBER=1001 -e SYNTHETIC_NOTES=true ... ghcr.io/health-informatics-uon/omop-lite
+```
+
+The generator is `omop_lite/synthetic_notes.py`; run `python -m omop_lite.synthetic_notes --help` to generate the CSVs by hand.
 
 ## Bring Your Own Data
 

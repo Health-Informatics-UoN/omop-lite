@@ -5,7 +5,8 @@ from pathlib import Path
 from typing import Union, Optional
 import logging
 import re
-from importlib.resources import files
+from importlib.resources import as_file, files
+import tempfile
 from importlib.abc import Traversable
 from omop_lite.settings import Settings
 from sqlalchemy.sql import text
@@ -307,13 +308,56 @@ class Database(ABC):
         logger.info("✅ Database completely dropped")
 
     def load_data(self) -> None:
-        """Load data into tables."""
+        """Load data into tables.
+
+        With synthetic_notes set, NOTE and NOTE_NLP are generated into a
+        temporary directory first (see omop_lite.synthetic_notes) and loaded
+        from there, instead of being shipped in the package.
+        """
+        with tempfile.TemporaryDirectory(prefix="omop-lite-notes-") as tmp:
+            generated = self._generate_synthetic_notes(Path(tmp))
+            self._load_tables(generated)
+
+    def _generate_synthetic_notes(self, out_dir: Path) -> dict[str, Path]:
+        """Generate NOTE / NOTE_NLP CSVs if requested.
+
+        Returns a map of table name -> generated CSV, empty if notes were not
+        requested or can't be generated for these settings.
+        """
+        if not self.settings.synthetic_notes:
+            return {}
+        if not self.settings.synthetic or self.settings.synthetic_number not in (1000, 1001):
+            logger.warning(
+                "synthetic_notes needs SYNTHETIC=true and SYNTHETIC_NUMBER=1000 or 1001; "
+                "skipping note generation"
+            )
+            return {}
+        if self.settings.omop_version == "omop5_3":
+            logger.warning(
+                "synthetic_notes produces CDM v5.4 NOTE columns, which don't match "
+                "omop5_3; skipping note generation"
+            )
+            return {}
+
+        # Imported here so normal runs don't pay for loading the generator.
+        from omop_lite.synthetic_notes import generate
+
+        logger.info("Generating synthetic NOTE / NOTE_NLP data...")
+        with as_file(self._get_data_dir()) as src_dir:
+            stats = generate(Path(src_dir), out_dir, seed=42, op_fraction=1.0)
+        logger.info(
+            f"Generated {stats['notes']} notes and {stats['note_nlp']} NLP rows"
+        )
+        return {"NOTE": out_dir / "NOTE.csv", "NOTE_NLP": out_dir / "NOTE_NLP.csv"}
+
+    def _load_tables(self, overrides: dict[str, Path]) -> None:
+        """Load each table's CSV, using `overrides` in place of the data dir."""
         data_dir = self._get_data_dir()
         logger.info(f"Loading data from {data_dir}")
 
         for table_name in self.omop_tables:
             table_lower = table_name.lower()
-            csv_file = data_dir / f"{table_name}.csv"
+            csv_file = overrides.get(table_name, data_dir / f"{table_name}.csv")
 
             if not self._file_exists(csv_file):
                 logger.warning(f"Warning: {csv_file} not found, skipping...")
