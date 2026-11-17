@@ -65,7 +65,8 @@ def test_generate_output_matches_note_concepts(tmp_path: Path, dataset: str) -> 
 
     with as_file(files(f"omop_lite.synthetic.{dataset}")) as src:
         stats = generate(Path(src), tmp_path, seed=42, op_fraction=1.0)
-        concepts = {r["concept_id"] for r in csv.DictReader(open(Path(src) / "CONCEPT.csv"))}
+        with open(Path(src) / "CONCEPT.csv", newline="") as f:
+            concepts = {r["concept_id"] for r in csv.DictReader(f)}
 
     assert stats["notes"] > 0 and stats["note_nlp"] > 0
     with open(tmp_path / "NOTE.csv", newline="") as f:
