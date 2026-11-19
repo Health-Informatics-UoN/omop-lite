@@ -19,6 +19,11 @@ class Settings(BaseSettings):
     synthetic_number: int = Field(
         default=100, description="Number of synthetic records"
     )
+    synthetic_notes: bool = Field(
+        default=False,
+        description="Generate and load synthetic NOTE / NOTE_NLP data "
+        "(synthetic 1000 / 1001 only)",
+    )
     data_dir: str = Field(default="data", description="Data directory")
     schema_name: str = Field(default="public", description="Database schema name")
     dialect: Literal["postgresql", "mssql", "duckdb"] = Field(

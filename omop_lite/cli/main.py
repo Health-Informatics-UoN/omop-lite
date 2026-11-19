@@ -81,6 +81,12 @@ def callback(
         envvar="SYNTHETIC_NUMBER",
         help="Number of synthetic records",
     ),
+    synthetic_notes: bool = typer.Option(
+        False,
+        "--synthetic-notes/--no-synthetic-notes",
+        envvar="SYNTHETIC_NOTES",
+        help="Generate and load synthetic NOTE/NOTE_NLP data (synthetic 1000/1001 only)",
+    ),
     data_dir: str = typer.Option(
         "data", "--data-dir", envvar="DATA_DIR", help="Data directory"
     ),
@@ -131,6 +137,7 @@ def callback(
             db_name=db_name,
             synthetic=synthetic,
             synthetic_number=synthetic_number,
+            synthetic_notes=synthetic_notes,
             data_dir=data_dir,
             schema_name=schema_name,
             dialect=dialect,
