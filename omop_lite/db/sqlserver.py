@@ -62,6 +62,9 @@ class SQLServerDatabase(Database):
                         )
                         row = row[: len(headers)]
 
+                    # Empty fields are NULL, as with COPY ... NULL '' on Postgres.
+                    # SQL Server would otherwise store '' as 0 in integer columns.
+                    row = [None if value == "" else value for value in row]
                     cursor.execute(insert_sql, row)
                 conn.commit()
             finally:

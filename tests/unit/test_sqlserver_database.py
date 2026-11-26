@@ -213,3 +213,20 @@ def test_bulk_load_builds_insert_and_pads_trims_rows(mock_sqlserver_db):
 
     _, long_row = mock_cursor.execute.call_args_list[1][0]
     assert long_row == ["2", "long", "extra"]
+
+
+def test_bulk_load_sends_empty_fields_as_null(mock_sqlserver_db):
+    """An empty field must reach SQL Server as NULL. Sent as '', SQL
+    Server stores 0 in an integer column, which then breaks foreign keys
+    such as fpk_person_location_id (#166)."""
+    mock_connection = Mock()
+    mock_cursor = Mock()
+    mock_sqlserver_db.engine.raw_connection.return_value = mock_connection
+    mock_connection.cursor.return_value = mock_cursor
+
+    csv_data = "person_id\tlocation_id\tprovider_id\tperson_source_value\n1\t\t\tabc\n2\t7\t\t\n"
+    with patch("builtins.open", mock_open(read_data=csv_data)):
+        mock_sqlserver_db._bulk_load("person", Path("/data/person.csv"))
+
+    rows = [call[0][1] for call in mock_cursor.execute.call_args_list]
+    assert rows == [["1", None, None, "abc"], ["2", "7", None, None]]
